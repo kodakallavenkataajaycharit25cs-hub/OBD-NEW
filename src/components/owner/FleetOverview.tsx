@@ -7,7 +7,9 @@ import {
   DollarSign,
   MapPin,
   Fuel,
-  Clock
+  Clock,
+  Activity,
+  Zap
 } from 'lucide-react';
 
 export default function FleetOverview() {
@@ -21,21 +23,21 @@ export default function FleetOverview() {
 
   const kpiData = [
     { 
-      title: 'Total Fleet Revenue', 
+      title: 'Gross Revenue', 
       value: formatIndianCurrency(2847600), 
       change: '+12.5%', 
       icon: DollarSign, 
-      color: 'green' 
+      color: 'blue' 
     },
     { 
-      title: 'Active Vehicles', 
+      title: 'Active Nodes', 
       value: '34/38', 
       change: '+2', 
       icon: Car, 
       color: 'blue' 
     },
     { 
-      title: 'Total Drivers', 
+      title: 'Pilot Network', 
       value: '42', 
       change: '+3', 
       icon: Users, 
@@ -55,67 +57,64 @@ export default function FleetOverview() {
     { route: 'Delhi → Agra', trips: 32, profit: 98600, margin: '21.8%' },
     { route: 'Bengaluru → Coorg', trips: 28, profit: 87400, margin: '19.6%' },
     { route: 'Mumbai → Goa', trips: 24, profit: 156000, margin: '28.7%' },
-    { route: 'Chennai → Pondicherry', trips: 19, profit: 54200, margin: '18.9%' }
   ];
 
   const topDrivers = [
     { name: 'Suresh Singh', score: 9.2, trips: 34, earnings: 48600 },
     { name: 'Ramesh Sharma', score: 9.0, trips: 31, earnings: 44200 },
     { name: 'Vikram Patel', score: 8.8, trips: 29, earnings: 42800 },
-    { name: 'Arjun Kumar', score: 8.6, trips: 27, earnings: 39400 },
-    { name: 'Ravi Gupta', score: 8.4, trips: 25, earnings: 36800 }
   ];
 
   const recentAlerts = [
-    { type: 'Maintenance', message: 'MH 02 AB 1234 due for service', time: '2 hours ago', severity: 'medium' },
-    { type: 'Fuel', message: 'DL 01 CD 5678 - Low fuel efficiency detected', time: '4 hours ago', severity: 'high' },
-    { type: 'Speed', message: 'GJ 03 EF 9012 exceeded speed limit', time: '6 hours ago', severity: 'high' },
-    { type: 'Route', message: 'KA 05 GH 3456 deviated from planned route', time: '8 hours ago', severity: 'low' },
-    { type: 'Health', message: 'TN 07 IJ 7890 engine temperature high', time: '12 hours ago', severity: 'high' }
+    { type: 'Service', message: 'MH 02 AB 1234 due for revision', time: '2h ago', severity: 'medium' },
+    { type: 'Efficiency', message: 'DL 01 CD 5678 - Low yield detected', time: '4h ago', severity: 'high' },
+    { type: 'Velocity', message: 'GJ 03 EF 9012 protocol breach', time: '6h ago', severity: 'high' },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 pb-12">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {kpiData.map((kpi, index) => (
           <div
             key={index}
-            className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all"
+            className="clay-card p-6 bg-zinc-900 border-white/5 hover:scale-105 transition-all group"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 bg-${kpi.color}-500/20 rounded-lg flex items-center justify-center`}>
-                <kpi.icon className={`w-6 h-6 text-${kpi.color}-400`} />
+            <div className="flex items-center justify-between mb-6">
+              <div className="w-12 h-12 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 group-hover:rotate-6 transition-transform">
+                <kpi.icon className="w-6 h-6 text-white" />
               </div>
-              <span className={`text-sm font-medium ${
-                kpi.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
+              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
+                kpi.change.startsWith('+') ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
               }`}>
                 {kpi.change}
               </span>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-1">{kpi.value}</h3>
-            <p className="text-gray-400 text-sm">{kpi.title}</p>
+            <h3 className="text-2xl font-black text-white mb-1 tracking-tighter uppercase">{kpi.value}</h3>
+            <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em] italic">{kpi.title}</p>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Route Profitability */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <MapPin className="w-6 h-6 mr-2 text-blue-500" />
-            Top Profitable Routes
-          </h3>
+        <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+          <div className="flex items-center space-x-4 mb-10">
+             <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
+               <MapPin className="w-5 h-5 text-blue-500" />
+             </div>
+             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Route Efficiency Matrix</h3>
+          </div>
           <div className="space-y-4">
             {topRoutes.map((route, index) => (
-              <div key={index} className="bg-white/5 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-white">{route.route}</h4>
-                  <span className="text-green-400 font-bold">{route.margin}</span>
+              <div key={index} className="clay-card p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-black text-white uppercase tracking-tight group-hover:text-blue-400 transition-colors">{route.route}</h4>
+                  <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[8px] font-black text-green-500 uppercase tracking-widest">{route.margin} Yield</div>
                 </div>
-                <div className="flex items-center justify-between text-sm text-gray-400">
-                  <span>{route.trips} trips</span>
-                  <span>{formatIndianCurrency(route.profit)}</span>
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-600">
+                  <span>{route.trips} Missions</span>
+                  <span className="text-white opacity-80">{formatIndianCurrency(route.profit)}</span>
                 </div>
               </div>
             ))}
@@ -123,28 +122,30 @@ export default function FleetOverview() {
         </div>
 
         {/* Driver Leaderboard */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <Users className="w-6 h-6 mr-2 text-purple-500" />
-            Driver Leaderboard
-          </h3>
+        <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+          <div className="flex items-center space-x-4 mb-10">
+             <div className="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center">
+               <Users className="w-5 h-5 text-purple-500" />
+             </div>
+             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Pilot Ranking Archives</h3>
+          </div>
           <div className="space-y-4">
             {topDrivers.map((driver, index) => (
-              <div key={index} className="bg-white/5 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {index + 1}
+              <div key={index} className="clay-card p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 clay-card bg-zinc-800 border-none flex items-center justify-center text-white font-black text-xs shadow-lg">
+                      #{index + 1}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white">{driver.name}</h4>
-                      <div className="flex items-center space-x-4 text-xs text-gray-400">
-                        <span>{driver.trips} trips</span>
-                        <span>Score: {driver.score}/10</span>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight group-hover:text-purple-400 transition-colors">{driver.name}</h4>
+                      <div className="flex items-center space-x-4 text-[8px] font-black uppercase tracking-widest text-gray-600 mt-1">
+                        <span>{driver.trips} Missions</span>
+                        <span className="flex items-center text-blue-500"><Activity className="w-3 h-3 mr-1" /> Score: {driver.score}</span>
                       </div>
                     </div>
                   </div>
-                  <span className="text-green-400 font-bold">
+                  <span className="text-lg font-black text-green-400 tracking-tighter">
                     {formatIndianCurrency(driver.earnings)}
                   </span>
                 </div>
@@ -154,98 +155,78 @@ export default function FleetOverview() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Vehicle Health Summary */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <Car className="w-6 h-6 mr-2 text-blue-500" />
-            Fleet Health Overview
-          </h3>
+        <div className="clay-card p-8 bg-zinc-900 border-white/5">
+          <div className="flex items-center space-x-4 mb-8">
+             <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
+               <Car className="w-5 h-5 text-blue-500" />
+             </div>
+             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Structural Health Summary</h3>
+          </div>
           
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-400">28</div>
-              <div className="text-sm text-green-300">Excellent</div>
-            </div>
-            <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-400">6</div>
-              <div className="text-sm text-yellow-300">Needs Attention</div>
-            </div>
-            <div className="bg-orange-500/20 border border-orange-500/50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-orange-400">3</div>
-              <div className="text-sm text-orange-300">Maintenance Due</div>
-            </div>
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-red-400">1</div>
-              <div className="text-sm text-red-300">Critical</div>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+            {[
+              { l: 'Nominal', v: 28, c: 'green' },
+              { l: 'Alert', v: 6, c: 'yellow' },
+              { l: 'Revised', v: 3, c: 'orange' },
+              { l: 'Critical', v: 1, c: 'red' }
+            ].map((stat, i) => (
+              <div key={i} className={`clay-card p-4 bg-${stat.c}-500/5 border-${stat.c}-500/20 text-center`}>
+                <div className={`text-2xl font-black text-${stat.c}-500 tracking-tighter`}>{stat.v}</div>
+                <div className={`text-[8px] font-black text-${stat.c}-500/60 uppercase tracking-widest mt-1`}>{stat.l}</div>
+              </div>
+            ))}
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Average Fuel Efficiency</span>
-              <span className="text-white font-semibold">14.2 km/l</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Fleet Utilization</span>
-              <span className="text-white font-semibold">89.5%</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Average Trip Distance</span>
-              <span className="text-white font-semibold">167 km</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Alerts */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-            <AlertTriangle className="w-6 h-6 mr-2 text-red-500" />
-            Recent Alerts
-          </h3>
-          
-          <div className="space-y-3">
-            {recentAlerts.map((alert, index) => (
-              <div key={index} className="bg-white/5 rounded-lg p-4 border-l-4 border-l-red-500">
-                <div className="flex items-center justify-between mb-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    alert.severity === 'high' ? 'bg-red-500/20 text-red-400' :
-                    alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-blue-500/20 text-blue-400'
-                  }`}>
-                    {alert.type}
-                  </span>
-                  <span className="text-xs text-gray-400">{alert.time}</span>
+          <div className="space-y-4 px-2">
+            {[
+              { l: 'Fleet Efficiency Alpha', v: '14.2 km/l', p: 85 },
+              { l: 'Operational Flux', v: '89.5%', p: 90 },
+              { l: 'Mean Mission Distance', v: '167 km', p: 65 }
+            ].map((m, i) => (
+              <div key={i}>
+                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
+                  <span>{m.l}</span>
+                  <span className="text-white">{m.v}</span>
                 </div>
-                <p className="text-sm text-gray-300">{alert.message}</p>
+                <div className="bg-black/40 rounded-full h-2 p-0.5 shadow-inner border border-white/5">
+                  <div className="bg-blue-600 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.2)]" style={{ width: `${m.p}%` }} />
+                </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* City Performance Heatmap */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-        <h3 className="text-xl font-bold text-white mb-6">City Performance Heatmap</h3>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {[
-            { city: 'Mumbai', trips: 89, revenue: 284600, growth: '+15%' },
-            { city: 'Delhi', trips: 76, revenue: 245800, growth: '+8%' },
-            { city: 'Bengaluru', trips: 64, revenue: 198400, growth: '+22%' },
-            { city: 'Chennai', trips: 52, revenue: 164200, growth: '+11%' },
-            { city: 'Hyderabad', trips: 43, revenue: 135700, growth: '+18%' },
-            { city: 'Pune', trips: 38, revenue: 118900, growth: '+14%' }
-          ].map((city, index) => (
-            <div key={index} className="bg-white/5 rounded-lg p-4 text-center">
-              <h4 className="font-semibold text-white mb-2">{city.city}</h4>
-              <div className="text-lg font-bold text-blue-400 mb-1">
-                {formatIndianCurrency(city.revenue)}
+        {/* Recent Alerts */}
+        <div className="clay-card p-8 bg-zinc-900 border-white/5">
+          <div className="flex items-center space-x-4 mb-8">
+             <div className="w-10 h-10 bg-red-600/10 rounded-xl flex items-center justify-center">
+               <AlertTriangle className="w-5 h-5 text-red-500" />
+             </div>
+             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">System Alerts</h3>
+          </div>
+          
+          <div className="space-y-4">
+            {recentAlerts.map((alert, index) => (
+              <div key={index} className="clay-card p-5 bg-black/20 border-white/5 border-l-4 border-l-red-600 shadow-inner group">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                    alert.severity === 'high' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                    alert.severity === 'medium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
+                    'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                  }`}>
+                    {alert.type} protocol
+                  </div>
+                  <span className="text-[8px] font-black text-gray-700 uppercase tracking-widest">{alert.time}</span>
+                </div>
+                <p className="text-xs font-bold text-gray-400 group-hover:text-white transition-colors">{alert.message}</p>
               </div>
-              <div className="text-sm text-gray-400 mb-2">{city.trips} trips</div>
-              <div className="text-xs text-green-400">{city.growth}</div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <button className="w-full clay-btn bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white mt-8 h-12 text-[10px] uppercase tracking-widest">
+            Access Full Logs
+          </button>
         </div>
       </div>
     </div>

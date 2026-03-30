@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Lock, AlertCircle } from 'lucide-react';
+import { X, User, Lock, AlertCircle, ShieldCheck, Zap, Globe } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,9 +17,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const navigate = useNavigate();
 
   const demoCredentials = [
-    { email: 'owner@demo.com', password: 'owner123', role: 'Owner/Admin' },
-    { email: 'driver1@demo.com', password: 'driver123', role: 'Driver 1' },
-    { email: 'driver2@demo.com', password: 'driver123', role: 'Driver 2' }
+    { email: 'owner@demo.com', password: 'owner123', role: 'Fleet Owner' },
+    { email: 'driver1@demo.com', password: 'driver123', role: 'Unit Pilot' }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,17 +30,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       const success = await login(email, password);
       if (success) {
         onClose();
-        // Navigate based on role
         if (email === 'owner@demo.com') {
           navigate('/owner');
         } else if (email.includes('driver')) {
           navigate('/driver');
         }
       } else {
-        setError('Invalid email or password');
+        setError('Invalid credentials sequence');
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError('Connection timeout. Retry session.');
     } finally {
       setLoading(false);
     }
@@ -56,85 +54,138 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+      {/* Dimmed Overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
-      <div className="relative bg-gray-900 border border-white/20 rounded-2xl p-8 w-full max-w-md mx-4">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
-        >
-          <X className="w-6 h-6" />
-        </button>
+      {/* Horizontal Mini-Page Modal */}
+      <div className="relative clay-card w-full max-w-5xl bg-zinc-900/60 border-white/10 shadow-3xl overflow-hidden flex flex-col md:flex-row min-h-[550px] animate-in zoom-in-95 duration-300">
+        
+        {/* Graph Pattern Overlay (Square Grid) */}
+        <div className="absolute inset-0 opacity-[0.05] pointer-events-none" 
+             style={{ 
+               backgroundImage: `linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)`,
+               backgroundSize: '40px 40px' 
+             }} />
+        
+        {/* Left Side: Branding & Info (Hidden on mobile or stacked) */}
+        <div className="w-full md:w-5/12 p-10 bg-blue-600/10 border-r border-white/5 flex flex-col justify-between relative overflow-hidden">
+          {/* Decorative Glow */}
+          <div className="absolute top-[-20%] left-[-20%] w-64 h-64 bg-blue-600/20 blur-[80px] rounded-full" />
+          
+          <div className="relative z-10">
+            <div className="w-14 h-14 bg-white text-black rounded-2xl flex items-center justify-center font-black text-xl shadow-xl mb-8">
+              S
+            </div>
+            <h2 className="text-4xl font-black text-white tracking-tighter leading-none clay-text-3d uppercase mb-4 italic">
+              Access<br/>The Core
+            </h2>
+            <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em] mb-10 leading-relaxed italic">
+              Sukrutha Mobility<br/>Fleet Authority Protocol
+            </p>
 
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <User className="w-8 h-8 text-white" />
+            <div className="space-y-6">
+              {[
+                { icon: ShieldCheck, text: 'Encrypted Node Uplink' },
+                { icon: Globe, text: 'Nationwide Sync active' },
+                { icon: Zap, text: 'Real-time Telemetry' }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center space-x-3 text-white/40 group hover:text-white/80 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                    <item.icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{item.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-gray-400">Sign in to access your dashboard</p>
+
+          <div className="relative z-10 pt-10">
+            <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">Systems Nominal</div>
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6 flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <span className="text-red-400 text-sm">{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-          </div>
-
+        {/* Right Side: Login Form */}
+        <div className="flex-1 p-10 flex flex-col justify-center relative bg-black/20">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold transition-all"
+            onClick={onClose}
+            className="absolute top-8 right-8 p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white transition-all active:scale-90"
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            <X className="w-4 h-4" />
           </button>
-        </form>
 
-        <div className="mt-8">
-          <div className="text-sm text-gray-400 text-center mb-4">Demo Credentials</div>
-          <div className="space-y-2">
-            {demoCredentials.map((cred, index) => (
+          <div className="max-w-md mx-auto w-full">
+            <div className="mb-10 text-center md:text-left">
+              <h3 className="text-2xl font-black text-white tracking-tighter uppercase clay-text-3d mb-2">Authorize Login</h3>
+              <p className="text-gray-600 text-[10px] font-bold uppercase tracking-widest italic">Enter secure mission passkeys</p>
+            </div>
+
+            {error && (
+              <div className="clay-card bg-red-500/10 border-red-500/20 p-4 mb-8 flex items-center space-x-3 animate-in slide-in-from-top-2">
+                <AlertCircle className="w-4 h-4 text-red-500" />
+                <span className="text-red-500 text-[9px] font-black uppercase tracking-widest">{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 ml-1">Identity Node</label>
+                <div className="relative group">
+                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800 group-focus-within:text-blue-500 transition-colors" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-800 focus:outline-none focus:border-blue-500/40 shadow-inner text-xs font-bold"
+                    placeholder="Operator ID"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-600 ml-1">Security sequence</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800 group-focus-within:text-blue-500 transition-colors" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-800 focus:outline-none focus:border-blue-500/40 shadow-inner text-xs font-bold"
+                    placeholder="Passkey"
+                    required
+                  />
+                </div>
+              </div>
+
               <button
-                key={index}
-                onClick={() => fillDemo(cred.email, cred.password)}
-                className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 transition-colors"
+                type="submit"
+                disabled={loading}
+                className="w-full clay-btn clay-btn-blue h-16 text-[10px] font-black uppercase tracking-[0.4em] disabled:opacity-50 mt-4"
               >
-                <div className="text-sm font-medium text-white">{cred.role}</div>
-                <div className="text-xs text-gray-400">{cred.email} / {cred.password}</div>
+                {loading ? 'SYNCING...' : 'INITIATE LOGIN'}
               </button>
-            ))}
+            </form>
+
+            <div className="mt-12">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="h-[1px] flex-1 bg-white/5" />
+                <span className="text-[8px] font-black text-gray-700 uppercase tracking-[0.3em] italic">Authority Entry Points</span>
+                <div className="h-[1px] flex-1 bg-white/5" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {demoCredentials.map((cred, index) => (
+                  <button
+                    key={index}
+                    onClick={() => fillDemo(cred.email, cred.password)}
+                    className="clay-card p-4 bg-white/5 border-white/5 hover:bg-white/10 transition-all flex flex-col items-center group shadow-inner"
+                  >
+                    <span className="text-[9px] font-black text-gray-400 group-hover:text-blue-500 transition-colors uppercase tracking-widest">{cred.role}</span>
+                    <span className="text-[7px] text-gray-700 font-bold uppercase tracking-tighter mt-1">Node {index + 1}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

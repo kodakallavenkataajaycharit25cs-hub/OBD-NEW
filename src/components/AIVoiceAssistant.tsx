@@ -10,7 +10,11 @@ import {
   TrendingUp,
   Users,
   Car,
-  DollarSign
+  DollarSign,
+  X,
+  Brain,
+  Zap,
+  Activity
 } from 'lucide-react';
 
 interface AIVoiceAssistantProps {
@@ -33,7 +37,7 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
     {
       id: '1',
       type: 'assistant',
-      content: 'Hello! I\'m your AI Fleet Assistant. Ask me about driver performance, route profitability, maintenance costs, or any fleet analytics.',
+      content: 'Mission Control AI active. I can assist with fleet logistics, pilot performance, and yield analytics. What are your parameters?',
       timestamp: new Date()
     }
   ]);
@@ -50,205 +54,127 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
 
   const mockResponses: Record<string, { response: string; highlight?: string }> = {
     'best driver': {
-      response: 'Based on this month\'s performance, Vikram Patel has the highest score at 9.5/10 with excellent safety ratings and fuel efficiency. He\'s completed 203 trips with zero violations. His fuel efficiency is 16.8 km/l, significantly above fleet average.',
+      response: 'Pilot Vikram Patel is currently lead operative. 9.5 mission score, 203 successful trips, 16.8 km/l efficiency yield. He represents our top structural performer.',
       highlight: 'drivers'
     },
     'driver performance': {
-      response: 'This month\'s top drivers: 1) Vikram Patel (9.5/10), 2) Suresh Singh (9.2/10), 3) Ramesh Sharma (8.9/10). Overall fleet average is 8.7/10. Performance factors include safety, fuel efficiency, customer ratings, and punctuality.',
+      response: 'Current pilot rankings: 1) Vikram Patel (9.5), 2) Suresh Singh (9.2), 3) Ramesh Sharma (8.9). Fleet safety aggregate at 8.7 protocol level.',
       highlight: 'drivers'
     },
     'mumbai pune route': {
-      response: 'Mumbai-Pune route shows excellent profitability: 47 trips completed, ₹1,42,800 profit with 23.4% margin. Average trip cost: ₹2,840 with fuel being 31% of costs. It\'s our most profitable route this month with high demand.',
+      response: 'Mumbai-Pune sector operational: 47 missions, ₹1,42,800 gross yield, 23.4% margin. Fuel consumption at 31% of mission overhead.',
       highlight: 'costing'
     },
     'route profitability': {
-      response: 'Top profitable routes: 1) Mumbai-Goa (28.7% margin), 2) Mumbai-Pune (23.4%), 3) Delhi-Agra (21.8%). Total route revenue is ₹28.5L this month. Mumbai-Goa has highest margin due to premium pricing.',
+      response: 'High-yield sectors: 1) Mumbai-Goa (28.7%), 2) Mumbai-Pune (23.4%), 3) Delhi-Agra (21.8%). Corporate sector remains the primary revenue driver.',
       highlight: 'costing'
     },
     'maintenance costs': {
-      response: 'Last quarter maintenance spending: ₹1,48,600 total. Breakdown: Labor (57%), Parts (29%), Consumables (10%), External services (4%). 8.5% reduction vs previous quarter. Predictive maintenance saved ₹45,000.',
+      response: 'Quarterly maintenance overhead: ₹1,48,600. Predictive analysis prevented 5 structural failures, saving ₹45,000 in emergency repairs.',
       highlight: 'maintenance'
     },
     'fuel efficiency': {
-      response: 'Fleet average fuel efficiency is 14.2 km/l. Best performer: Vikram Patel (16.8 km/l). 3 vehicles showing below-average efficiency need attention. Fuel costs represent 42.5% of total operational expenses.',
+      response: 'Fleet efficiency at 14.2 km/l nominal. Fuel overhead represents 42.5% of gross operational budget. efficiency revision suggested for 3 nodes.',
       highlight: 'health'
     },
     'safety status': {
-      response: 'Current safety status: 3 active alerts, 98.7% safety score. Recent incidents: 1 SOS alert (resolved), 2 speed violations (warnings issued). Average response time: 4.2 minutes.',
+      response: 'Safety protocol status: 98.7% nominal. 1 SOS alert successfully resolved. Mean response time for mission incidents: 4.2 minutes.',
       highlight: 'safety'
     },
     'monthly revenue': {
-      response: 'Monthly revenue: ₹28,47,600 (+15.2% vs last month). Net profit: ₹11,51,200 (40.4% margin). Outstanding payments: ₹4,56,800. Top revenue source: Corporate bookings (68%).',
+      response: 'Current revenue stream: ₹28,47,600 (+15.2% delta). Corporate authority accounts for 68% of total fleet bookings.',
       highlight: 'billing'
     },
     'vehicle health': {
-      response: 'Fleet health overview: 28 vehicles excellent, 6 need attention, 3 maintenance due, 1 critical. Average vehicle utilization: 89.5%. MH 02 AB 1234 has highest performance score.',
+      response: 'Fleet structural health: 28 units Excellent, 6 Units Alert, 3 Revision Due, 1 Critical Failure recorded. MH 02 AB 1234 leads in health index.',
       highlight: 'health'
-    },
-    'driver violations': {
-      response: 'This month: 15 total violations across fleet. Speed violations: 8, Geofence: 4, Extended idling: 3. Suresh Singh has 2 violations, Ramesh Sharma has 4. Training scheduled for repeat offenders.',
-      highlight: 'drivers'
-    },
-    'expense summary': {
-      response: 'Monthly expenses: Fuel ₹1,45,680 (42.5%), Driver pay ₹98,450 (28.7%), Maintenance ₹28,500 (8.3%), Tolls ₹34,200 (10%). Total operational cost: ₹3,43,000.',
-      highlight: 'expenses'
-    },
-    'trip analytics': {
-      response: 'This month: 234 total trips, average distance 167 km, average duration 3.2 hours. Peak booking hours: 9-11 AM and 6-8 PM. Weekend bookings up 22% vs weekdays.',
-      highlight: 'analytics'
     }
   };
 
   const getAIResponse = (query: string): { response: string; highlight?: string } => {
     const lowerQuery = query.toLowerCase();
-    
     for (const [key, value] of Object.entries(mockResponses)) {
-      if (lowerQuery.includes(key)) {
-        return value;
-      }
+      if (lowerQuery.includes(key)) return value;
     }
-    
     return {
-      response: 'I can help you with driver performance, route profitability, maintenance costs, fuel efficiency, safety alerts, and revenue analytics. Try asking about specific metrics or comparisons.',
+      response: 'Awaiting valid query sequence. I can analyze pilot stats, route margins, or structural health. Please specify mission parameters.',
       highlight: undefined
     };
   };
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
-
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputText,
-      timestamp: new Date()
-    };
-
+    const userMessage: ChatMessage = { id: Date.now().toString(), type: 'user', content: inputText, timestamp: new Date() };
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
-
-    // Simulate AI processing delay
     setTimeout(() => {
       const aiResponse = getAIResponse(inputText);
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: aiResponse.response,
-        timestamp: new Date(),
-        highlightSection: aiResponse.highlight
-      };
-
+      const assistantMessage: ChatMessage = { id: (Date.now() + 1).toString(), type: 'assistant', content: aiResponse.response, timestamp: new Date(), highlightSection: aiResponse.highlight };
       setMessages(prev => [...prev, assistantMessage]);
-      
-      // Highlight relevant section if specified
-      if (aiResponse.highlight && onHighlightSection) {
-        onHighlightSection(aiResponse.highlight);
-      }
-    }, 1000);
+      if (aiResponse.highlight && onHighlightSection) onHighlightSection(aiResponse.highlight);
+    }, 800);
   };
-
-  const handleVoiceInput = () => {
-    if (isListening) {
-      setIsListening(false);
-      // Mock voice recognition result
-      setTimeout(() => {
-        setInputText('Which driver had the best score this month?');
-      }, 500);
-    } else {
-      setIsListening(true);
-      // Mock listening for 3 seconds
-      setTimeout(() => {
-        setIsListening(false);
-      }, 3000);
-    }
-  };
-
-  const speakResponse = (text: string) => {
-    if ('speechSynthesis' in window) {
-      setIsSpeaking(true);
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.onend = () => setIsSpeaking(false);
-      speechSynthesis.speak(utterance);
-    }
-  };
-
-  const quickQuestions = [
-    'Which driver had the best score this month?',
-    'Show me route profitability for Mumbai-Pune',
-    'How much did we spend on maintenance last quarter?',
-    'What\'s our current fuel efficiency?',
-    'Any safety alerts I should know about?',
-    'What\'s our monthly revenue breakdown?',
-    'Show me vehicle health status',
-    'How many driver violations this month?',
-    'Give me expense summary',
-    'Show trip analytics for this month'
-  ];
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-8 right-8 z-[100]">
         <button
           onClick={() => setIsMinimized(false)}
-          className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-110"
+          className="w-20 h-20 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 transition-all hover:scale-110 active:scale-95 group"
         >
-          <Bot className="w-8 h-8 text-white" />
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse" />
+          <div className="relative">
+            <Bot className="w-10 h-10 text-white group-hover:rotate-12 transition-transform" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-blue-600 animate-pulse" />
+          </div>
         </button>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-black/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl z-50 flex flex-col">
+    <div className="fixed bottom-8 right-8 w-[400px] h-[650px] clay-card bg-zinc-900 border-white/10 shadow-3xl z-[100] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/20">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-            <Bot className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-between p-6 bg-black/40 border-b border-white/5">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40">
+            <Brain className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h3 className="font-bold text-white">AI Fleet Assistant</h3>
-            <p className="text-xs text-gray-400">Powered by Sukrutha AI</p>
+            <h3 className="text-sm font-black text-white uppercase tracking-tighter clay-text-3d">Mission Control AI</h3>
+            <div className="flex items-center space-x-2 mt-1">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none">Intelligence Online</span>
+            </div>
           </div>
         </div>
         <button
           onClick={() => setIsMinimized(true)}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white transition-all active:scale-90"
         >
-          ×
+          <X className="w-5 h-5" />
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${
+              className={`max-w-[85%] p-4 rounded-2xl text-[11px] font-bold leading-relaxed shadow-sm ${
                 message.type === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white/10 text-gray-100'
+                  ? 'clay-card bg-blue-600 text-white border-none shadow-blue-900/20'
+                  : 'clay-card bg-black/40 text-gray-300 border-white/5 shadow-inner'
               }`}
             >
-              <p className="text-sm">{message.content}</p>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs opacity-70">
-                  {message.timestamp.toLocaleTimeString('en-IN', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </span>
+              <p className={message.type === 'assistant' ? 'italic' : ''}>{message.content}</p>
+              <div className="flex items-center justify-between mt-3 opacity-30 text-[8px] uppercase tracking-widest font-black">
+                <span>{message.timestamp.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
                 {message.type === 'assistant' && (
-                  <button
-                    onClick={() => speakResponse(message.content)}
-                    className="text-xs opacity-70 hover:opacity-100 transition-opacity"
-                    disabled={isSpeaking}
-                  >
-                    {isSpeaking ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                  <button className="hover:text-blue-400 transition-colors">
+                    <Volume2 className="w-3 h-3" />
                   </button>
                 )}
               </div>
@@ -258,53 +184,39 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick Questions */}
-      <div className="p-4 border-t border-white/20">
-        <p className="text-xs text-gray-400 mb-2">Quick questions:</p>
-        <div className="flex flex-wrap gap-1">
-          {quickQuestions.slice(0, 3).map((question, index) => (
-            <button
-              key={index}
-              onClick={() => setInputText(question)}
-              className="text-xs bg-white/10 hover:bg-white/20 text-gray-300 px-2 py-1 rounded transition-colors"
-            >
-              {question.length > 25 ? question.substring(0, 25) + '...' : question}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-white/20">
-        <div className="flex items-center space-x-2">
-          <div className="flex-1 relative">
+      {/* Input Terminal */}
+      <div className="p-6 bg-black/20 border-t border-white/5 space-y-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 relative group">
             <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask about your fleet..."
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Awaiting Command..."
+              className="w-full bg-black/40 border border-white/10 rounded-2xl pl-10 pr-4 py-4 text-[10px] font-black uppercase tracking-widest text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 transition-all shadow-inner"
             />
-            <Sparkles className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-purple-400" />
+            <Zap className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500/30 group-focus-within:text-blue-500 transition-colors" />
           </div>
-          <button
-            onClick={handleVoiceInput}
-            className={`p-2 rounded-lg transition-colors ${
-              isListening 
-                ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
-                : 'bg-purple-600 hover:bg-purple-700'
-            }`}
-          >
-            {isListening ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
-          </button>
           <button
             onClick={handleSendMessage}
             disabled={!inputText.trim()}
-            className="p-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+            className="w-14 h-14 clay-btn clay-btn-blue p-0 flex items-center justify-center disabled:opacity-50"
           >
-            <Send className="w-5 h-5 text-white" />
+            <Send className="w-5 h-5" />
           </button>
+        </div>
+        
+        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+           {['Pilot Intel', 'Sector ROI', 'Alert Status'].map((q, i) => (
+             <button
+               key={i}
+               onClick={() => setInputText(q)}
+               className="whitespace-nowrap px-3 py-1.5 bg-white/5 border border-white/5 rounded-full text-[8px] font-black uppercase tracking-widest text-gray-600 hover:text-blue-500 hover:bg-white/10 transition-all"
+             >
+               {q}
+             </button>
+           ))}
         </div>
       </div>
     </div>
