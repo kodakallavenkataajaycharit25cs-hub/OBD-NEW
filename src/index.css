@@ -1,21 +1,29 @@
+/* stylelint-disable at-rule-no-unknown */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-black text-white antialiased selection:bg-blue-500/30 selection:text-blue-200 font-["Space_Grotesk",sans-serif];
+    @apply bg-black text-white antialiased selection:bg-blue-500/30 selection:text-blue-200;
+    font-family: 'Space Grotesk', sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-["Syne",sans-serif] tracking-tight font-extrabold;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Syne', sans-serif;
+    @apply tracking-tight font-extrabold;
   }
 }
 
 @layer components {
   .clay-card {
     @apply bg-white/10 backdrop-blur-md rounded-[3rem] border border-white/20;
-    box-shadow: 
+    box-shadow:
       inset -8px -8px 16px 0px rgba(0, 0, 0, 0.2),
       inset 8px 8px 16px 0px rgba(255, 255, 255, 0.2),
       0px 20px 40px -10px rgba(0, 0, 0, 0.4);
@@ -27,7 +35,7 @@
 
   .clay-card-hover:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 
+    box-shadow:
       inset -12px -12px 24px 0px rgba(0, 0, 0, 0.3),
       inset 12px 12px 24px 0px rgba(255, 255, 255, 0.3),
       0px 30px 60px -20px rgba(0, 0, 0, 0.6);
@@ -35,7 +43,7 @@
 
   .clay-btn {
     @apply px-10 py-5 rounded-3xl font-black transition-all duration-300 active:scale-95;
-    box-shadow: 
+    box-shadow:
       inset -4px -4px 8px 0px rgba(0, 0, 0, 0.2),
       inset 4px 4px 8px 0px rgba(255, 255, 255, 0.2),
       0px 10px 20px -5px rgba(0, 0, 0, 0.3);
@@ -50,7 +58,7 @@
   }
 
   .clay-text-3d {
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
   }
 
   .glass-navbar {
@@ -76,10 +84,197 @@
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+@keyframes slide-in-left {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes dust-trail {
+  0% {
+    transform: translateX(0) scaleX(0);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateX(100%) scaleX(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes dust-trail-delayed {
+  0% {
+    transform: translateX(0) scaleX(0);
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 0.4;
+  }
+
+  100% {
+    transform: translateX(80%) scaleX(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-scan {
+  animation: scan 3s linear infinite;
+}
+
+.animate-dust-trail {
+  animation: dust-trail 0.8s ease-out 0.3s forwards;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-slow {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
 }
