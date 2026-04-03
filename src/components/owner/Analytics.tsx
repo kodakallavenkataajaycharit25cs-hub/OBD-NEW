@@ -241,15 +241,37 @@ export default function Analytics() {
           <div className="space-y-4">
             {mlInsights.map((insight, index) => {
               const impactColor = getImpactColor(insight.impact);
+              const colorMaps: Record<string, string> = {
+                blue: 'bg-blue-600 hover:bg-blue-700',
+                red: 'bg-red-600 hover:bg-red-700',
+                green: 'bg-green-600 hover:bg-green-700',
+                yellow: 'bg-yellow-600 hover:bg-yellow-700',
+              };
+              const cardColorMaps: Record<string, string> = {
+                blue: 'bg-blue-500/20 border-blue-500/50',
+                red: 'bg-red-500/20 border-red-500/50',
+                green: 'bg-green-500/20 border-green-500/50',
+                yellow: 'bg-yellow-500/20 border-yellow-500/50',
+              };
+              const iconColorMaps: Record<string, string> = {
+                blue: 'bg-blue-500/30 text-blue-400',
+                red: 'bg-red-500/30 text-red-400',
+                green: 'bg-green-500/30 text-green-400',
+                yellow: 'bg-yellow-500/30 text-yellow-400',
+              };
+
+              const btnColor = colorMaps[insight.color] || 'bg-gray-600';
+              const cardColor = cardColorMaps[insight.color] || 'bg-gray-500/20 border-gray-500/50';
+              const iconColor = iconColorMaps[insight.color] || 'bg-gray-500/30 text-gray-400';
               
               return (
                 <div
                   key={index}
-                  className={`bg-${insight.color}-500/20 border border-${insight.color}-500/50 rounded-lg p-4`}
+                  className={`${cardColor} border rounded-lg p-4`}
                 >
                   <div className="flex items-start space-x-4">
-                    <div className={`w-12 h-12 bg-${insight.color}-500/30 rounded-lg flex items-center justify-center`}>
-                      <insight.icon className={`w-6 h-6 text-${insight.color}-400`} />
+                    <div className={`w-12 h-12 ${iconColor.split(' ')[0]} rounded-lg flex items-center justify-center`}>
+                      <insight.icon className={`w-6 h-6 ${iconColor.split(' ')[1]}`} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
@@ -263,7 +285,7 @@ export default function Analytics() {
                         <span className="text-green-400 font-semibold">
                           Potential Savings: {formatIndianCurrency(insight.savings)}/month
                         </span>
-                        <button className={`bg-${insight.color}-600 hover:bg-${insight.color}-700 text-white px-4 py-1 rounded text-sm transition-colors`}>
+                        <button className={`${btnColor} text-white px-4 py-1 rounded text-sm transition-colors`}>
                           Apply
                         </button>
                       </div>

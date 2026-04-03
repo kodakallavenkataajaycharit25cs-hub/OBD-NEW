@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
 import AIVoiceAssistant from './AIVoiceAssistant';
+import SpotBooking from './SpotBooking';
 
 export default function DriverPortal() {
   const { user, logout } = useAuth();
@@ -39,6 +40,7 @@ export default function DriverPortal() {
     { name: 'Earnings', href: '/driver/earnings', icon: TrendingUp, current: location.pathname === '/driver/earnings' },
     { name: 'Badges', href: '/driver/badges', icon: Award, current: location.pathname === '/driver/badges' },
     { name: 'Expenses', href: '/driver/expenses', icon: Camera, current: location.pathname === '/driver/expenses' },
+    { name: 'Booking', href: '/driver/booking', icon: MapPin, current: location.pathname === '/driver/booking' },
   ];
 
   // Mock driver data
@@ -422,17 +424,21 @@ export default function DriverPortal() {
 
           <nav className={`flex-1 ${sidebarOpen ? 'px-4' : 'px-2'} space-y-2 overflow-y-auto custom-scrollbar`}>
             {navigation.map((item) => {
-              const isExpenses = item.name === 'Expenses';
+              const isSpecial = item.name === 'Expenses' || item.name === 'Booking';
               const isHighlighted = highlightedSection && item.href.includes(highlightedSection);
               
-              if (isExpenses && sidebarOpen) {
+              if (isSpecial && sidebarOpen && (item.current || isHighlighted)) {
                 return (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className="flex items-center p-1 mt-4"
+                    className="flex items-center p-1 mt-2"
                   >
-                    <div className={`w-full clay-card ${isHighlighted ? 'bg-orange-500 animate-pulse' : 'bg-blue-600'} border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95`}>
+                    <div className={`w-full clay-card ${
+                      isHighlighted 
+                        ? 'bg-orange-500 animate-pulse' 
+                        : 'bg-blue-600'
+                    } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95`}>
                       <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                         <item.icon className="w-5 h-5 text-white" />
                       </div>
@@ -526,6 +532,7 @@ export default function DriverPortal() {
               <Route path="/earnings" element={<EarningsSection />} />
               <Route path="/badges" element={<BadgesSection />} />
               <Route path="/expenses" element={<ExpenseClassifier userRole="driver" />} />
+              <Route path="/booking" element={<SpotBooking />} />
               <Route path="*" element={<Navigate to="/driver" replace />} />
             </Routes>
           </div>

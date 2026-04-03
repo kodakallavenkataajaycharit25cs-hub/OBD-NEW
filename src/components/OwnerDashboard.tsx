@@ -28,6 +28,7 @@ import SafetyEmergency from './owner/SafetyEmergency';
 import Maintenance from './owner/Maintenance';
 import BillingFinance from './owner/BillingFinance';
 import Analytics from './owner/Analytics';
+import SpotBooking from './SpotBooking';
 
 export default function OwnerDashboard() {
   const { user, logout } = useAuth();
@@ -50,6 +51,7 @@ export default function OwnerDashboard() {
     { name: 'Billing & Finance', href: '/owner/billing', icon: CreditCard, current: location.pathname === '/owner/billing' },
     { name: 'Expense Classifier', href: '/owner/expenses', icon: Camera, current: location.pathname === '/owner/expenses' },
     { name: 'Analytics & ML', href: '/owner/analytics', icon: Brain, current: location.pathname === '/owner/analytics' },
+    { name: 'Booking', href: '/owner/booking', icon: MapPin, current: location.pathname === '/owner/booking' },
   ];
 
   return (
@@ -159,6 +161,7 @@ export default function OwnerDashboard() {
               <Route path="/billing" element={<BillingFinance />} />
               <Route path="/expenses" element={<ExpenseClassifier userRole="owner" />} />
               <Route path="/analytics" element={<Analytics />} />
+              <Route path="/booking" element={<SpotBooking />} />
               <Route path="*" element={<Navigate to="/owner" replace />} />
             </Routes>
           </div>

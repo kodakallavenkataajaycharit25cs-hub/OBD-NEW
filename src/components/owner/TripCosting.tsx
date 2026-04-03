@@ -73,8 +73,8 @@ export default function TripCosting() {
             </div>
             <div className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1">{stat.title}</div>
             <div className="text-2xl font-black text-white tracking-tighter clay-text-3d">{stat.value}</div>
-            <div className={`mt-2 flex items-center text-xs font-bold ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-              {stat.trend === 'up' ? <ArrowUpRight className="w-3 h-3 mr-1" /> : <ArrowDownRight className="w-3 h-3 mr-1" />}
+            <div className={`mt-2 flex items-center text-sm font-bold ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
+              {stat.trend === 'up' ? <ArrowUpRight className="w-[14px] h-[14px] mr-1" /> : <ArrowDownRight className="w-[14px] h-[14px] mr-1" />}
               {stat.change} vs last period
             </div>
           </div>
@@ -148,8 +148,8 @@ export default function TripCosting() {
                   <option value="90d" className="bg-zinc-900">Last 3 Months</option>
                   <option value="1y" className="bg-zinc-900">Last Year</option>
                 </select>
-                <button className="w-full clay-btn py-4 text-[10px]">
-                  <Download className="w-4 h-4 mr-2" />
+                <button className="w-full clay-btn py-4 text-[13px] flex items-center justify-center">
+                  <Download className="w-[19px] h-[19px] mr-2" />
                   EXPORT AUDIT LOG
                 </button>
               </div>
@@ -181,16 +181,16 @@ export default function TripCosting() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                   <div>
-                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-700 leading-none mb-1">Fuel Core</div>
-                    <div className="text-sm font-bold text-white">{formatIndianCurrency(trip.fuelCost)}</div>
+                    <div className="text-[10.5px] font-black uppercase tracking-widest text-gray-700 leading-none mb-1">Fuel Core</div>
+                    <div className="text-base font-bold text-white">{formatIndianCurrency(trip.fuelCost)}</div>
                   </div>
                   <div>
-                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-700 leading-none mb-1">Driver Pay</div>
-                    <div className="text-sm font-bold text-white">{formatIndianCurrency(trip.driverPay)}</div>
+                    <div className="text-[10.5px] font-black uppercase tracking-widest text-gray-700 leading-none mb-1">Driver Pay</div>
+                    <div className="text-base font-bold text-white">{formatIndianCurrency(trip.driverPay)}</div>
                   </div>
                   <div>
-                    <div className="text-[8px] font-black uppercase tracking-widest text-gray-700 leading-none mb-1">Net Yield</div>
-                    <div className="text-sm font-bold text-green-400">{formatIndianCurrency(trip.revenue - (trip.fuelCost + trip.tollCost + trip.driverPay))}</div>
+                    <div className="text-[10.5px] font-black uppercase tracking-widest text-gray-700 leading-none mb-1">Net Yield</div>
+                    <div className="text-base font-bold text-green-400">{formatIndianCurrency(trip.revenue - (trip.fuelCost + trip.tollCost + trip.driverPay))}</div>
                   </div>
                   <div>
                     <div className="text-[10px] font-black uppercase tracking-widest text-blue-500/40 leading-none mb-1 text-right">Revenue</div>

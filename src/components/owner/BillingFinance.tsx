@@ -474,18 +474,49 @@ export default function BillingFinance() {
           { name: 'Invoice Aging Report', description: 'Outstanding payments and collections', icon: Calendar, color: 'yellow' },
           { name: 'Tax Summary', description: 'Consolidated tax calculations and payments', icon: FileText, color: 'orange' },
           { name: 'Cash Flow Statement', description: 'Monthly cash flow analysis', icon: IndianRupee, color: 'red' }
-        ].map((report, index) => (
-          <div key={index} className={`bg-${report.color}-500/20 border border-${report.color}-500/50 rounded-lg p-6 hover:bg-${report.color}-500/30 transition-colors cursor-pointer`}>
-            <div className={`w-12 h-12 bg-${report.color}-500/30 rounded-lg flex items-center justify-center mb-4`}>
-              <report.icon className={`w-6 h-6 text-${report.color}-400`} />
+        ].map((report, index) => {
+          const cardColorMaps: Record<string, string> = {
+            blue: 'bg-blue-500/20 border-blue-500/50 hover:bg-blue-500/30',
+            green: 'bg-green-500/20 border-green-500/50 hover:bg-green-500/30',
+            purple: 'bg-purple-500/20 border-purple-500/50 hover:bg-purple-500/30',
+            yellow: 'bg-yellow-500/20 border-yellow-500/50 hover:bg-yellow-500/30',
+            orange: 'bg-orange-500/20 border-orange-500/50 hover:bg-orange-500/30',
+            red: 'bg-red-500/20 border-red-500/50 hover:bg-red-500/30',
+          };
+          const iconColorMaps: Record<string, string> = {
+            blue: 'bg-blue-500/30 text-blue-400',
+            green: 'bg-green-500/30 text-green-400',
+            purple: 'bg-purple-500/30 text-purple-400',
+            yellow: 'bg-yellow-500/30 text-yellow-400',
+            orange: 'bg-orange-500/30 text-orange-400',
+            red: 'bg-red-500/30 text-red-400',
+          };
+          const btnColorMaps: Record<string, string> = {
+            blue: 'bg-blue-600 hover:bg-blue-700',
+            green: 'bg-green-600 hover:bg-green-700',
+            purple: 'bg-purple-600 hover:bg-purple-700',
+            yellow: 'bg-yellow-600 hover:bg-yellow-700',
+            orange: 'bg-orange-600 hover:bg-orange-700',
+            red: 'bg-red-600 hover:bg-red-700',
+          };
+
+          const cardStyle = cardColorMaps[report.color] || 'bg-gray-500/20 border-gray-500/50';
+          const iconStyle = iconColorMaps[report.color] || 'bg-gray-500/30 text-gray-400';
+          const btnStyle = btnColorMaps[report.color] || 'bg-gray-600 hover:bg-gray-700';
+
+          return (
+            <div key={index} className={`${cardStyle} rounded-lg p-6 transition-colors cursor-pointer group`}>
+              <div className={`w-12 h-12 ${iconStyle.split(' ')[0]} rounded-lg flex items-center justify-center mb-4`}>
+                <report.icon className={`w-6 h-6 ${iconStyle.split(' ')[1]}`} />
+              </div>
+              <h4 className="font-black text-white uppercase tracking-tight mb-2">{report.name}</h4>
+              <p className="text-gray-300 text-sm mb-4">{report.description}</p>
+              <button className={`w-full ${btnStyle} text-white py-2 rounded-lg transition-colors`}>
+                Generate Report
+              </button>
             </div>
-            <h4 className="font-black text-white uppercase tracking-tight mb-2">{report.name}</h4>
-            <p className="text-gray-300 text-sm mb-4">{report.description}</p>
-            <button className={`w-full bg-${report.color}-600 hover:bg-${report.color}-700 text-white py-2 rounded-lg transition-colors`}>
-              Generate Report
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Integration Section */}
