@@ -24,7 +24,7 @@ import SpotBooking from './SpotBooking';
 export default function DriverPortal() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '1m' | '3m'>('1m');
+  const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '1m' | '3m' | '1y'>('1m');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
 
@@ -44,7 +44,7 @@ export default function DriverPortal() {
   ];
 
   // Mock driver data
-  const getDriverDataForPeriod = (period: '7d' | '1m' | '3m') => {
+  const getDriverDataForPeriod = (period: '7d' | '1m' | '3m' | '1y') => {
     const baseData = {
       vehicleAssigned: 'Toyota Innova Crysta - MH 02 AB 1234',
       safetyScore: 8.7,
@@ -89,6 +89,16 @@ export default function DriverPortal() {
           periodLabel: 'Last 3 Months',
           previousLabel: 'Previous 3 Months'
         };
+      case '1y':
+        return {
+          ...baseData,
+          totalTrips: 584,
+          totalDistance: '88,240 km',
+          currentPeriodEarnings: 395000,
+          previousPeriodEarnings: 362000,
+          periodLabel: 'This Year',
+          previousLabel: 'Last Year'
+        };
       default:
         return baseData as any;
     }
@@ -114,7 +124,8 @@ export default function DriverPortal() {
             {[
               { key: '7d', label: '7D' },
               { key: '1m', label: '1M' },
-              { key: '3m', label: '3M' }
+              { key: '3m', label: '3M' },
+              { key: '1y', label: '1Y' }
             ].map((period) => (
               <button
                 key={period.key}
@@ -301,7 +312,8 @@ export default function DriverPortal() {
             {[
               { key: '7d', label: '7D' },
               { key: '1m', label: '1M' },
-              { key: '3m', label: '3M' }
+              { key: '3m', label: '3M' },
+              { key: '1y', label: '1Y' }
             ].map((period) => (
               <button
                 key={period.key}
@@ -337,7 +349,7 @@ export default function DriverPortal() {
         </div>
 
         <div className="clay-card p-8 bg-black/20 border-white/5 shadow-inner">
-          <h3 className="text-xs font-black text-white mb-8 uppercase tracking-[0.3em] italic">Settlement Cycles</h3>
+          <h3 className="text-sm font-black text-white mb-8 uppercase tracking-[0.3em] italic">Settlement Cycles</h3>
           <div className="space-y-6">
             {[
               { date: '2025-01-15', amount: 15200, type: 'Weekly Settlement' },
@@ -345,13 +357,13 @@ export default function DriverPortal() {
               { date: '2025-01-01', amount: 15600, type: 'Weekly Settlement' }
             ].map((payment, index) => (
               <div key={index} className="flex items-center justify-between py-4 border-b border-white/5 last:border-b-0 group">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 clay-card bg-zinc-800 border-none flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
+                <div className="flex items-center space-x-6">
+                  <div className="w-12 h-12 clay-card bg-zinc-800 border-none flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <div>
-                    <div className="text-xs font-black text-white uppercase tracking-tight italic">{payment.type}</div>
-                    <div className="text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-1">{payment.date}</div>
+                    <div className="text-sm font-black text-white uppercase tracking-tight italic">{payment.type}</div>
+                    <div className="text-xs text-gray-600 font-bold uppercase tracking-widest mt-1">{payment.date}</div>
                   </div>
                 </div>
                 <div className="text-xl md:text-2xl font-black text-green-400 tracking-tighter">
