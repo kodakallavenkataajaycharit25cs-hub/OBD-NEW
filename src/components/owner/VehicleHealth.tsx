@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Car, 
   Thermometer, 
@@ -9,23 +9,56 @@ import {
   XCircle,
   Settings,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Activity
 } from 'lucide-react';
+import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../../services/obdApi';
 
 export default function VehicleHealth() {
   const [selectedVehicle, setSelectedVehicle] = useState('MH-02-AB-1234');
+  const [telemetry, setTelemetry] = useState<OBDData>({});
+
+  useEffect(() => {
+    // Only poll if the selected vehicle is the one we have OBD data for
+    if (selectedVehicle === 'MH-02-AB-1234') {
+      const updateTelemetry = async () => {
+        try {
+          const [rpmData, speedData, fuelData, diagData] = await Promise.all([
+            fetchRPM(),
+            fetchSpeed(),
+            fetchFuelLevel(),
+            fetchDiagnostics()
+          ]);
+          setTelemetry({
+            rpm: rpmData.rpm,
+            speed: speedData.speed,
+            fuel_level: fuelData.fuel_level,
+            diagnostics: diagData
+          });
+        } catch (error) {
+          console.error('Failed to update telemetry:', error);
+        }
+      };
+
+      updateTelemetry();
+      const interval = setInterval(updateTelemetry, 10000);
+      return () => clearInterval(interval);
+    } else {
+      setTelemetry({});
+    }
+  }, [selectedVehicle]);
 
   const vehicles = [
     {
       id: 'MH-02-AB-1234',
       model: 'Toyota Innova Crysta',
       driver: 'Suresh Singh',
-      status: 'good',
-      rpm: 2450,
-      coolantTemp: 87,
+      status: telemetry.diagnostics?.mil_status === 'ON' ? 'critical' : 'good',
+      rpm: telemetry.rpm || 2450,
+      coolantTemp: telemetry.diagnostics?.coolant_temp ? parseInt(telemetry.diagnostics.coolant_temp) : 87,
       fuelEfficiency: 14.8,
       tyrePressure: { fl: 32, fr: 32, rl: 30, rr: 31 },
-      engineCodes: [],
+      engineCodes: telemetry.diagnostics?.dtc || [],
       lastService: '2024-12-15',
       nextService: '2025-03-15',
       mileage: 45680,
@@ -160,15 +193,15 @@ export default function VehicleHealth() {
                 return (
                   <div
                     key={index}
-                    className={`bg-${statusColor}-500/20 border border-${statusColor}-500/50 rounded-lg p-4 text-center`}
+                    className={`clay-card clay-card-hover group bg-${statusColor}-500/20 border border-${statusColor}-500/50 rounded-lg p-4 text-center transition-all`}
                   >
-                    <div className={`w-12 h-12 bg-${statusColor}-500/30 rounded-lg flex items-center justify-center mx-auto mb-3`}>
+                    <div className={`w-12 h-12 bg-${statusColor}-500/30 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 group-hover:rotate-6 transition-transform`}>
                       <metric.icon className={`w-6 h-6 text-${statusColor}-400`} />
                     </div>
-                    <div className={`text-2xl font-bold text-${statusColor}-400 mb-1`}>
+                    <div className={`text-2xl font-bold text-${statusColor}-400 mb-1 group-hover:text-${statusColor}-300 transition-colors`}>
                       {metric.value} {metric.unit}
                     </div>
-                    <div className="text-sm text-gray-300">{metric.name}</div>
+                    <div className="text-sm text-gray-300 group-hover:text-white transition-colors">{metric.name}</div>
                   </div>
                 );
               })}
@@ -208,18 +241,18 @@ export default function VehicleHealth() {
                 { type: 'Geofence', location: 'Unauthorized route deviation', time: '1 day ago', severity: 'medium' },
                 { type: 'Idle', location: 'Extended idling at toll plaza', time: '2 days ago', severity: 'low' }
               ].map((violation, index) => (
-                <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500">
+                <div key={index} className="clay-card clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      violation.severity === 'high' ? 'bg-red-500/20 text-red-400' :
-                      violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-blue-500/20 text-blue-400'
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                      violation.severity === 'high' ? 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30' :
+                      violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30' :
+                      'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
                     }`}>
                       {violation.type}
                     </span>
-                    <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">{violation.time}</span>
+                    <span className="text-[10px] uppercase font-black tracking-widest text-gray-500 group-hover:text-gray-400 transition-colors">{violation.time}</span>
                   </div>
-                  <p className="text-sm text-gray-300">{violation.location}</p>
+                  <p className="text-sm text-gray-300 group-hover:text-white transition-colors">{violation.location}</p>
                 </div>
               ))}
             </div>

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Star, 
-  TrendingUp, 
-  Award, 
+import {
+  Users,
+  Star,
+  TrendingUp,
+  Award,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -141,7 +141,7 @@ export default function DriverManagement() {
       {/* Header */}
       <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Driver Management</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">42</div>
@@ -175,11 +175,10 @@ export default function DriverManagement() {
               <div
                 key={driver.id}
                 onClick={() => setSelectedDriver(driver.id)}
-                className={`cursor-pointer border rounded-lg p-4 transition-all hover:bg-white/10 ${
-                  selectedDriver === driver.id
+                className={`cursor-pointer border rounded-lg p-4 transition-all hover:bg-white/10 ${selectedDriver === driver.id
                     ? 'border-blue-500 bg-blue-500/20'
                     : 'border-white/20 bg-white/5'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
@@ -189,9 +188,8 @@ export default function DriverManagement() {
                     <div>
                       <h4 className="font-black text-white uppercase tracking-tight">{driver.name}</h4>
                       <div className="flex items-center space-x-2 text-[10px] uppercase font-black tracking-widest text-gray-500">
-                        <span className={`w-2 h-2 rounded-full ${
-                          driver.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
-                        }`} />
+                        <span className={`w-2 h-2 rounded-full ${driver.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
+                          }`} />
                         <span>{driver.status}</span>
                         <span>•</span>
                         <span>{driver.location}</span>
@@ -206,7 +204,7 @@ export default function DriverManagement() {
                     <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">{driver.totalTrips} trips</div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Score:</span>
@@ -231,7 +229,7 @@ export default function DriverManagement() {
           {/* Profile Info */}
           <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Driver Profile</h3>
-            
+
             <div className="flex items-center space-x-4 mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 <Users className="w-8 h-8 text-white" />
@@ -240,9 +238,8 @@ export default function DriverManagement() {
                 <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData.name}</h4>
                 <p className="text-gray-400">{selectedDriverData.experience} experience</p>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className={`w-2 h-2 rounded-full ${
-                    selectedDriverData.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
-                  }`} />
+                  <span className={`w-2 h-2 rounded-full ${selectedDriverData.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
+                    }`} />
                   <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">{selectedDriverData.status}</span>
                 </div>
               </div>
@@ -274,7 +271,7 @@ export default function DriverManagement() {
               <TrendingUp className="w-6 h-6 mr-2 text-green-500" />
               Performance Scores
             </h3>
-            
+
             <div className="space-y-4">
               {[
                 { label: 'Safety Score', value: selectedDriverData.scores.safety, key: 'safety' },
@@ -285,7 +282,7 @@ export default function DriverManagement() {
                 { label: 'Fuel Efficiency', value: selectedDriverData.scores.efficiency, key: 'efficiency' }
               ].map((score, index) => {
                 const color = getScoreColor(score.value);
-                
+
                 return (
                   <div key={index}>
                     <div className="flex justify-between mb-2">
@@ -293,7 +290,7 @@ export default function DriverManagement() {
                       <span className={`text-${color}-400 font-semibold`}>{score.value}/10</span>
                     </div>
                     <div className="bg-gray-700 rounded-full h-2">
-                      <div 
+                      <div
                         className={`bg-${color}-500 h-2 rounded-full`}
                         style={{ width: `${score.value * 10}%` }}
                       />
@@ -304,44 +301,14 @@ export default function DriverManagement() {
             </div>
           </div>
 
-          {/* Badges & Achievements */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
-            <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
-              <Award className="w-6 h-6 mr-2 text-yellow-500" />
-              Badges & Achievements
-            </h3>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {selectedDriverData.badges.map((badge, index) => (
-                <div key={index} className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 text-center">
-                  <Award className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                  <span className="text-yellow-300 text-sm font-medium">{badge}</span>
-                </div>
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/20">
-              <div className="text-center">
-                <div className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData.totalTrips}</div>
-                <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Total Trips</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData.totalDistance.toLocaleString('en-IN')} km</div>
-                <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Distance</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData.violations}</div>
-                <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Violations</div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 
       {/* Document Status */}
       <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Document Status</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { name: 'Driving License', key: 'license' },
@@ -350,7 +317,7 @@ export default function DriverManagement() {
           ].map((doc, index) => {
             const docData = selectedDriverData.documents[doc.key as keyof typeof selectedDriverData.documents];
             const status = getDocumentStatus(docData.status);
-            
+
             return (
               <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
                 <div className="flex items-center justify-between mb-3">

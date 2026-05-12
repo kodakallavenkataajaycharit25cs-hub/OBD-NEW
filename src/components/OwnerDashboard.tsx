@@ -110,12 +110,6 @@ export default function OwnerDashboard() {
         {/* Header */}
         <header className="h-24 px-8 flex items-center justify-between z-10">
           <div className="flex items-center space-x-6">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-12 h-12 clay-card bg-white/5 border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90"
-            >
-              <Settings className="w-5 h-5 text-gray-400" />
-            </button>
             <div>
               <h2 className="text-xs font-black uppercase tracking-[0.4em] text-gray-500 italic leading-none mb-2">Fleet Authority Dashboard</h2>
               <div className="flex items-center space-x-3">

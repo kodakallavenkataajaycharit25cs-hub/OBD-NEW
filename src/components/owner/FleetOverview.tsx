@@ -79,7 +79,7 @@ export default function FleetOverview() {
         {kpiData.map((kpi, index) => (
           <div
             key={index}
-            className="clay-card p-6 bg-zinc-900 border-white/5 hover:scale-105 transition-all group"
+            className="clay-card clay-card-hover p-6 bg-zinc-900 border-white/5 group"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="w-12 h-12 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 group-hover:rotate-6 transition-transform">
@@ -90,8 +90,8 @@ export default function FleetOverview() {
                 {kpi.change}
               </span>
             </div>
-            <h3 className="text-xl font-black text-white mb-1 tabular-nums font-['Space_Grotesk'] not-italic">{kpi.value}</h3>
-            <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em] italic">{kpi.title}</p>
+            <h3 className="text-xl font-bold text-white mb-1 tabular-nums font-['Space_Grotesk'] not-italic">{kpi.value}</h3>
+            <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em]">{kpi.title}</p>
           </div>
         ))}
       </div>
@@ -172,9 +172,9 @@ export default function FleetOverview() {
               { l: 'Revised', v: 3, c: 'orange' },
               { l: 'Critical', v: 1, c: 'red' }
             ].map((stat, i) => (
-              <div key={i} className={`clay-card p-4 bg-${stat.c}-500/5 border-${stat.c}-500/20 text-center`}>
-                <div className={`text-2xl font-black text-${stat.c}-500 tabular-nums font-['Space_Grotesk'] not-italic`}>{stat.v}</div>
-                <div className={`text-[8px] font-black text-${stat.c}-500/60 uppercase tracking-widest mt-1`}>{stat.l}</div>
+              <div key={i} className={`clay-card clay-card-hover p-4 bg-${stat.c}-500/5 border-${stat.c}-500/20 text-center group`}>
+                <div className={`text-2xl font-black text-${stat.c}-500 tabular-nums font-['Space_Grotesk'] not-italic group-hover:scale-110 transition-transform`}>{stat.v}</div>
+                <div className={`text-[8px] font-black text-${stat.c}-500/60 uppercase tracking-widest mt-1 group-hover:text-${stat.c}-400 transition-colors`}>{stat.l}</div>
               </div>
             ))}
           </div>

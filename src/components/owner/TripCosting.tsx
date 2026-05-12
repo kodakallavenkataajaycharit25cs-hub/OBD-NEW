@@ -72,7 +72,7 @@ export default function TripCosting() {
               <TrendingUp className="w-12 h-12" />
             </div>
             <div className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1">{stat.title}</div>
-            <div className="text-2xl font-black text-white tracking-tighter clay-text-3d">{stat.value}</div>
+            <div className="text-2xl font-bold text-white tracking-tight">{stat.value}</div>
             <div className={`mt-2 flex items-center text-sm font-bold ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
               {stat.trend === 'up' ? <ArrowUpRight className="w-[14px] h-[14px] mr-1" /> : <ArrowDownRight className="w-[14px] h-[14px] mr-1" />}
               {stat.change} vs last period
@@ -86,7 +86,7 @@ export default function TripCosting() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <TrendingUp className="w-8 h-8 text-blue-500" />
-            <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Trip Economics Interface</h2>
+            <h2 className="text-2xl font-bold tracking-tight uppercase text-white">Trip Economics Interface</h2>
           </div>
         </div>
 
@@ -118,7 +118,7 @@ export default function TripCosting() {
                  <div className="inline-block px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-xl mb-4">
                    <TrendingUp className="w-6 h-6 text-blue-400 mx-auto" />
                  </div>
-                 <div className="text-xs font-black uppercase tracking-[0.4em] text-gray-500 italic">Profitability Stream Visualization Live</div>
+                 <div className="text-xs font-black uppercase tracking-[0.4em] text-gray-500">Profitability Stream Visualization Live</div>
                  <p className="max-w-xs text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-4 mx-auto leading-relaxed">ML-powered route profitability correlation active</p>
                </div>
             </div>
@@ -129,14 +129,14 @@ export default function TripCosting() {
             <div className="clay-card p-6 bg-blue-600 border-none shadow-blue-900/40 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8" />
                <div className="relative z-10">
-                 <h3 className="text-sm font-black uppercase tracking-widest text-white/50 mb-2 italic text-left">Unit Economics Lead</h3>
-                 <div className="text-4xl font-black text-white tracking-tighter">₹28.4</div>
+                 <h3 className="text-sm font-black uppercase tracking-widest text-white/50 mb-2 text-left">Unit Economics Lead</h3>
+                 <div className="text-4xl font-bold text-white tracking-tight">₹28.4</div>
                  <div className="text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">Net profit per missions kilometer</div>
                </div>
             </div>
 
             <div className="clay-card p-6 border-white/5">
-              <h3 className="text-xs font-black text-white mb-6 uppercase tracking-[0.3em] italic">Temporal Core Filtering</h3>
+              <h3 className="text-xs font-black text-white mb-6 uppercase tracking-[0.3em]">Temporal Core Filtering</h3>
               <div className="space-y-3">
                 <select 
                   value={dateRange}
@@ -160,7 +160,7 @@ export default function TripCosting() {
 
       {/* Recent Trips Analysis */}
       <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
-        <h2 className="text-xl font-black text-white mb-8 tracking-tighter uppercase clay-text-3d italic text-left">Mission Profitability Audit</h2>
+        <h2 className="text-xl font-bold text-white mb-8 tracking-tight uppercase text-left">Mission Profitability Audit</h2>
         
         <div className="space-y-4">
           {recentTrips.map((trip) => (
@@ -169,7 +169,7 @@ export default function TripCosting() {
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <span className="text-[10px] font-black uppercase tracking-widest text-blue-500/80">{trip.id}</span>
-                    <h3 className="text-lg font-black text-white tracking-tight uppercase group-hover:text-blue-400 transition-colors italic">{trip.route}</h3>
+                    <h3 className="text-lg font-bold text-white tracking-tight uppercase group-hover:text-blue-400 transition-colors">{trip.route}</h3>
                   </div>
                   <div className="flex items-center space-x-4 text-[10px] font-black uppercase tracking-widest text-gray-600">
                     <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" /> {trip.distance}</span>
@@ -194,7 +194,7 @@ export default function TripCosting() {
                   </div>
                   <div>
                     <div className="text-[10px] font-black uppercase tracking-widest text-blue-500/40 leading-none mb-1 text-right">Revenue</div>
-                    <div className="text-xl font-black text-white tracking-tighter text-right leading-none transition-all group-hover:text-blue-400">{formatIndianCurrency(trip.revenue)}</div>
+                    <div className="text-xl font-bold text-white tracking-tight text-right leading-none transition-all group-hover:text-blue-400">{formatIndianCurrency(trip.revenue)}</div>
                   </div>
                 </div>
               </div>

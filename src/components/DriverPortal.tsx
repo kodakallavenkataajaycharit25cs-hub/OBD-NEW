@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import {
   User,
@@ -14,12 +14,16 @@ import {
   Activity,
   ArrowRight,
   Settings,
-  Bot
+  Bot,
+  Zap,
+  Thermometer,
+  Gauge
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
 import AIVoiceAssistant from './AIVoiceAssistant';
 import SpotBooking from './SpotBooking';
+import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../services/obdApi';
 
 export default function DriverPortal() {
   const { user, logout } = useAuth();
@@ -27,6 +31,32 @@ export default function DriverPortal() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '1m' | '3m' | '1y'>('1m');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
+  const [telemetry, setTelemetry] = useState<OBDData>({});
+
+  useEffect(() => {
+    const updateTelemetry = async () => {
+      try {
+        const [rpmData, speedData, fuelData, diagData] = await Promise.all([
+          fetchRPM(),
+          fetchSpeed(),
+          fetchFuelLevel(),
+          fetchDiagnostics()
+        ]);
+        setTelemetry({
+          rpm: rpmData.rpm,
+          speed: speedData.speed,
+          fuel_level: fuelData.fuel_level,
+          diagnostics: diagData
+        });
+      } catch (error) {
+        console.error('Failed to update telemetry:', error);
+      }
+    };
+
+    updateTelemetry();
+    const interval = setInterval(updateTelemetry, 10000); // Update every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSectionHighlight = (section: string) => {
     setHighlightedSection(section);
@@ -35,6 +65,7 @@ export default function DriverPortal() {
 
   const navigation = [
     { name: 'Profile', href: '/driver', icon: User, current: location.pathname === '/driver' },
+    { name: 'Telemetry', href: '/driver/telemetry', icon: Activity, current: location.pathname === '/driver/telemetry' },
     { name: 'Documents', href: '/driver/documents', icon: FileText, current: location.pathname === '/driver/documents' },
     { name: 'Trip Logs', href: '/driver/trips', icon: MapPin, current: location.pathname === '/driver/trips' },
     { name: 'Earnings', href: '/driver/earnings', icon: TrendingUp, current: location.pathname === '/driver/earnings' },
@@ -377,6 +408,73 @@ export default function DriverPortal() {
     </div>
   );
 
+  const TelemetrySection = () => (
+    <div className="space-y-8">
+      <div className="clay-card p-8 bg-zinc-900 border-white/5">
+        <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Real-time Telemetry</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {[
+            { label: 'Engine RPM', value: telemetry.rpm || 0, unit: 'RPM', icon: Gauge, color: 'blue' },
+            { label: 'Ground Speed', value: telemetry.speed || 0, unit: 'km/h', icon: Zap, color: 'orange' },
+            { label: 'Fuel Reservoir', value: telemetry.fuel_level || 0, unit: '%', icon: Thermometer, color: 'green' },
+            { label: 'Engine Load', value: telemetry.diagnostics?.engine_load || '0%', unit: '', icon: Activity, color: 'purple' }
+          ].map((stat, i) => (
+            <div key={i} className="clay-card p-6 bg-black/20 border-white/5 shadow-inner text-center group hover:bg-white/5 transition-all">
+              <div className={`w-12 h-12 rounded-2xl bg-${stat.color}-500/10 flex items-center justify-center mx-auto mb-4 border border-${stat.color}-500/20 group-hover:scale-110 transition-transform`}>
+                <stat.icon className={`w-6 h-6 text-${stat.color}-500`} />
+              </div>
+              <div className="text-3xl font-black text-white tracking-tighter">
+                {stat.value}<span className="text-xs ml-1 text-gray-500">{stat.unit}</span>
+              </div>
+              <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-1">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="clay-card p-8 bg-black/20 border-white/5 shadow-inner">
+            <h3 className="text-lg font-black text-white mb-6 tracking-tighter uppercase clay-text-3d italic">Diagnostic Status</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center py-3 border-b border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">MIL Status</span>
+                <span className={`text-xs font-black uppercase ${telemetry.diagnostics?.mil_status === 'OFF' ? 'text-green-500' : 'text-red-500'}`}>
+                  {telemetry.diagnostics?.mil_status || 'UNKNOWN'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Coolant Temp</span>
+                <span className="text-xs font-black text-blue-400">
+                  {telemetry.diagnostics?.coolant_temp || '0C'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Active DTCs</span>
+                <span className="text-xs font-black text-gray-400">
+                  {telemetry.diagnostics?.dtc?.length || 0} Codes Detected
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="clay-card p-8 bg-blue-600/5 border-blue-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Activity className="w-24 h-24 text-blue-500" />
+            </div>
+            <h3 className="text-lg font-black text-white mb-6 tracking-tighter uppercase clay-text-3d italic">System Health</h3>
+            <p className="text-sm text-gray-400 leading-relaxed mb-6">
+              All vehicle subsystems are currently operating within nominal parameters. Real-time sync with Core Command is active.
+            </p>
+            <div className="flex items-center space-x-3 text-green-400">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Nominal State Verified</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const BadgesSection = () => (
     <div className="space-y-8">
       <div className="clay-card p-8 bg-zinc-900 border-white/5">
@@ -539,6 +637,7 @@ export default function DriverPortal() {
           <div className="max-w-[1400px] mx-auto">
             <Routes>
               <Route index element={<ProfileSection />} />
+              <Route path="/telemetry" element={<TelemetrySection />} />
               <Route path="/documents" element={<DocumentsSection />} />
               <Route path="/trips" element={<TripLogsSection />} />
               <Route path="/earnings" element={<EarningsSection />} />

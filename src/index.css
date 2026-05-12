@@ -1,3 +1,7 @@
+* {
+  cursor: none !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,23 +29,43 @@
 
 @layer components {
   .clay-card {
-    @apply bg-white/10 backdrop-blur-md rounded-2xl border border-white/20;
+    @apply bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 transition-all duration-500 ease-out;
     box-shadow:
       inset -8px -8px 16px 0px rgba(0, 0, 0, 0.2),
       inset 8px 8px 16px 0px rgba(255, 255, 255, 0.2),
       0px 20px 40px -10px rgba(0, 0, 0, 0.4);
   }
 
+  .clay-card:hover {
+    @apply border-white/40;
+    transform: translateY(-4px);
+    box-shadow:
+      inset -10px -10px 20px 0px rgba(0, 0, 0, 0.25),
+      inset 10px 10px 20px 0px rgba(255, 255, 255, 0.25),
+      0px 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
   .clay-card-hover {
-    @apply transition-all duration-500 ease-out cursor-pointer;
+    @apply cursor-pointer;
   }
 
   .clay-card-hover:hover {
     transform: translateY(-8px) scale(1.02);
+    @apply border-blue-500/30;
     box-shadow:
       inset -12px -12px 24px 0px rgba(0, 0, 0, 0.3),
       inset 12px 12px 24px 0px rgba(255, 255, 255, 0.3),
       0px 30px 60px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Global Icon Hover */
+  svg:not(.animate-pulse) {
+    @apply transition-all duration-300;
+  }
+  
+  .clay-card:hover svg,
+  .group:hover svg {
+    @apply scale-110 text-blue-400;
   }
 
   .clay-btn {
@@ -98,4 +122,17 @@
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

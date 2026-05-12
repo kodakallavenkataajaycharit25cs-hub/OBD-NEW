@@ -219,8 +219,8 @@ export default function SafetyEmergency() {
                   key={incident.id}
                   onClick={() => setSelectedIncident(incident.id)}
                   className={`cursor-pointer border rounded-2xl p-6 transition-all hover:bg-white/10 ${selectedIncident === incident.id
-                      ? 'border-blue-500 bg-blue-500/20'
-                      : 'border-white/20 bg-white/5'
+                    ? 'border-blue-500 bg-blue-500/20'
+                    : 'border-white/20 bg-white/5'
                     }`}
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -302,57 +302,7 @@ export default function SafetyEmergency() {
         </div>
       )}
 
-      {/* Crash Detection Settings */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
-        <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
-          <Zap className="w-6 h-6 mr-2 text-yellow-500" />
-          Crash Detection & SOS Settings
-        </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h4 className="font-black text-white uppercase tracking-tight">Detection Sensitivity</h4>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-300">Sudden Deceleration Threshold</span>
-                <span className="text-white font-semibold">-8 m/s²</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-300">Impact Force Threshold</span>
-                <span className="text-white font-semibold">12 G-force</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-300">SOS Response Time</span>
-                <span className="text-white font-semibold">30 seconds</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-black text-white uppercase tracking-tight">Escalation Rules</h4>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
-                <span className="text-gray-300">Immediate driver contact</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
-                <span className="text-gray-300">Fleet manager notification (if no response)</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
-                <span className="text-gray-300">Emergency services (100/108)</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</div>
-                <span className="text-gray-300">GPS location shared with responders</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

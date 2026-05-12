@@ -183,7 +183,7 @@ export default function BillingFinance() {
             <div key={invoice.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h4 className="text-lg font-black tracking-tight uppercase text-white">{invoice.id}</h4>
+                  <h4 className="text-lg font-bold uppercase text-white">{invoice.id}</h4>
                   <p className="text-gray-400">{invoice.customer}</p>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -192,7 +192,7 @@ export default function BillingFinance() {
                     {invoice.status}
                   </span>
                   <div className="text-right">
-                    <div className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">{formatIndianCurrency(invoice.totalAmount)}</div>
+                    <div className="text-2xl font-bold text-white">{formatIndianCurrency(invoice.totalAmount)}</div>
                     <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Inc. GST</div>
                   </div>
                 </div>
@@ -567,7 +567,7 @@ export default function BillingFinance() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {financialMetrics.map((metric, index) => (
             <div key={index} className="bg-white/10 rounded-lg p-4 text-center">
-              <div className="text-lg font-black tracking-tight uppercase text-white mb-1">{metric.value}</div>
+              <div className="text-lg font-bold text-white mb-1">{metric.value}</div>
               <div className="text-sm text-gray-300 mb-2">{metric.title}</div>
               <div className={`text-xs font-medium ${metric.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
                 }`}>
