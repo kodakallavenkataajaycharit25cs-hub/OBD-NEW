@@ -12,6 +12,7 @@ import {
   Zap,
   Car
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function FleetOverview() {
   const formatIndianCurrency = (amount: number) => {
@@ -77,9 +78,13 @@ export default function FleetOverview() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {kpiData.map((kpi, index) => (
-          <div
+          <BorderGlow
             key={index}
-            className="clay-card clay-card-hover p-6 bg-zinc-900 border-white/5 group"
+            borderRadius={28}
+            glowRadius={35}
+            glowIntensity={1}
+            backgroundColor="#120F17"
+            className="clay-card clay-card-hover border-white/5 group h-full p-6"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="w-12 h-12 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 group-hover:rotate-6 transition-transform">
@@ -92,13 +97,19 @@ export default function FleetOverview() {
             </div>
             <h3 className="text-xl font-bold text-white mb-1 tabular-nums font-['Space_Grotesk'] not-italic">{kpi.value}</h3>
             <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em]">{kpi.title}</p>
-          </div>
+          </BorderGlow>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Route Profitability */}
-        <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          backgroundColor="#120F17"
+          className="clay-card p-8 border-white/5 shadow-2xl h-full"
+        >
           <div className="flex items-center space-x-4 mb-10">
             <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
               <MapPin className="w-5 h-5 text-blue-500" />
@@ -119,10 +130,17 @@ export default function FleetOverview() {
               </div>
             ))}
           </div>
-        </div>
+        </BorderGlow>
 
         {/* Driver Leaderboard */}
-        <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          glowColor="280 60 70"
+          backgroundColor="#120F17"
+          className="clay-card p-8 border-white/5 shadow-2xl h-full"
+        >
           <div className="flex items-center space-x-4 mb-10">
             <div className="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center">
               <Users className="w-5 h-5 text-purple-500" />
@@ -152,12 +170,18 @@ export default function FleetOverview() {
               </div>
             ))}
           </div>
-        </div>
+        </BorderGlow>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Vehicle Health Summary */}
-        <div className="clay-card p-8 bg-zinc-900 border-white/5">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          backgroundColor="#120F17"
+          className="clay-card p-8 border-white/5 h-full"
+        >
           <div className="flex items-center space-x-4 mb-8">
             <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
               <Truck className="w-5 h-5 text-blue-500" />
@@ -196,10 +220,17 @@ export default function FleetOverview() {
               </div>
             ))}
           </div>
-        </div>
+        </BorderGlow>
 
         {/* Recent Alerts */}
-        <div className="clay-card p-8 bg-zinc-900 border-white/5">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          glowColor="0 80 50"
+          backgroundColor="#120F17"
+          className="clay-card p-8 border-white/5 h-full"
+        >
           <div className="flex items-center space-x-4 mb-8">
             <div className="w-10 h-10 bg-red-600/10 rounded-xl flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-red-500" />
@@ -226,7 +257,7 @@ export default function FleetOverview() {
           <button className="w-full clay-btn bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white mt-8 h-12 text-[10px] uppercase tracking-widest">
             Access Full Logs
           </button>
-        </div>
+        </BorderGlow>
       </div>
     </div>
   );

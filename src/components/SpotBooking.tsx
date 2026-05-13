@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Car, 
+import {
+  MapPin,
+  Calendar,
+  Users,
+  Car,
   CheckCircle,
   Clock,
   ArrowRight
 } from 'lucide-react';
+import BorderGlow from './BorderGlow';
 
 export default function SpotBooking() {
   const [booking, setBooking] = useState({
@@ -46,10 +47,16 @@ export default function SpotBooking() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl relative overflow-hidden">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-8 border-white/5 shadow-2xl relative overflow-hidden h-full"
+          >
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-            
+
             <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
@@ -134,11 +141,10 @@ export default function SpotBooking() {
                       key={v.id}
                       type="button"
                       onClick={() => setBooking(prev => ({ ...prev, car: v.id }))}
-                      className={`p-4 rounded-2xl text-center transition-all group ${
-                        booking.car === v.id
+                      className={`p-4 rounded-2xl text-center transition-all group ${booking.car === v.id
                           ? 'clay-card bg-blue-600 border-none shadow-blue-900/40 text-white'
                           : 'bg-black/20 text-gray-600 hover:text-white hover:bg-white/5 border border-white/5 shadow-inner'
-                      }`}
+                        }`}
                     >
                       <Car className={`w-6 h-6 mx-auto mb-2 ${booking.car === v.id ? 'text-white' : 'text-gray-700 group-hover:text-blue-500/50'}`} />
                       <div className="text-[10px] font-black uppercase tracking-tighter leading-none">{v.name}</div>
@@ -151,11 +157,10 @@ export default function SpotBooking() {
               <button
                 type="submit"
                 disabled={submitted}
-                className={`w-full h-16 rounded-2xl font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center space-x-3 ${
-                  submitted 
+                className={`w-full h-16 rounded-2xl font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center space-x-3 ${submitted
                     ? 'bg-green-500/20 text-green-500 border border-green-500/20 cursor-default'
                     : 'clay-card bg-blue-600 border-none shadow-blue-900/40 text-white hover:scale-[1.02] active:scale-95'
-                }`}
+                  }`}
               >
                 {submitted ? (
                   <>
@@ -170,11 +175,18 @@ export default function SpotBooking() {
                 )}
               </button>
             </form>
-          </div>
+          </BorderGlow>
         </div>
 
         <div className="space-y-8">
-          <div className="clay-card p-8 bg-blue-600 border-none shadow-blue-900/50 relative overflow-hidden group">
+          <BorderGlow
+            borderRadius={28}
+            glowColor="180 80 50"
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-8 border-none shadow-blue-900/50 relative overflow-hidden group h-full"
+          >
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 transition-transform group-hover:scale-150" />
             <h3 className="text-xl font-black text-white mb-6 tracking-tighter uppercase italic leading-none">Instant Confirmation</h3>
             <p className="text-xs font-black text-blue-100/60 uppercase tracking-widest leading-relaxed mb-8">
@@ -186,9 +198,15 @@ export default function SpotBooking() {
                 <span className="text-[10px] font-black text-white uppercase tracking-widest">Real-time Node Ready</span>
               </div>
             </div>
-          </div>
+          </BorderGlow>
 
-          <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-8 border-white/5 shadow-2xl h-full"
+          >
             <h3 className="text-sm font-black text-white mb-6 uppercase tracking-widest italic clay-text-3d">Recent Registrations</h3>
             <div className="space-y-4">
               {[
@@ -207,7 +225,7 @@ export default function SpotBooking() {
                 </div>
               ))}
             </div>
-          </div>
+          </BorderGlow>
         </div>
       </div>
     </div>

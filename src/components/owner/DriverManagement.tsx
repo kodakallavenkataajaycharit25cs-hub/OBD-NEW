@@ -13,6 +13,7 @@ import {
   Calendar,
   Car
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function DriverManagement() {
   const [selectedDriver, setSelectedDriver] = useState('driver-1');
@@ -139,7 +140,11 @@ export default function DriverManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+      <BorderGlow
+        borderRadius={24}
+        backgroundColor="#18181b"
+        className="clay-card p-6 border-white/5 shadow-2xl"
+      >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Driver Management</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -160,11 +165,15 @@ export default function DriverManagement() {
             <div className="text-sm text-purple-300">Avg Rating</div>
           </div>
         </div>
-      </div>
+      </BorderGlow>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Driver List */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={24}
+          backgroundColor="#18181b"
+          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+        >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Users className="w-6 h-6 mr-2 text-blue-500" />
             Driver Roster
@@ -222,12 +231,16 @@ export default function DriverManagement() {
               </div>
             ))}
           </div>
-        </div>
+        </BorderGlow>
 
         {/* Driver Details */}
         <div className="space-y-6">
           {/* Profile Info */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={24}
+            backgroundColor="#18181b"
+            className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Driver Profile</h3>
 
             <div className="flex items-center space-x-4 mb-6">
@@ -263,10 +276,14 @@ export default function DriverManagement() {
                 <span className="text-gray-300">{selectedDriverData.location}</span>
               </div>
             </div>
-          </div>
+          </BorderGlow>
 
           {/* Performance Scores */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={24}
+            backgroundColor="#18181b"
+            className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
               <TrendingUp className="w-6 h-6 mr-2 text-green-500" />
               Performance Scores
@@ -299,14 +316,18 @@ export default function DriverManagement() {
                 );
               })}
             </div>
-          </div>
+          </BorderGlow>
 
 
         </div>
       </div>
 
       {/* Document Status */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+      <BorderGlow
+        borderRadius={32}
+        backgroundColor="#18181b"
+        className="clay-card p-6 border-white/5 shadow-2xl h-full"
+      >
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Document Status</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -342,7 +363,7 @@ export default function DriverManagement() {
             );
           })}
         </div>
-      </div>
+      </BorderGlow>
     </div>
   );
 }

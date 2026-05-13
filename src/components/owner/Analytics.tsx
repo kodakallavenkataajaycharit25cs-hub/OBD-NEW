@@ -13,6 +13,7 @@ import {
   PieChart,
   Activity
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function Analytics() {
   const [selectedTimeframe, setSelectedTimeframe] = useState('30d');
@@ -189,13 +190,17 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-500/50 rounded-2xl p-6">
+      <BorderGlow
+        borderRadius={32}
+        backgroundColor="#18181b"
+        className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-500/50 p-6"
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white flex items-center">
             <Brain className="w-8 h-8 mr-3 text-purple-400" />
             Analytics & Machine Learning Insights
           </h2>
-          
+
           <div className="flex items-center space-x-4">
             <select
               value={selectedTimeframe}
@@ -228,11 +233,15 @@ export default function Analytics() {
             <div className="text-sm text-yellow-300">Efficiency Improvement</div>
           </div>
         </div>
-      </div>
+      </BorderGlow>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ML Insights */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={32}
+          backgroundColor="#18181b"
+          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+        >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Zap className="w-6 h-6 mr-2 text-yellow-500" />
             AI-Powered Insights
@@ -263,7 +272,7 @@ export default function Analytics() {
               const btnColor = colorMaps[insight.color] || 'bg-gray-600';
               const cardColor = cardColorMaps[insight.color] || 'bg-gray-500/20 border-gray-500/50';
               const iconColor = iconColorMaps[insight.color] || 'bg-gray-500/30 text-gray-400';
-              
+
               return (
                 <div
                   key={index}
@@ -295,10 +304,14 @@ export default function Analytics() {
               );
             })}
           </div>
-        </div>
+        </BorderGlow>
 
         {/* Demand Forecasting */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={32}
+          backgroundColor="#18181b"
+          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+        >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <TrendingUp className="w-6 h-6 mr-2 text-blue-500" />
             Demand Forecasting
@@ -309,13 +322,12 @@ export default function Analytics() {
               <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-black text-white uppercase tracking-tight">{forecast.route}</h4>
-                  <span className={`font-bold ${
-                    forecast.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
-                  }`}>
+                  <span className={`font-bold ${forecast.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
+                    }`}>
                     {forecast.change}
                   </span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Current Demand:</span>
@@ -326,11 +338,11 @@ export default function Analytics() {
                     <p className="text-white font-semibold">{forecast.forecastedDemand} trips/week</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-3">
                   <div className="flex items-center space-x-3">
                     <div className="flex-1 bg-gray-700 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-500 h-2 rounded-full"
                         style={{ width: `${(forecast.forecastedDemand / 100) * 100}%` }}
                       />
@@ -341,7 +353,7 @@ export default function Analytics() {
               </div>
             ))}
           </div>
-        </div>
+        </BorderGlow>
       </div>
 
       {/* Hotspot Mapping */}

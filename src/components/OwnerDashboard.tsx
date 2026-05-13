@@ -29,6 +29,7 @@ import Maintenance from './owner/Maintenance';
 import BillingFinance from './owner/BillingFinance';
 import Analytics from './owner/Analytics';
 import SpotBooking from './SpotBooking';
+import BorderGlow from './BorderGlow';
 
 export default function OwnerDashboard() {
   const { user, logout } = useAuth();
@@ -127,14 +128,14 @@ export default function OwnerDashboard() {
               <span className="text-[8px] font-black uppercase tracking-widest text-gray-600">Operations Lead</span>
               <span className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</span>
             </div>
-            <div className="w-14 h-14 clay-card bg-zinc-800 border-white/5 flex items-center justify-center group overflow-hidden">
+            <div className="w-14 h-14 bg-zinc-800 border-white/5 flex items-center justify-center group overflow-hidden">
               <div className="w-full h-full bg-blue-600 flex items-center justify-center transition-transform group-hover:scale-110">
                 <Users className="w-6 h-6 text-white" />
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center px-4 py-2 clay-card bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
+              className="flex items-center px-4 py-2 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
             >
               <LogOut className="w-4 h-4 mr-2" />
               <span className="text-[10px] font-black uppercase tracking-widest">Logout</span>

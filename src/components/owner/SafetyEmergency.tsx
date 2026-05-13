@@ -13,6 +13,7 @@ import {
   XCircle,
   Play
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function SafetyEmergency() {
   const [selectedIncident, setSelectedIncident] = useState<string | null>(null);
@@ -121,7 +122,13 @@ export default function SafetyEmergency() {
   return (
     <div className="space-y-4">
       {/* Header with Emergency Stats */}
-      <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-500/50 rounded-2xl p-6">
+      <BorderGlow
+        borderRadius={28}
+        glowRadius={40}
+        glowIntensity={1}
+        backgroundColor="#120F17"
+        className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-500/50 p-6"
+      >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <Shield className="w-8 h-8 mr-3 text-red-400" />
           Safety & Emergency Management
@@ -145,11 +152,17 @@ export default function SafetyEmergency() {
             <div className="text-sm text-yellow-300">Incidents This Month</div>
           </div>
         </div>
-      </div>
+      </BorderGlow>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live Alerts */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          backgroundColor="#120F17"
+          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+        >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <AlertTriangle className="w-6 h-6 mr-2 text-yellow-500" />
             Live Alerts
@@ -200,10 +213,16 @@ export default function SafetyEmergency() {
               );
             })}
           </div>
-        </div>
+        </BorderGlow>
 
         {/* Recent Incidents */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          backgroundColor="#120F17"
+          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+        >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Activity className="w-6 h-6 mr-2 text-blue-500" />
             Recent Safety Incidents
@@ -249,12 +268,18 @@ export default function SafetyEmergency() {
               );
             })}
           </div>
-        </div>
+        </BorderGlow>
       </div>
 
       {/* Incident Details Section (Conditional) */}
       {selectedIncidentData && (
-        <div className="clay-card p-6 bg-white/5 border-white/10 rounded-lg shadow-2xl animate-in fade-in slide-in-from-top-4">
+        <BorderGlow
+          borderRadius={28}
+          glowRadius={40}
+          glowIntensity={1}
+          backgroundColor="#120F17"
+          className="clay-card p-6 border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-4"
+        >
           <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Incident Dossier: {selectedIncidentData.id}</h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -299,7 +324,7 @@ export default function SafetyEmergency() {
               </ul>
             </div>
           </div>
-        </div>
+        </BorderGlow>
       )}
 
 

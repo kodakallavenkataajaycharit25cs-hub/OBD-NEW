@@ -12,6 +12,7 @@ import {
   TrendingDown,
   Activity
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../../services/obdApi';
 
 export default function VehicleHealth() {
@@ -149,22 +150,27 @@ export default function VehicleHealth() {
   return (
     <div className="space-y-6">
       {/* Vehicle Selector */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-6 border-white/5 shadow-2xl"
+      >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Vehicle Health Monitoring</h2>
         <div className="flex flex-wrap gap-3">
           {vehicles.map((vehicle) => {
             const StatusIcon = getStatusIcon(vehicle.status);
             const statusColor = getStatusColor(vehicle.status);
-            
+
             return (
               <button
                 key={vehicle.id}
                 onClick={() => setSelectedVehicle(vehicle.id)}
-                className={`flex items-center space-x-3 p-3 rounded-lg border transition-all ${
-                  selectedVehicle === vehicle.id
+                className={`flex items-center space-x-3 p-3 rounded-lg border transition-all ${selectedVehicle === vehicle.id
                     ? 'border-blue-500 bg-blue-500/20'
                     : 'border-white/20 bg-white/5 hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <StatusIcon className={`w-5 h-5 text-${statusColor}-400`} />
                 <div className="text-left">
@@ -175,12 +181,18 @@ export default function VehicleHealth() {
             );
           })}
         </div>
-      </div>
+      </BorderGlow>
 
       {/* Selected Vehicle Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-6 border-white/5 shadow-2xl"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
               <Car className="w-6 h-6 mr-2 text-blue-500" />
               Real-time OBD Data - {selectedVehicleData.id}
@@ -189,11 +201,15 @@ export default function VehicleHealth() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               {obdMetrics.map((metric, index) => {
                 const statusColor = getStatusColor(metric.status);
-                
+
                 return (
-                  <div
+                  <BorderGlow
                     key={index}
-                    className={`clay-card clay-card-hover group bg-${statusColor}-500/20 border border-${statusColor}-500/50 rounded-lg p-4 text-center transition-all`}
+                    borderRadius={28}
+                    glowRadius={40}
+                    glowIntensity={1}
+                    backgroundColor="#120F17"
+                    className={`clay-card clay-card-hover group bg-${statusColor}-500/20 border border-${statusColor}-500/50 p-4 text-center transition-all h-full`}
                   >
                     <div className={`w-12 h-12 bg-${statusColor}-500/30 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 group-hover:rotate-6 transition-transform`}>
                       <metric.icon className={`w-6 h-6 text-${statusColor}-400`} />
@@ -202,13 +218,11 @@ export default function VehicleHealth() {
                       {metric.value} {metric.unit}
                     </div>
                     <div className="text-sm text-gray-300 group-hover:text-white transition-colors">{metric.name}</div>
-                  </div>
+                  </BorderGlow>
                 );
               })}
             </div>
-
-
-          </div>
+          </BorderGlow>
 
           {/* Engine Diagnostic Codes */}
           {selectedVehicleData.engineCodes.length > 0 && (
@@ -232,9 +246,15 @@ export default function VehicleHealth() {
           )}
 
           {/* Speed & Geofence Violations */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-6 border-white/5 shadow-2xl"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Recent Violations</h3>
-            
+
             <div className="space-y-4">
               {[
                 { type: 'Speed', location: 'Mumbai-Pune Highway', time: '2 hours ago', severity: 'high' },
@@ -243,11 +263,10 @@ export default function VehicleHealth() {
               ].map((violation, index) => (
                 <div key={index} className="clay-card clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all">
                   <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-                      violation.severity === 'high' ? 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30' :
-                      violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30' :
-                      'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${violation.severity === 'high' ? 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30' :
+                        violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30' :
+                          'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
+                      }`}>
                       {violation.type}
                     </span>
                     <span className="text-[10px] uppercase font-black tracking-widest text-gray-500 group-hover:text-gray-400 transition-colors">{violation.time}</span>
@@ -256,15 +275,21 @@ export default function VehicleHealth() {
                 </div>
               ))}
             </div>
-          </div>
+          </BorderGlow>
         </div>
 
         {/* Vehicle Details Sidebar */}
         <div className="space-y-6">
           {/* Vehicle Info */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-6 border-white/5 shadow-2xl"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Vehicle Details</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <span className="text-gray-400 text-sm">Model</span>
@@ -288,7 +313,7 @@ export default function VehicleHealth() {
                   {(() => {
                     const StatusIcon = getStatusIcon(selectedVehicleData.status);
                     const statusColor = getStatusColor(selectedVehicleData.status);
-                    
+
                     return (
                       <>
                         <StatusIcon className={`w-5 h-5 text-${statusColor}-400`} />
@@ -301,12 +326,18 @@ export default function VehicleHealth() {
                 </div>
               </div>
             </div>
-          </div>
+          </BorderGlow>
 
           {/* Maintenance Info */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-6 border-white/5 shadow-2xl"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Maintenance Schedule</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <span className="text-gray-400 text-sm">Last Service</span>
@@ -320,7 +351,7 @@ export default function VehicleHealth() {
                   {new Date(selectedVehicleData.nextService).toLocaleDateString('en-IN')}
                 </p>
               </div>
-              
+
               <div className="mt-4">
                 {new Date(selectedVehicleData.nextService) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) ? (
                   <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 text-center">
@@ -335,12 +366,18 @@ export default function VehicleHealth() {
                 )}
               </div>
             </div>
-          </div>
+          </BorderGlow>
 
           {/* Efficiency Trends */}
-          <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-6 border-white/5 shadow-2xl"
+          >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Efficiency Trends</h3>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-gray-400">Fuel Efficiency</span>
@@ -364,7 +401,7 @@ export default function VehicleHealth() {
                 </div>
               </div>
             </div>
-          </div>
+          </BorderGlow>
         </div>
       </div>
     </div>

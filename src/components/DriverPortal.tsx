@@ -23,6 +23,7 @@ import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
 import AIVoiceAssistant from './AIVoiceAssistant';
 import SpotBooking from './SpotBooking';
+import BorderGlow from './BorderGlow';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../services/obdApi';
 
 export default function DriverPortal() {
@@ -148,7 +149,13 @@ export default function DriverPortal() {
   const ProfileSection = () => (
     <div className="space-y-8">
       {/* Time Period Selector */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-xl">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-6 border-white/5 shadow-xl"
+      >
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-white tracking-tighter uppercase clay-text-3d">Performance Horizon</h3>
           <div className="flex p-1 bg-black/20 rounded-2xl shadow-inner">
@@ -171,9 +178,15 @@ export default function DriverPortal() {
             ))}
           </div>
         </div>
-      </div>
+      </BorderGlow>
 
-      <div className="clay-card p-8 bg-zinc-900 border-white/10 group">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-8 border-white/10 group"
+      >
         <div className="flex items-center space-x-8 mb-10">
           <div className="w-24 h-24 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 relative">
             <User className="w-12 h-12 text-white" />
@@ -206,10 +219,16 @@ export default function DriverPortal() {
             </div>
           ))}
         </div>
-      </div>
+      </BorderGlow>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="clay-card p-8 border-white/5">
+        <BorderGlow
+          borderRadius={28}
+          backgroundColor="#120F17"
+          glowRadius={40}
+          glowIntensity={1}
+          className="clay-card p-8 border-white/5 h-full"
+        >
           <h3 className="text-xl font-black text-white mb-8 tracking-tighter uppercase clay-text-3d italic">Efficiency Matrix</h3>
           <div className="space-y-8">
             <div>
@@ -237,9 +256,16 @@ export default function DriverPortal() {
               </div>
             </div>
           </div>
-        </div>
+        </BorderGlow>
 
-        <div className="clay-card p-8 bg-blue-600/5 border-blue-500/20">
+        <BorderGlow
+          borderRadius={28}
+          glowColor="120 70 50"
+          backgroundColor="#120F17"
+          glowRadius={40}
+          glowIntensity={1}
+          className="clay-card p-8 bg-blue-600/5 border-blue-500/20 h-full"
+        >
           <h3 className="text-xl font-black text-white mb-8 tracking-tighter uppercase clay-text-3d italic">{driverData.periodLabel} Credit</h3>
           <div className="space-y-6">
             <div>
@@ -260,19 +286,32 @@ export default function DriverPortal() {
               </div>
             </div>
           </div>
-        </div>
+        </BorderGlow>
       </div>
     </div>
   );
 
   const DocumentsSection = () => (
     <div className="space-y-8">
-      <div className="clay-card p-8 bg-zinc-900 border-white/5">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-8 border-white/5 h-full"
+      >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Document Archives</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {driverData.documents?.map((doc: any, index: number) => (
-            <div key={index} className="clay-card p-6 bg-black/20 border-white/5 shadow-inner">
+            <BorderGlow
+              key={index}
+              borderRadius={28}
+              glowRadius={40}
+              glowIntensity={1}
+              backgroundColor="#120F17"
+              className="clay-card p-6 border-white/5 shadow-inner h-full"
+            >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-black text-white uppercase tracking-tight">{doc.name}</h3>
                 <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${doc.status === 'valid' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
@@ -290,16 +329,22 @@ export default function DriverPortal() {
                 <Upload className="w-4 h-4" />
                 <span>UPLOAD REVISION</span>
               </button>
-            </div>
+            </BorderGlow>
           ))}
         </div>
-      </div>
+      </BorderGlow>
     </div>
   );
 
   const TripLogsSection = () => (
     <div className="space-y-8">
-      <div className="clay-card p-8 bg-zinc-900 border-white/5">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-8 border-white/5 h-full"
+      >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Historical Missions</h2>
 
         <div className="space-y-4">
@@ -309,7 +354,14 @@ export default function DriverPortal() {
             { date: '2025-01-13', route: 'Mumbai → Nashik', distance: '166 km', duration: '4h 10m', fare: 3200 },
             { date: '2025-01-12', route: 'Mumbai Airport → Lonavala', distance: '98 km', duration: '2h 45m', fare: 2100 }
           ].map((trip, index) => (
-            <div key={index} className="clay-card p-6 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+            <BorderGlow
+              key={index}
+              borderRadius={28}
+              glowRadius={40}
+              glowIntensity={1}
+              backgroundColor="#120F17"
+              className="clay-card p-6 shadow-inner hover:bg-white/5 transition-all group border-white/5"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-black text-white tracking tight uppercase group-hover:text-blue-400 transition-colors">{trip.route}</h3>
@@ -326,10 +378,10 @@ export default function DriverPortal() {
                   <div className="text-[10px] text-gray-700 font-bold uppercase tracking-widest mt-1">Mission Credit</div>
                 </div>
               </div>
-            </div>
+            </BorderGlow>
           ))}
         </div>
-      </div>
+      </BorderGlow>
     </div>
   );
 
@@ -389,7 +441,7 @@ export default function DriverPortal() {
             ].map((payment, index) => (
               <div key={index} className="flex items-center justify-between py-4 border-b border-white/5 last:border-b-0 group">
                 <div className="flex items-center space-x-6">
-                  <div className="w-12 h-12 clay-card bg-zinc-800 border-none flex items-center justify-center">
+                  <div className="w-12 h-12 clay-card bg-zinc-800 border-none flex items-center justify-center rounded-xl">
                     <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <div>
@@ -410,7 +462,13 @@ export default function DriverPortal() {
 
   const TelemetrySection = () => (
     <div className="space-y-8">
-      <div className="clay-card p-8 bg-zinc-900 border-white/5">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-8 border-white/5 h-full"
+      >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Real-time Telemetry</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -420,7 +478,14 @@ export default function DriverPortal() {
             { label: 'Fuel Reservoir', value: telemetry.fuel_level || 0, unit: '%', icon: Thermometer, color: 'green' },
             { label: 'Engine Load', value: telemetry.diagnostics?.engine_load || '0%', unit: '', icon: Activity, color: 'purple' }
           ].map((stat, i) => (
-            <div key={i} className="clay-card p-6 bg-black/20 border-white/5 shadow-inner text-center group hover:bg-white/5 transition-all">
+            <BorderGlow
+              key={i}
+              borderRadius={28}
+              glowRadius={40}
+              glowIntensity={1}
+              backgroundColor="#120F17"
+              className="clay-card p-6 shadow-inner text-center group hover:bg-white/5 transition-all h-full border-white/5"
+            >
               <div className={`w-12 h-12 rounded-2xl bg-${stat.color}-500/10 flex items-center justify-center mx-auto mb-4 border border-${stat.color}-500/20 group-hover:scale-110 transition-transform`}>
                 <stat.icon className={`w-6 h-6 text-${stat.color}-500`} />
               </div>
@@ -428,12 +493,18 @@ export default function DriverPortal() {
                 {stat.value}<span className="text-xs ml-1 text-gray-500">{stat.unit}</span>
               </div>
               <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-1">{stat.label}</div>
-            </div>
+            </BorderGlow>
           ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="clay-card p-8 bg-black/20 border-white/5 shadow-inner">
+          <BorderGlow
+            borderRadius={28}
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-8 border-white/5 shadow-inner h-full"
+          >
             <h3 className="text-lg font-black text-white mb-6 tracking-tighter uppercase clay-text-3d italic">Diagnostic Status</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-white/5">
@@ -455,9 +526,16 @@ export default function DriverPortal() {
                 </span>
               </div>
             </div>
-          </div>
+          </BorderGlow>
 
-          <div className="clay-card p-8 bg-blue-600/5 border-blue-500/20 relative overflow-hidden">
+          <BorderGlow
+            borderRadius={28}
+            glowColor="120 70 50"
+            backgroundColor="#120F17"
+            glowRadius={40}
+            glowIntensity={1}
+            className="clay-card p-8 border-blue-500/20 relative overflow-hidden h-full"
+          >
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Activity className="w-24 h-24 text-blue-500" />
             </div>
@@ -469,15 +547,21 @@ export default function DriverPortal() {
               <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
               <span className="text-[10px] font-black uppercase tracking-widest">Nominal State Verified</span>
             </div>
-          </div>
+          </BorderGlow>
         </div>
-      </div>
+      </BorderGlow>
     </div>
   );
 
   const BadgesSection = () => (
     <div className="space-y-8">
-      <div className="clay-card p-8 bg-zinc-900 border-white/5">
+      <BorderGlow
+        borderRadius={28}
+        backgroundColor="#120F17"
+        glowRadius={40}
+        glowIntensity={1}
+        className="clay-card p-8 border-white/5 h-full"
+      >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Achievement Nodes</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -489,10 +573,17 @@ export default function DriverPortal() {
             { name: 'Punctual Opt', description: '95% On-Time Stream', earned: false, color: 'gray' },
             { name: 'Route Expert', description: 'Perfect Geo Navigation', earned: false, color: 'gray' }
           ].map((badge, index) => (
-            <div key={index} className={`clay-card p-8 border-white/5 text-center transition-all ${badge.earned
-              ? 'bg-blue-600/5 opacity-100'
-              : 'bg-black/20 opacity-40 grayscale'
-              }`}>
+            <BorderGlow
+              key={index}
+              borderRadius={28}
+              glowRadius={40}
+              glowIntensity={1}
+              backgroundColor="#120F17"
+              className={`clay-card p-8 border-white/5 text-center transition-all h-full ${badge.earned
+                ? 'bg-blue-600/5 opacity-100'
+                : 'bg-black/20 opacity-40 grayscale'
+                }`}
+            >
               <div className={`w-20 h-20 clay-card mx-auto mb-6 flex items-center justify-center transition-transform ${badge.earned
                 ? `bg-${badge.color}-500 border-none shadow-${badge.color}-900/40 hover:scale-110`
                 : 'bg-zinc-800 border-white/5'
@@ -504,10 +595,10 @@ export default function DriverPortal() {
               {badge.earned && (
                 <div className="text-[10px] text-green-400 mt-4 font-black uppercase tracking-widest shadow-green-500/20">NODE UNLOCKED</div>
               )}
-            </div>
+            </BorderGlow>
           ))}
         </div>
-      </div>
+      </BorderGlow>
     </div>
   );
 
@@ -536,7 +627,7 @@ export default function DriverPortal() {
             {navigation.map((item) => {
               const isSpecial = item.name === 'Expenses' || item.name === 'Booking';
               const isHighlighted = highlightedSection && item.href.includes(highlightedSection);
-              
+
               if (isSpecial && sidebarOpen && (item.current || isHighlighted)) {
                 return (
                   <Link
@@ -544,11 +635,10 @@ export default function DriverPortal() {
                     to={item.href}
                     className="flex items-center p-1 mt-2"
                   >
-                    <div className={`w-full clay-card ${
-                      isHighlighted 
-                        ? 'bg-orange-500 animate-pulse' 
-                        : 'bg-blue-600'
-                    } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95`}>
+                    <div className={`w-full clay-card ${isHighlighted
+                      ? 'bg-orange-500 animate-pulse'
+                      : 'bg-blue-600'
+                      } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95`}>
                       <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                         <item.icon className="w-5 h-5 text-white" />
                       </div>
@@ -573,7 +663,7 @@ export default function DriverPortal() {
                     <item.icon className="w-5 h-5" />
                   </div>
                   {sidebarOpen && (
-                     <span className="ml-4 text-xs font-black uppercase tracking-widest leading-none text-white/90">
+                    <span className="ml-4 text-xs font-black uppercase tracking-widest leading-none text-white/90">
                       {item.name}
                     </span>
                   )}
@@ -648,7 +738,7 @@ export default function DriverPortal() {
             </Routes>
           </div>
         </main>
-        
+
         {/* AI Voice Assistant */}
         <AIVoiceAssistant onHighlightSection={handleSectionHighlight} />
       </div>

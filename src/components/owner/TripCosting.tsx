@@ -10,6 +10,7 @@ import {
   Download,
   IndianRupee
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function TripCosting() {
   const [dateRange, setDateRange] = useState('30d');
@@ -67,7 +68,14 @@ export default function TripCosting() {
       {/* Header Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {tripStats.map((stat, i) => (
-          <div key={i} className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl relative group overflow-hidden">
+          <BorderGlow
+            key={i}
+            borderRadius={28}
+            glowRadius={40}
+            glowIntensity={1}
+            backgroundColor="#120F17"
+            className="clay-card p-6 border-white/5 shadow-2xl relative group overflow-hidden h-full"
+          >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <TrendingUp className="w-12 h-12" />
             </div>
@@ -77,12 +85,18 @@ export default function TripCosting() {
               {stat.trend === 'up' ? <ArrowUpRight className="w-[14px] h-[14px] mr-1" /> : <ArrowDownRight className="w-[14px] h-[14px] mr-1" />}
               {stat.change} vs last period
             </div>
-          </div>
+          </BorderGlow>
         ))}
       </div>
 
       {/* Main Analysis Section */}
-      <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+      <BorderGlow
+        borderRadius={28}
+        glowRadius={40}
+        glowIntensity={1}
+        backgroundColor="#120F17"
+        className="clay-card p-8 border-white/5 shadow-2xl"
+      >
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <TrendingUp className="w-8 h-8 text-blue-500" />
@@ -113,32 +127,38 @@ export default function TripCosting() {
 
             {/* Performance Chart Placeholder */}
             <div className="h-64 clay-card bg-black/40 border-white/5 shadow-inner flex items-center justify-center relative overflow-hidden">
-               <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-[2px]" />
-               <div className="text-center z-10 p-8">
-                 <div className="inline-block px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-xl mb-4">
-                   <TrendingUp className="w-6 h-6 text-blue-400 mx-auto" />
-                 </div>
-                 <div className="text-xs font-black uppercase tracking-[0.4em] text-gray-500">Profitability Stream Visualization Live</div>
-                 <p className="max-w-xs text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-4 mx-auto leading-relaxed">ML-powered route profitability correlation active</p>
-               </div>
+              <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-[2px]" />
+              <div className="text-center z-10 p-8">
+                <div className="inline-block px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-xl mb-4">
+                  <TrendingUp className="w-6 h-6 text-blue-400 mx-auto" />
+                </div>
+                <div className="text-xs font-black uppercase tracking-[0.4em] text-gray-500">Profitability Stream Visualization Live</div>
+                <p className="max-w-xs text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-4 mx-auto leading-relaxed">ML-powered route profitability correlation active</p>
+              </div>
             </div>
           </div>
 
           {/* Controls & Mini Stats */}
           <div className="space-y-6">
-            <div className="clay-card p-6 bg-blue-600 border-none shadow-blue-900/40 relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8" />
-               <div className="relative z-10">
-                 <h3 className="text-sm font-black uppercase tracking-widest text-white/50 mb-2 text-left">Unit Economics Lead</h3>
-                 <div className="text-4xl font-bold text-white tracking-tight">₹28.4</div>
-                 <div className="text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">Net profit per missions kilometer</div>
-               </div>
-            </div>
+            <BorderGlow
+              borderRadius={28}
+              glowRadius={40}
+              glowIntensity={1}
+              backgroundColor="#120F17"
+              className="clay-card p-6 border-none shadow-blue-900/40 relative overflow-hidden h-full"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8" />
+              <div className="relative z-10">
+                <h3 className="text-sm font-black uppercase tracking-widest text-white/50 mb-2 text-left">Unit Economics Lead</h3>
+                <div className="text-4xl font-bold text-white tracking-tight">₹28.4</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">Net profit per missions kilometer</div>
+              </div>
+            </BorderGlow>
 
             <div className="clay-card p-6 border-white/5">
               <h3 className="text-xs font-black text-white mb-6 uppercase tracking-[0.3em]">Temporal Core Filtering</h3>
               <div className="space-y-3">
-                <select 
+                <select
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-white outline-none focus:border-blue-500/50 transition-all custom-select"
@@ -156,12 +176,18 @@ export default function TripCosting() {
             </div>
           </div>
         </div>
-      </div>
+      </BorderGlow>
 
       {/* Recent Trips Analysis */}
-      <div className="clay-card p-8 bg-zinc-900 border-white/5 shadow-2xl">
+      <BorderGlow
+        borderRadius={28}
+        glowRadius={40}
+        glowIntensity={1}
+        backgroundColor="#120F17"
+        className="clay-card p-8 border-white/5 shadow-2xl h-full"
+      >
         <h2 className="text-xl font-bold text-white mb-8 tracking-tight uppercase text-left">Mission Profitability Audit</h2>
-        
+
         <div className="space-y-4">
           {recentTrips.map((trip) => (
             <div key={trip.id} className="clay-card p-6 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
@@ -201,7 +227,7 @@ export default function TripCosting() {
             </div>
           ))}
         </div>
-      </div>
+      </BorderGlow>
     </div>
   );
 }

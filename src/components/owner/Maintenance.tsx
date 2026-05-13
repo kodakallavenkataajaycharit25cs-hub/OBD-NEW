@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  Wrench, 
-  Calendar, 
-  Clock, 
-  AlertTriangle, 
+import {
+  Wrench,
+  Calendar,
+  Clock,
+  AlertTriangle,
   CheckCircle,
   IndianRupee,
   User,
@@ -12,6 +12,7 @@ import {
   Plus,
   Filter
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function Maintenance() {
   const [selectedView, setSelectedView] = useState<'schedule' | 'jobs' | 'analytics'>('schedule');
@@ -159,11 +160,14 @@ export default function Maintenance() {
         {upcomingMaintenance.map((maintenance) => {
           const priorityColor = getPriorityColor(maintenance.priority);
           const daysUntilDue = Math.ceil((new Date(maintenance.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          
+
           return (
-            <div
+            <BorderGlow
               key={maintenance.id}
-              className={`bg-${priorityColor}-500/20 border border-${priorityColor}-500/50 rounded-lg p-6`}
+              borderRadius={16}
+              glowRadius={30}
+              backgroundColor={`#18181b`}
+              className={`clay-card p-6 border border-${priorityColor}-500/50 h-full`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -203,14 +207,14 @@ export default function Maintenance() {
                   View Details
                 </button>
               </div>
-            </div>
+            </BorderGlow>
           );
         })}
       </div>
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
         <h4 className="text-lg font-black tracking-tight uppercase text-white mb-4">Predictive Maintenance Insights</h4>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">7</div>
@@ -235,11 +239,10 @@ export default function Maintenance() {
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Active Maintenance Jobs</h3>
         <div className="flex space-x-3 relative">
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                showFilterMenu ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-600 hover:bg-gray-700 text-gray-200'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${showFilterMenu ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-600 hover:bg-gray-700 text-gray-200'
+                }`}
             >
               <Filter className="w-4 h-4" />
               <span>{activeJobsFilter === 'startDate' ? 'Started Date' : activeJobsFilter.charAt(0).toUpperCase() + activeJobsFilter.slice(1)}</span>
@@ -258,11 +261,10 @@ export default function Maintenance() {
                       setActiveJobsFilter(option.key as any);
                       setShowFilterMenu(false);
                     }}
-                    className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                      activeJobsFilter === option.key 
-                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                    className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeJobsFilter === option.key
+                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
                         : 'text-gray-500 hover:bg-white/5 hover:text-white'
-                    }`}
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -280,9 +282,14 @@ export default function Maintenance() {
       <div className="space-y-6">
         {filteredJobs.map((job) => {
           const statusColor = getStatusColor(job.status);
-          
+
           return (
-            <div key={job.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+            <BorderGlow
+              key={job.id}
+              borderRadius={24}
+              backgroundColor="#18181b"
+              className="clay-card p-6 border-white/10 shadow-2xl"
+            >
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h4 className="text-lg font-black tracking-tight uppercase text-white">{job.id}</h4>
@@ -312,14 +319,14 @@ export default function Maintenance() {
                     <span className="text-gray-300">Due: {new Date(job.estimatedCompletion).toLocaleDateString('en-IN')}</span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300">Progress</span>
                     <span className="text-white font-semibold">{job.progress}%</span>
                   </div>
                   <div className="bg-gray-700 rounded-full h-2">
-                    <div 
+                    <div
                       className={`bg-${statusColor}-500 h-2 rounded-full`}
                       style={{ width: `${job.progress}%` }}
                     />
@@ -335,9 +342,9 @@ export default function Maintenance() {
                 <h5 className="font-black text-white uppercase tracking-tight">Task Progress</h5>
                 {job.tasks.map((task, index) => {
                   const taskStatusColor = getStatusColor(task.status);
-                  const TaskIcon = task.status === 'completed' ? CheckCircle : 
-                                   task.status === 'in-progress' ? Clock : Wrench;
-                  
+                  const TaskIcon = task.status === 'completed' ? CheckCircle :
+                    task.status === 'in-progress' ? Clock : Wrench;
+
                   return (
                     <div key={index} className="flex items-center space-x-3">
                       <TaskIcon className={`w-5 h-5 text-${taskStatusColor}-400`} />
@@ -349,7 +356,7 @@ export default function Maintenance() {
                   );
                 })}
               </div>
-            </div>
+            </BorderGlow>
           );
         })}
       </div>
@@ -365,9 +372,8 @@ export default function Maintenance() {
           <div key={index} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-center">
             <div className="text-lg font-black tracking-tight uppercase text-white mb-1">{metric.value}</div>
             <div className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-2">{metric.title}</div>
-            <div className={`text-xs font-medium ${
-              metric.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
-            }`}>
+            <div className={`text-xs font-medium ${metric.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
+              }`}>
               {metric.change}
             </div>
           </div>
@@ -377,7 +383,7 @@ export default function Maintenance() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
           <h4 className="text-lg font-black tracking-tight uppercase text-white mb-4">Vendor Performance</h4>
-          
+
           <div className="space-y-4">
             {vendors.map((vendor, index) => (
               <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
@@ -388,9 +394,8 @@ export default function Maintenance() {
                       {[...Array(5)].map((_, i) => (
                         <div
                           key={i}
-                          className={`w-3 h-3 ${
-                            i < Math.floor(vendor.rating) ? 'text-yellow-400' : 'text-gray-600'
-                          }`}
+                          className={`w-3 h-3 ${i < Math.floor(vendor.rating) ? 'text-yellow-400' : 'text-gray-600'
+                            }`}
                         >★</div>
                       ))}
                     </div>
@@ -414,7 +419,7 @@ export default function Maintenance() {
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
           <h4 className="text-lg font-black tracking-tight uppercase text-white mb-4">Cost Breakdown</h4>
-          
+
           <div className="space-y-4">
             {[
               { category: 'Labor Cost', amount: 84600, percentage: 57 },
@@ -429,7 +434,7 @@ export default function Maintenance() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="flex-1 bg-gray-700 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-500 h-2 rounded-full"
                       style={{ width: `${cost.percentage}%` }}
                     />
@@ -444,7 +449,7 @@ export default function Maintenance() {
 
       <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-sm border border-green-500/50 rounded-lg p-6">
         <h4 className="text-lg font-black tracking-tight uppercase text-white mb-4">Maintenance ROI Analysis</h4>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-400 mb-2">₹5.2L</div>
@@ -465,12 +470,16 @@ export default function Maintenance() {
 
   return (
     <div className="space-y-6">
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+      <BorderGlow
+        borderRadius={24}
+        backgroundColor="#18181b"
+        className="clay-card p-6 border-white/5 shadow-2xl"
+      >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <Wrench className="w-8 h-8 mr-3 text-orange-500" />
           Maintenance Lifecycle Management
         </h2>
-        
+
         <div className="flex space-x-4">
           {[
             { key: 'schedule', label: 'Schedule', icon: Calendar },
@@ -480,18 +489,17 @@ export default function Maintenance() {
             <button
               key={tab.key}
               onClick={() => setSelectedView(tab.key as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedView === tab.key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${selectedView === tab.key
+                ? 'bg-blue-600 text-white'
+                : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
+                }`}
             >
               <tab.icon className="w-5 h-5" />
               <span>{tab.label}</span>
             </button>
           ))}
         </div>
-      </div>
+      </BorderGlow>
 
       {selectedView === 'schedule' && <ScheduleView />}
       {selectedView === 'jobs' && <JobsView />}

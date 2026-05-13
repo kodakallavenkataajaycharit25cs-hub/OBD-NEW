@@ -12,6 +12,7 @@ import {
   Search,
   Plus
 } from 'lucide-react';
+import BorderGlow from '../BorderGlow';
 
 export default function BillingFinance() {
   const [selectedTab, setSelectedTab] = useState<'invoices' | 'pricing' | 'payroll' | 'reports'>('invoices');
@@ -163,11 +164,11 @@ export default function BillingFinance() {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Invoice Management</h3>
         <div className="flex space-x-3">
-          <button className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors">
+          <button className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-xl transition-colors">
             <Filter className="w-4 h-4" />
             <span>Filter</span>
           </button>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors">
             <Plus className="w-4 h-4" />
             <span>Generate Invoice</span>
           </button>
@@ -180,7 +181,12 @@ export default function BillingFinance() {
           const isOverdue = new Date(invoice.dueDate) < new Date() && invoice.status !== 'paid';
 
           return (
-            <div key={invoice.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+            <BorderGlow
+              key={invoice.id}
+              borderRadius={24}
+              backgroundColor="#18181b"
+              className="clay-card p-6 border border-white/10 shadow-2xl"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h4 className="text-lg font-bold uppercase text-white">{invoice.id}</h4>
@@ -237,21 +243,21 @@ export default function BillingFinance() {
               </div>
 
               <div className="flex space-x-3">
-                <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors">
                   <FileText className="w-4 h-4" />
                   <span>View</span>
                 </button>
-                <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition-colors">
                   <Download className="w-4 h-4" />
                   <span>Download PDF</span>
                 </button>
                 {invoice.status === 'pending' && (
-                  <button className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                  <button className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-colors">
                     <span>Send Reminder</span>
                   </button>
                 )}
               </div>
-            </div>
+            </BorderGlow>
           );
         })}
       </div>
@@ -391,7 +397,12 @@ export default function BillingFinance() {
           const statusColor = getStatusColor(payroll.status);
 
           return (
-            <div key={payroll.id} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+            <BorderGlow
+              key={payroll.id}
+              borderRadius={24}
+              backgroundColor="#18181b"
+              className="clay-card p-6 border border-white/10 shadow-2xl"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
@@ -455,7 +466,7 @@ export default function BillingFinance() {
                   </button>
                 )}
               </div>
-            </div>
+            </BorderGlow>
           );
         })}
       </div>
@@ -558,7 +569,11 @@ export default function BillingFinance() {
   return (
     <div className="space-y-6">
       {/* Header with Financial Overview */}
-      <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-sm border border-green-500/50 rounded-2xl p-6">
+      <BorderGlow
+        borderRadius={32}
+        backgroundColor="#18181b"
+        className="bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-sm border border-green-500/50 p-6"
+      >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <CreditCard className="w-8 h-8 mr-3 text-green-400" />
           Billing & Finance Management
@@ -576,10 +591,14 @@ export default function BillingFinance() {
             </div>
           ))}
         </div>
-      </div>
+      </BorderGlow>
 
       {/* Navigation Tabs */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+      <BorderGlow
+        borderRadius={24}
+        backgroundColor="#18181b"
+        className="clay-card p-6 border-white/10 shadow-2xl"
+      >
         <div className="flex space-x-4">
           {[
             { key: 'invoices', label: 'Invoices & GST', icon: Receipt },
@@ -590,7 +609,7 @@ export default function BillingFinance() {
             <button
               key={tab.key}
               onClick={() => setSelectedTab(tab.key as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${selectedTab === tab.key
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-colors ${selectedTab === tab.key
                   ? 'bg-blue-600 text-white'
                   : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
                 }`}
@@ -600,7 +619,7 @@ export default function BillingFinance() {
             </button>
           ))}
         </div>
-      </div>
+      </BorderGlow>
 
       {/* Content based on selected tab */}
       {selectedTab === 'invoices' && <InvoicesView />}

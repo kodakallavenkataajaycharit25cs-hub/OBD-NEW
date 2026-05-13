@@ -14,6 +14,7 @@ import {
   Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import BorderGlow from './BorderGlow';
 
 interface BookingPageProps {
   onLoginClick: () => void;
@@ -151,12 +152,16 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Booking Form */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="clay-card p-10 bg-zinc-900 border-white/5 shadow-2xl">
+            <BorderGlow
+              borderRadius={32}
+              backgroundColor="#18181b"
+              className="clay-card p-10 border-white/5 shadow-2xl"
+            >
               <div className="flex items-center space-x-4 mb-10">
-                 <div className="w-12 h-12 bg-blue-600/20 rounded-2xl flex items-center justify-center">
-                   <MapPin className="w-6 h-6 text-blue-500" />
-                 </div>
-                 <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Route Parameters</h2>
+                <div className="w-12 h-12 bg-blue-600/20 rounded-2xl flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-blue-500" />
+                </div>
+                <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Route Parameters</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -214,7 +219,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                     onChange={(e) => setBooking(prev => ({ ...prev, passengers: parseInt(e.target.value) }))}
                     className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none"
                   >
-                    {[1,2,3,4,5,6,7,8,12,15].map(num => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 12, 15].map(num => (
                       <option key={num} value={num} className="bg-zinc-900">{num} Pax</option>
                     ))}
                   </select>
@@ -232,26 +237,29 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                     <button
                       key={option.value}
                       onClick={() => setBooking(prev => ({ ...prev, tripType: option.value as any }))}
-                      className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                        booking.tripType === option.value
+                      className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${booking.tripType === option.value
                           ? 'clay-card bg-blue-600 border-none shadow-blue-900/40 text-white translate-y-[-2px]'
                           : 'bg-black/20 text-gray-600 hover:text-white hover:bg-white/5 border border-white/5 shadow-inner'
-                      }`}
+                        }`}
                     >
                       {option.label}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
+            </BorderGlow>
 
             {/* Vehicle Selection */}
-            <div className="clay-card p-10 bg-zinc-900 border-white/5 shadow-2xl">
+            <BorderGlow
+              borderRadius={32}
+              backgroundColor="#18181b"
+              className="clay-card p-10 border-white/5 shadow-2xl"
+            >
               <div className="flex items-center space-x-4 mb-10">
-                 <div className="w-12 h-12 bg-purple-600/20 rounded-2xl flex items-center justify-center">
-                   <Car className="w-6 h-6 text-purple-500" />
-                 </div>
-                 <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Machine Selection</h2>
+                <div className="w-12 h-12 bg-purple-600/20 rounded-2xl flex items-center justify-center">
+                  <Car className="w-6 h-6 text-purple-500" />
+                </div>
+                <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Machine Selection</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -259,11 +267,10 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                   <button
                     key={vehicle.id}
                     onClick={() => setBooking(prev => ({ ...prev, vehicle: vehicle.id }))}
-                    className={`text-left p-6 rounded-3xl transition-all border-none ${
-                      booking.vehicle === vehicle.id
+                    className={`text-left p-6 rounded-3xl transition-all border-none ${booking.vehicle === vehicle.id
                         ? 'clay-card bg-blue-600 text-white shadow-blue-900/40 scale-[1.02]'
                         : 'clay-card bg-white/5 text-gray-500 hover:bg-white/10 border-white/5 shadow-inner'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-black text-sm uppercase tracking-tight">{vehicle.name}</h3>
@@ -288,16 +295,21 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
               >
                 Execute Analysis
               </button>
-            </div>
+            </BorderGlow>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-8">
             {/* Fare Estimate */}
             {fareEstimate.total > 0 ? (
-              <div className="clay-card p-10 bg-blue-600 border-none shadow-blue-900/50 sticky top-32">
+              <BorderGlow
+                borderRadius={32}
+                backgroundColor="#18181b"
+                className="clay-card p-10 border-none shadow-blue-900/50 sticky top-32"
+              >
+                <div className="absolute inset-0 bg-blue-600 opacity-90 z-[-1]" />
                 <h3 className="text-xl font-black mb-8 text-white uppercase tracking-tighter italic shadow-sm">Credit Analysis</h3>
-                
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-blue-100/60 pb-4 border-b border-white/10">
                     <span>Range Vector</span>
@@ -315,7 +327,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                       <span className="text-white opacity-80">{formatIndianCurrency(item.v)}</span>
                     </div>
                   ))}
-                  
+
                   <div className="pt-6 mt-4 border-t-2 border-dashed border-white/20">
                     <div className="flex justify-between items-end">
                       <div className="text-[10px] font-black uppercase tracking-widest text-blue-100/50 mb-1">Total Payload</div>
@@ -330,20 +342,28 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                   <CreditCard className="w-5 h-5" />
                   <span>AUTHORIZE BOOKING</span>
                 </button>
-              </div>
+              </BorderGlow>
             ) : (
-              <div className="clay-card p-10 bg-zinc-900 border-white/5 border-dashed flex flex-col items-center justify-center text-center opacity-40 py-20">
-                 <Zap className="w-12 h-12 text-gray-700 mb-6" />
-                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 leading-relaxed">
-                   Complete parameters to<br/>unlock credit analysis
-                 </p>
-              </div>
+              <BorderGlow
+                borderRadius={32}
+                backgroundColor="#18181b"
+                className="clay-card p-10 border-white/5 border-dashed flex flex-col items-center justify-center text-center opacity-40 py-20"
+              >
+                <Zap className="w-12 h-12 text-gray-700 mb-6" />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 leading-relaxed">
+                  Complete parameters to<br />unlock credit analysis
+                </p>
+              </BorderGlow>
             )}
 
             {/* Popular Routes */}
-            <div className="clay-card p-10 bg-zinc-900 border-white/5 shadow-2xl">
+            <BorderGlow
+              borderRadius={32}
+              backgroundColor="#18181b"
+              className="clay-card p-10 border-white/5 shadow-2xl"
+            >
               <h3 className="text-xl font-black mb-8 text-white uppercase tracking-tighter clay-text-3d italic">Standard Routes</h3>
-              
+
               <div className="space-y-4">
                 {popularRoutes.map((route, index) => (
                   <button
@@ -363,20 +383,24 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                   </button>
                 ))}
               </div>
-            </div>
+            </BorderGlow>
 
             {/* Support */}
-            <div className="clay-card p-10 bg-zinc-900 border-white/5 shadow-2xl relative overflow-hidden group">
+            <BorderGlow
+              borderRadius={32}
+              backgroundColor="#18181b"
+              className="clay-card p-10 border-white/5 shadow-2xl relative overflow-hidden group"
+            >
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -mr-12 -mt-12 transition-all group-hover:scale-150" />
               <h3 className="text-xl font-black mb-4 text-white uppercase tracking-tighter clay-text-3d italic leading-none">Inquiry Node</h3>
               <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-8 leading-relaxed italic">
-                Our operations team is available<br/>24/7 for strategic support
+                Our operations team is available<br />24/7 for strategic support
               </p>
               <button className="w-full clay-btn bg-white/5 hover:bg-white/10 text-white flex items-center justify-center space-x-3 p-4 rounded-2xl border border-white/5">
                 <Phone className="w-4 h-4 text-blue-500" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Contact Ops</span>
               </button>
-            </div>
+            </BorderGlow>
           </div>
         </div>
       </div>

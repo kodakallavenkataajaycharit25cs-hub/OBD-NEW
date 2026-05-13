@@ -160,7 +160,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
         <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Upload Receipts</h3>
           
-          <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-purple-500/50 transition-colors">
+          <div className="border-2 border-dashed border-white/20 rounded-2xl p-8 text-center hover:border-purple-500/50 transition-colors">
             <input
               type="file"
               multiple
@@ -177,7 +177,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
           </div>
 
           {isProcessing && (
-            <div className="mt-6 bg-blue-500/20 border border-blue-500/50 rounded-lg p-4">
+            <div className="mt-6 bg-blue-500/20 border border-blue-500/50 rounded-2xl p-4">
               <div className="flex items-center space-x-3">
                 <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" />
                 <span className="text-blue-400 font-medium">Processing with AI OCR...</span>
@@ -207,14 +207,14 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
             <div className="flex space-x-2">
               <button
                 onClick={() => exportExpenses('csv')}
-                className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg text-sm transition-colors"
+                className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-3 py-2 rounded-xl text-sm transition-colors"
               >
                 <Download className="w-4 h-4" />
                 <span>CSV</span>
               </button>
               <button
                 onClick={() => exportExpenses('pdf')}
-                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg text-sm transition-colors"
+                className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-xl text-sm transition-colors"
               >
                 <Download className="w-4 h-4" />
                 <span>PDF</span>
@@ -229,7 +229,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
               const count = classifiedExpenses.filter(exp => exp.category === category).length;
               
               return (
-                <div key={category} className={`bg-${color}-500/20 border border-${color}-500/50 rounded-lg p-4`}>
+                <div key={category} className={`bg-${color}-500/20 border border-${color}-500/50 rounded-2xl p-4`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <Icon className={`w-6 h-6 text-${color}-400`} />
@@ -260,7 +260,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
               <div key={expense.id} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 bg-${color}-500/20 rounded-lg flex items-center justify-center`}>
+                    <div className={`w-12 h-12 bg-${color}-500/20 rounded-xl flex items-center justify-center`}>
                       <Icon className={`w-6 h-6 text-${color}-400`} />
                     </div>
                     <div>
