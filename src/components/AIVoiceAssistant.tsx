@@ -120,7 +120,7 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
       <div className="fixed top-1/2 right-0 -translate-y-1/2 z-[100]">
         <button
           onClick={() => setIsMinimized(false)}
-          className="flex flex-col items-center justify-center py-6 px-3 clay-card bg-blue-600 border-none rounded-r-none rounded-l-2xl shadow-[-10px_0_30px_rgba(37,99,235,0.3)] transition-all hover:pr-5 group"
+          className="flex flex-col items-center justify-center py-6 px-3 bg-blue-600 border-none rounded-r-none rounded-l-2xl shadow-[-10px_0_30px_rgba(37,99,235,0.3)] transition-all hover:pr-5 group"
         >
           <div className="relative mb-4">
             <Bot className="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />
@@ -138,11 +138,11 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
   }
 
   return (
-    <div className="fixed bottom-8 right-8 w-[360px] h-[550px] clay-card bg-zinc-900 border-white/10 shadow-3xl z-[100] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
+    <div className="fixed bottom-8 right-8 w-[360px] h-[550px] bg-[#120F17] border-white/10 shadow-3xl z-[100] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
       {/* Header */}
       <div className="flex items-center justify-between p-6 bg-black/40 border-b border-white/5">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40">
+          <div className="w-12 h-12 bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40">
             <Brain className="w-6 h-6 text-white" />
           </div>
           <div>

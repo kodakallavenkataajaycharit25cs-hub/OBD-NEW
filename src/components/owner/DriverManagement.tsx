@@ -142,8 +142,8 @@ export default function DriverManagement() {
       {/* Header */}
       <BorderGlow
         borderRadius={24}
-        backgroundColor="#18181b"
-        className="clay-card p-6 border-white/5 shadow-2xl"
+        backgroundColor="#120F17"
+        className="p-6 border-white/5 shadow-2xl"
       >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Driver Management</h2>
 
@@ -171,8 +171,8 @@ export default function DriverManagement() {
         {/* Driver List */}
         <BorderGlow
           borderRadius={24}
-          backgroundColor="#18181b"
-          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          backgroundColor="#120F17"
+          className="p-6 border-white/5 shadow-2xl h-full"
         >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Users className="w-6 h-6 mr-2 text-blue-500" />
@@ -238,8 +238,8 @@ export default function DriverManagement() {
           {/* Profile Info */}
           <BorderGlow
             borderRadius={24}
-            backgroundColor="#18181b"
-            className="clay-card p-6 border-white/5 shadow-2xl h-full"
+            backgroundColor="#120F17"
+            className="p-6 border-white/5 shadow-2xl h-full"
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Driver Profile</h3>
 
@@ -278,45 +278,6 @@ export default function DriverManagement() {
             </div>
           </BorderGlow>
 
-          {/* Performance Scores */}
-          <BorderGlow
-            borderRadius={24}
-            backgroundColor="#18181b"
-            className="clay-card p-6 border-white/5 shadow-2xl h-full"
-          >
-            <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
-              <TrendingUp className="w-6 h-6 mr-2 text-green-500" />
-              Performance Scores
-            </h3>
-
-            <div className="space-y-4">
-              {[
-                { label: 'Safety Score', value: selectedDriverData.scores.safety, key: 'safety' },
-                { label: 'Acceleration', value: selectedDriverData.scores.acceleration, key: 'acceleration' },
-                { label: 'Braking', value: selectedDriverData.scores.braking, key: 'braking' },
-                { label: 'Speed Control', value: selectedDriverData.scores.speed, key: 'speed' },
-                { label: 'Idling Control', value: selectedDriverData.scores.idling, key: 'idling' },
-                { label: 'Fuel Efficiency', value: selectedDriverData.scores.efficiency, key: 'efficiency' }
-              ].map((score, index) => {
-                const color = getScoreColor(score.value);
-
-                return (
-                  <div key={index}>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-300">{score.label}</span>
-                      <span className={`text-${color}-400 font-semibold`}>{score.value}/10</span>
-                    </div>
-                    <div className="bg-gray-700 rounded-full h-2">
-                      <div
-                        className={`bg-${color}-500 h-2 rounded-full`}
-                        style={{ width: `${score.value * 10}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </BorderGlow>
 
 
         </div>
@@ -325,8 +286,8 @@ export default function DriverManagement() {
       {/* Document Status */}
       <BorderGlow
         borderRadius={32}
-        backgroundColor="#18181b"
-        className="clay-card p-6 border-white/5 shadow-2xl h-full"
+        backgroundColor="#120F17"
+        className="p-6 border-white/5 shadow-2xl h-full"
       >
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Document Status</h3>
 
@@ -340,7 +301,7 @@ export default function DriverManagement() {
             const status = getDocumentStatus(docData.status);
 
             return (
-              <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-black text-white uppercase tracking-tight">{doc.name}</h4>
                   <status.icon className={`w-5 h-5 text-${status.color}-400`} />

@@ -154,8 +154,8 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
           <div className="lg:col-span-2 space-y-8">
             <BorderGlow
               borderRadius={32}
-              backgroundColor="#18181b"
-              className="clay-card p-10 border-white/5 shadow-2xl"
+              backgroundColor="#120F17"
+              className="p-10 border-white/5 shadow-2xl"
             >
               <div className="flex items-center space-x-4 mb-10">
                 <div className="w-12 h-12 bg-blue-600/20 rounded-2xl flex items-center justify-center">
@@ -220,7 +220,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                     className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 12, 15].map(num => (
-                      <option key={num} value={num} className="bg-zinc-900">{num} Pax</option>
+                      <option key={num} value={num} className="bg-[#120F17]">{num} Pax</option>
                     ))}
                   </select>
                 </div>
@@ -252,8 +252,8 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
             {/* Vehicle Selection */}
             <BorderGlow
               borderRadius={32}
-              backgroundColor="#18181b"
-              className="clay-card p-10 border-white/5 shadow-2xl"
+              backgroundColor="#120F17"
+              className="p-10 border-white/5 shadow-2xl"
             >
               <div className="flex items-center space-x-4 mb-10">
                 <div className="w-12 h-12 bg-purple-600/20 rounded-2xl flex items-center justify-center">
@@ -304,8 +304,8 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
             {fareEstimate.total > 0 ? (
               <BorderGlow
                 borderRadius={32}
-                backgroundColor="#18181b"
-                className="clay-card p-10 border-none shadow-blue-900/50 sticky top-32"
+                backgroundColor="#120F17"
+                className="p-10 border-none shadow-blue-900/50 sticky top-32"
               >
                 <div className="absolute inset-0 bg-blue-600 opacity-90 z-[-1]" />
                 <h3 className="text-xl font-black mb-8 text-white uppercase tracking-tighter italic shadow-sm">Credit Analysis</h3>
@@ -346,8 +346,8 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
             ) : (
               <BorderGlow
                 borderRadius={32}
-                backgroundColor="#18181b"
-                className="clay-card p-10 border-white/5 border-dashed flex flex-col items-center justify-center text-center opacity-40 py-20"
+                backgroundColor="#120F17"
+                className="p-10 border-white/5 border-dashed flex flex-col items-center justify-center text-center opacity-40 py-20"
               >
                 <Zap className="w-12 h-12 text-gray-700 mb-6" />
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 leading-relaxed">
@@ -359,8 +359,8 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
             {/* Popular Routes */}
             <BorderGlow
               borderRadius={32}
-              backgroundColor="#18181b"
-              className="clay-card p-10 border-white/5 shadow-2xl"
+              backgroundColor="#120F17"
+              className="p-10 border-white/5 shadow-2xl"
             >
               <h3 className="text-xl font-black mb-8 text-white uppercase tracking-tighter clay-text-3d italic">Standard Routes</h3>
 
@@ -369,7 +369,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                   <button
                     key={index}
                     onClick={() => setBooking(prev => ({ ...prev, pickup: route.from, dropoff: route.to }))}
-                    className="w-full clay-card p-5 bg-black/20 border-white/5 hover:bg-white/5 transition-all text-left flex items-center justify-between group shadow-inner"
+                    className="w-full p-5 bg-black/20 border-white/5 hover:bg-white/5 transition-all text-left flex items-center justify-between group shadow-inner"
                   >
                     <div>
                       <div className="text-[10px] font-black text-white uppercase tracking-tight group-hover:text-blue-500 transition-colors">
@@ -388,8 +388,8 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
             {/* Support */}
             <BorderGlow
               borderRadius={32}
-              backgroundColor="#18181b"
-              className="clay-card p-10 border-white/5 shadow-2xl relative overflow-hidden group"
+              backgroundColor="#120F17"
+              className="p-10 border-white/5 shadow-2xl relative overflow-hidden group"
             >
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -mr-12 -mt-12 transition-all group-hover:scale-150" />
               <h3 className="text-xl font-black mb-4 text-white uppercase tracking-tighter clay-text-3d italic leading-none">Inquiry Node</h3>

@@ -155,7 +155,7 @@ export default function VehicleHealth() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-6 border-white/5 shadow-2xl"
+        className="p-6 border-white/5 shadow-2xl"
       >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Vehicle Health Monitoring</h2>
         <div className="flex flex-wrap gap-3">
@@ -191,7 +191,7 @@ export default function VehicleHealth() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-6 border-white/5 shadow-2xl"
+            className="p-6 border-white/5 shadow-2xl"
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
               <Car className="w-6 h-6 mr-2 text-blue-500" />
@@ -209,7 +209,7 @@ export default function VehicleHealth() {
                     glowRadius={40}
                     glowIntensity={1}
                     backgroundColor="#120F17"
-                    className={`clay-card clay-card-hover group bg-${statusColor}-500/20 border border-${statusColor}-500/50 p-4 text-center transition-all h-full`}
+                    className={`clay-card group bg-${statusColor}-500/20 border border-${statusColor}-500/50 p-4 text-center transition-all h-full`}
                   >
                     <div className={`w-12 h-12 bg-${statusColor}-500/30 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:scale-110 group-hover:rotate-6 transition-transform`}>
                       <metric.icon className={`w-6 h-6 text-${statusColor}-400`} />
@@ -251,7 +251,7 @@ export default function VehicleHealth() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-6 border-white/5 shadow-2xl"
+            className="p-6 border-white/5 shadow-2xl"
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Recent Violations</h3>
 
@@ -261,7 +261,7 @@ export default function VehicleHealth() {
                 { type: 'Geofence', location: 'Unauthorized route deviation', time: '1 day ago', severity: 'medium' },
                 { type: 'Idle', location: 'Extended idling at toll plaza', time: '2 days ago', severity: 'low' }
               ].map((violation, index) => (
-                <div key={index} className="clay-card clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all">
+                <div key={index} className="clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${violation.severity === 'high' ? 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30' :
                         violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30' :
@@ -286,7 +286,7 @@ export default function VehicleHealth() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-6 border-white/5 shadow-2xl"
+            className="p-6 border-white/5 shadow-2xl"
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Vehicle Details</h3>
 
@@ -334,7 +334,7 @@ export default function VehicleHealth() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-6 border-white/5 shadow-2xl"
+            className="p-6 border-white/5 shadow-2xl"
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Maintenance Schedule</h3>
 
@@ -374,7 +374,7 @@ export default function VehicleHealth() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-6 border-white/5 shadow-2xl"
+            className="p-6 border-white/5 shadow-2xl"
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Efficiency Trends</h3>
 

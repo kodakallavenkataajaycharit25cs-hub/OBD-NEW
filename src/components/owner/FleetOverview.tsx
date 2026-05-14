@@ -84,10 +84,10 @@ export default function FleetOverview() {
             glowRadius={35}
             glowIntensity={1}
             backgroundColor="#120F17"
-            className="clay-card clay-card-hover border-white/5 group h-full p-6"
+            className="border-white/5 group h-full p-6"
           >
             <div className="flex items-center justify-between mb-6">
-              <div className="w-12 h-12 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 group-hover:rotate-6 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 group-hover:rotate-6 transition-transform">
                 <kpi.icon className="w-6 h-6 text-white" />
               </div>
               <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full tabular-nums font-['Space_Grotesk'] not-italic ${kpi.change.startsWith('+') ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'
@@ -108,7 +108,7 @@ export default function FleetOverview() {
           glowRadius={40}
           glowIntensity={1}
           backgroundColor="#120F17"
-          className="clay-card p-8 border-white/5 shadow-2xl h-full"
+          className="p-8 border-white/5 shadow-2xl h-full"
         >
           <div className="flex items-center space-x-4 mb-10">
             <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
@@ -118,7 +118,7 @@ export default function FleetOverview() {
           </div>
           <div className="space-y-4">
             {topRoutes.map((route, index) => (
-              <div key={index} className="clay-card p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-black text-white uppercase tracking-tight group-hover:text-blue-400 transition-colors">{route.route}</h4>
                   <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] font-black text-green-500 uppercase tracking-widest font-['Space_Grotesk'] not-italic">{route.margin} Yield</div>
@@ -139,7 +139,7 @@ export default function FleetOverview() {
           glowIntensity={1}
           glowColor="280 60 70"
           backgroundColor="#120F17"
-          className="clay-card p-8 border-white/5 shadow-2xl h-full"
+          className="p-8 border-white/5 shadow-2xl h-full"
         >
           <div className="flex items-center space-x-4 mb-10">
             <div className="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center">
@@ -149,10 +149,10 @@ export default function FleetOverview() {
           </div>
           <div className="space-y-4">
             {topDrivers.map((driver, index) => (
-              <div key={index} className="clay-card p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 clay-card bg-zinc-800 border-none flex items-center justify-center text-white font-black text-xs shadow-lg">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-800 border-none flex items-center justify-center text-white font-black text-xs shadow-lg">
                       #{index + 1}
                     </div>
                     <div>
@@ -180,7 +180,7 @@ export default function FleetOverview() {
           glowRadius={40}
           glowIntensity={1}
           backgroundColor="#120F17"
-          className="clay-card p-8 border-white/5 h-full"
+          className="p-8 border-white/5 h-full"
         >
           <div className="flex items-center space-x-4 mb-8">
             <div className="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center">
@@ -196,7 +196,7 @@ export default function FleetOverview() {
               { l: 'Revised', v: 3, c: 'orange' },
               { l: 'Critical', v: 1, c: 'red' }
             ].map((stat, i) => (
-              <div key={i} className={`clay-card clay-card-hover p-4 bg-${stat.c}-500/5 border-${stat.c}-500/20 text-center group`}>
+              <div key={i} className={`clay-card p-4 bg-${stat.c}-500/5 border-${stat.c}-500/20 text-center group`}>
                 <div className={`text-2xl font-black text-${stat.c}-500 tabular-nums font-['Space_Grotesk'] not-italic group-hover:scale-110 transition-transform`}>{stat.v}</div>
                 <div className={`text-[8px] font-black text-${stat.c}-500/60 uppercase tracking-widest mt-1 group-hover:text-${stat.c}-400 transition-colors`}>{stat.l}</div>
               </div>
@@ -229,7 +229,7 @@ export default function FleetOverview() {
           glowIntensity={1}
           glowColor="0 80 50"
           backgroundColor="#120F17"
-          className="clay-card p-8 border-white/5 h-full"
+          className="p-8 border-white/5 h-full"
         >
           <div className="flex items-center space-x-4 mb-8">
             <div className="w-10 h-10 bg-red-600/10 rounded-xl flex items-center justify-center">
@@ -240,7 +240,7 @@ export default function FleetOverview() {
 
           <div className="space-y-4">
             {recentAlerts.map((alert, index) => (
-              <div key={index} className="clay-card p-5 bg-black/20 border-white/5 border-l-4 border-l-red-600 shadow-inner group">
+              <div key={index} className="p-5 bg-black/20 border-white/5 border-l-4 border-l-red-600 shadow-inner group">
                 <div className="flex items-center justify-between mb-3">
                   <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${alert.severity === 'high' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
                     alert.severity === 'medium' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :

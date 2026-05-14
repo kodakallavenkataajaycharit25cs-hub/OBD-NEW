@@ -249,7 +249,7 @@ export default function Maintenance() {
             </button>
 
             {showFilterMenu && (
-              <div className="absolute right-0 mt-2 w-48 clay-card bg-zinc-900 border-white/10 shadow-2xl z-50 p-2 space-y-1">
+              <div className="absolute right-0 mt-2 w-48 bg-[#120F17] border-white/10 shadow-2xl z-50 p-2 space-y-1">
                 {[
                   { key: 'progress', label: 'Progress' },
                   { key: 'cost', label: 'Cost' },
@@ -287,8 +287,8 @@ export default function Maintenance() {
             <BorderGlow
               key={job.id}
               borderRadius={24}
-              backgroundColor="#18181b"
-              className="clay-card p-6 border-white/10 shadow-2xl"
+              backgroundColor="#120F17"
+              className="p-6 border-white/10 shadow-2xl"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -386,7 +386,7 @@ export default function Maintenance() {
 
           <div className="space-y-4">
             {vendors.map((vendor, index) => (
-              <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
                 <div className="flex items-center justify-between mb-2">
                   <h5 className="font-black text-white uppercase tracking-tight">{vendor.name}</h5>
                   <div className="flex items-center space-x-1">
@@ -472,8 +472,8 @@ export default function Maintenance() {
     <div className="space-y-6">
       <BorderGlow
         borderRadius={24}
-        backgroundColor="#18181b"
-        className="clay-card p-6 border-white/5 shadow-2xl"
+        backgroundColor="#120F17"
+        className="p-6 border-white/5 shadow-2xl"
       >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <Wrench className="w-8 h-8 mr-3 text-orange-500" />

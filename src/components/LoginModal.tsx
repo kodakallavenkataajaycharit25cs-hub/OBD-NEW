@@ -59,7 +59,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       {/* Horizontal Mini-Page Modal */}
-      <div className="relative clay-card w-full max-w-5xl bg-zinc-900/60 border-white/10 shadow-3xl overflow-hidden flex flex-col md:flex-row min-h-[550px] animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-5xl bg-[#120F17]/60 border-white/10 shadow-3xl overflow-hidden flex flex-col md:flex-row min-h-[550px] animate-in zoom-in-95 duration-300">
         
         {/* Graph Pattern Overlay (Square Grid) */}
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none" 
@@ -121,7 +121,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
 
             {error && (
-              <div className="clay-card bg-red-500/10 border-red-500/20 p-4 mb-8 flex items-center space-x-3 animate-in slide-in-from-top-2">
+              <div className="bg-red-500/10 border-red-500/20 p-4 mb-8 flex items-center space-x-3 animate-in slide-in-from-top-2">
                 <AlertCircle className="w-4 h-4 text-red-500" />
                 <span className="text-red-500 text-[9px] font-black uppercase tracking-widest">{error}</span>
               </div>
@@ -178,7 +178,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   <button
                     key={index}
                     onClick={() => fillDemo(cred.email, cred.password)}
-                    className="clay-card p-4 bg-white/5 border-white/5 hover:bg-white/10 transition-all flex flex-col items-center group shadow-inner"
+                    className="p-4 bg-white/5 border-white/5 hover:bg-white/10 transition-all flex flex-col items-center group shadow-inner"
                   >
                     <span className="text-[9px] font-black text-gray-400 group-hover:text-blue-500 transition-colors uppercase tracking-widest">{cred.role}</span>
                     <span className="text-[7px] text-gray-700 font-bold uppercase tracking-tighter mt-1">Node {index + 1}</span>

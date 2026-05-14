@@ -52,7 +52,7 @@ export default function SpotBooking() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-8 border-white/5 shadow-2xl relative overflow-hidden h-full"
+            className="p-8 border-white/5 shadow-2xl relative overflow-hidden h-full"
           >
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
@@ -100,7 +100,7 @@ export default function SpotBooking() {
                       className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none transition-all cursor-pointer"
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 12, 15].map(num => (
-                        <option key={num} value={num} className="bg-zinc-900">{num} People</option>
+                        <option key={num} value={num} className="bg-[#120F17]">{num} People</option>
                       ))}
                     </select>
                   </div>
@@ -185,45 +185,42 @@ export default function SpotBooking() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-8 border-none shadow-blue-900/50 relative overflow-hidden group h-full"
+            className="p-8 border-none shadow-blue-900/50 relative overflow-hidden group h-full"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 transition-transform group-hover:scale-150" />
-            <h3 className="text-xl font-black text-white mb-6 tracking-tighter uppercase italic leading-none">Instant Confirmation</h3>
-            <p className="text-xs font-black text-blue-100/60 uppercase tracking-widest leading-relaxed mb-8">
-              Spot bookings are processed with priority routing. Ensure all passenger documents are verified at the boarding station.
-            </p>
-            <div className="p-4 bg-white/10 rounded-xl border border-white/10 backdrop-blur-md">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-[10px] font-black text-white uppercase tracking-widest">Real-time Node Ready</span>
+            
+            <div className="mb-10">
+              <h3 className="text-xl font-black text-white mb-6 tracking-tighter uppercase italic leading-none">Instant Confirmation</h3>
+              <p className="text-xs font-black text-blue-100/60 uppercase tracking-widest leading-relaxed mb-8">
+                Spot bookings are processed with priority routing. Ensure all passenger documents are verified at the boarding station.
+              </p>
+              <div className="p-4 bg-white/10 rounded-xl border border-white/10 backdrop-blur-md">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Real-time Node Ready</span>
+                </div>
               </div>
             </div>
-          </BorderGlow>
 
-          <BorderGlow
-            borderRadius={28}
-            backgroundColor="#120F17"
-            glowRadius={40}
-            glowIntensity={1}
-            className="clay-card p-8 border-white/5 shadow-2xl h-full"
-          >
-            <h3 className="text-sm font-black text-white mb-6 uppercase tracking-widest italic clay-text-3d">Recent Registrations</h3>
-            <div className="space-y-4">
-              {[
-                { id: 'BK-501', route: 'Domestic Terminal → Bandra', time: '10:45 AM' },
-                { id: 'BK-498', route: 'Gateway → Colaba', time: '09:20 AM' },
-                { id: 'BK-492', route: 'BKC Node → Powai', time: '08:15 AM' }
-              ].map((b, i) => (
-                <div key={i} className="p-4 bg-black/20 rounded-xl border border-white/5 shadow-inner flex items-center justify-between group">
-                  <div>
-                    <div className="text-[10px] font-black text-white uppercase tracking-tight group-hover:text-blue-500 transition-colors">{b.route}</div>
-                    <div className="text-[8px] font-bold text-gray-600 uppercase tracking-widest mt-1">{b.id} • {b.time}</div>
+            <div className="pt-8 border-t border-white/5">
+              <h3 className="text-sm font-black text-white mb-6 uppercase tracking-widest italic clay-text-3d">Recent Registrations</h3>
+              <div className="space-y-4">
+                {[
+                  { id: 'BK-501', route: 'Domestic Terminal → Bandra', time: '10:45 AM' },
+                  { id: 'BK-498', route: 'Gateway → Colaba', time: '09:20 AM' },
+                  { id: 'BK-492', route: 'BKC Node → Powai', time: '08:15 AM' }
+                ].map((b, i) => (
+                  <div key={i} className="p-4 bg-black/20 rounded-xl border border-white/5 shadow-inner flex items-center justify-between group">
+                    <div>
+                      <div className="text-[10px] font-black text-white uppercase tracking-tight group-hover:text-blue-500 transition-colors">{b.route}</div>
+                      <div className="text-[8px] font-bold text-gray-600 uppercase tracking-widest mt-1">{b.id} • {b.time}</div>
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    </div>
                   </div>
-                  <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </BorderGlow>
         </div>

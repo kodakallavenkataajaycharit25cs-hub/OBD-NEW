@@ -154,7 +154,7 @@ export default function DriverPortal() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-6 border-white/5 shadow-xl"
+        className="p-6 border-white/5 shadow-xl"
       >
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-white tracking-tighter uppercase clay-text-3d">Performance Horizon</h3>
@@ -185,12 +185,12 @@ export default function DriverPortal() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-8 border-white/10 group"
+        className="p-8 border-white/10 group"
       >
         <div className="flex items-center space-x-8 mb-10">
-          <div className="w-24 h-24 clay-card bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 relative">
+          <div className="w-24 h-24 rounded-3xl bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 relative">
             <User className="w-12 h-12 text-white" />
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 clay-card bg-green-500 border-none flex items-center justify-center">
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-green-500 border-none flex items-center justify-center">
               <Activity className="w-4 h-4 text-white" />
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function DriverPortal() {
             { label: 'Distance Vector', val: driverData.totalDistance, icon: TrendingUp },
             { label: 'Pilot Rating', val: `${driverData.customerRating}/5`, icon: Award }
           ].map((stat, i) => (
-            <div key={i} className="clay-card p-6 bg-black/20 border-white/5 shadow-inner text-center">
+            <div key={i} className="p-6 bg-black/20 border-white/5 shadow-inner text-center">
               <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-4 border border-white/5">
                 <stat.icon className="w-5 h-5 text-gray-500" />
               </div>
@@ -227,7 +227,7 @@ export default function DriverPortal() {
           backgroundColor="#120F17"
           glowRadius={40}
           glowIntensity={1}
-          className="clay-card p-8 border-white/5 h-full"
+          className="p-8 border-white/5 h-full"
         >
           <h3 className="text-xl font-black text-white mb-8 tracking-tighter uppercase clay-text-3d italic">Efficiency Matrix</h3>
           <div className="space-y-8">
@@ -264,7 +264,7 @@ export default function DriverPortal() {
           backgroundColor="#120F17"
           glowRadius={40}
           glowIntensity={1}
-          className="clay-card p-8 bg-blue-600/5 border-blue-500/20 h-full"
+          className="p-8 bg-blue-600/5 border-blue-500/20 h-full"
         >
           <h3 className="text-xl font-black text-white mb-8 tracking-tighter uppercase clay-text-3d italic">{driverData.periodLabel} Credit</h3>
           <div className="space-y-6">
@@ -281,7 +281,7 @@ export default function DriverPortal() {
                   {formatIndianCurrency(driverData.previousPeriodEarnings)}
                 </div>
               </div>
-              <div className="px-5 py-3 clay-card bg-green-500 border-none text-xs md:text-sm font-black text-white uppercase tracking-widest shadow-green-900/40">
+              <div className="px-5 py-3 bg-green-500 border-none text-xs md:text-sm font-black text-white uppercase tracking-widest shadow-green-900/40">
                 +{(((driverData.currentPeriodEarnings - driverData.previousPeriodEarnings) / driverData.previousPeriodEarnings) * 100).toFixed(1)}% Yield
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function DriverPortal() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-8 border-white/5 h-full"
+        className="p-8 border-white/5 h-full"
       >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Document Archives</h2>
 
@@ -310,7 +310,7 @@ export default function DriverPortal() {
               glowRadius={40}
               glowIntensity={1}
               backgroundColor="#120F17"
-              className="clay-card p-6 border-white/5 shadow-inner h-full"
+              className="p-6 border-white/5 shadow-inner h-full"
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-sm font-black text-white uppercase tracking-tight">{doc.name}</h3>
@@ -343,7 +343,7 @@ export default function DriverPortal() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-8 border-white/5 h-full"
+        className="p-8 border-white/5 h-full"
       >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Historical Missions</h2>
 
@@ -360,7 +360,7 @@ export default function DriverPortal() {
               glowRadius={40}
               glowIntensity={1}
               backgroundColor="#120F17"
-              className="clay-card p-6 shadow-inner hover:bg-white/5 transition-all group border-white/5"
+              className="p-6 shadow-inner hover:bg-white/5 transition-all group border-white/5"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -388,7 +388,7 @@ export default function DriverPortal() {
   const EarningsSection = () => (
     <div className="space-y-8">
       {/* Time Period Selector */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5">
+      <div className="p-6 bg-[#120F17] border-white/5">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-white tracking-tighter uppercase clay-text-3d">Earnings Analysis</h3>
           <div className="flex p-1 bg-black/20 rounded-2xl shadow-inner">
@@ -413,25 +413,25 @@ export default function DriverPortal() {
         </div>
       </div>
 
-      <div className="clay-card p-8 bg-zinc-900 border-white/5">
+      <div className="p-8 bg-[#120F17] border-white/5">
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Credit Summary</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="clay-card p-6 bg-green-500/10 border-green-500/20 text-center">
+          <div className="p-6 bg-green-500/10 border-green-500/20 text-center">
             <div className="text-4xl md:text-5xl font-black text-green-400 tracking-tighter mb-1">{formatIndianCurrency(driverData.currentPeriodEarnings)}</div>
             <div className="text-xs text-green-500 font-black uppercase tracking-widest mt-2 italic">{driverData.periodLabel}</div>
           </div>
-          <div className="clay-card p-6 bg-blue-500/10 border-blue-500/20 text-center">
+          <div className="p-6 bg-blue-500/10 border-blue-500/20 text-center">
             <div className="text-4xl md:text-5xl font-black text-blue-400 tracking-tighter mb-1">{formatIndianCurrency(driverData.previousPeriodEarnings)}</div>
             <div className="text-xs text-blue-500 font-black uppercase tracking-widest mt-2 italic">{driverData.previousLabel}</div>
           </div>
-          <div className="clay-card p-6 bg-purple-500/10 border-purple-500/20 text-center">
+          <div className="p-6 bg-purple-500/10 border-purple-500/20 text-center">
             <div className="text-4xl md:text-5xl font-black text-purple-400 tracking-tighter mb-1">{formatIndianCurrency(driverData.currentPeriodEarnings + driverData.previousPeriodEarnings)}</div>
             <div className="text-xs text-purple-500 font-black uppercase tracking-widest mt-2 italic">Total Ops Credit</div>
           </div>
         </div>
 
-        <div className="clay-card p-8 bg-black/20 border-white/5 shadow-inner">
+        <div className="p-8 bg-black/20 border-white/5 shadow-inner">
           <h3 className="text-sm font-black text-white mb-8 uppercase tracking-[0.3em] italic">Settlement Cycles</h3>
           <div className="space-y-6">
             {[
@@ -441,7 +441,7 @@ export default function DriverPortal() {
             ].map((payment, index) => (
               <div key={index} className="flex items-center justify-between py-4 border-b border-white/5 last:border-b-0 group">
                 <div className="flex items-center space-x-6">
-                  <div className="w-12 h-12 clay-card bg-zinc-800 border-none flex items-center justify-center rounded-xl">
+                  <div className="w-12 h-12 bg-zinc-800 border-none flex items-center justify-center rounded-xl">
                     <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
                   <div>
@@ -467,7 +467,7 @@ export default function DriverPortal() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-8 border-white/5 h-full"
+        className="p-8 border-white/5 h-full"
       >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Real-time Telemetry</h2>
 
@@ -484,7 +484,7 @@ export default function DriverPortal() {
               glowRadius={40}
               glowIntensity={1}
               backgroundColor="#120F17"
-              className="clay-card p-6 shadow-inner text-center group hover:bg-white/5 transition-all h-full border-white/5"
+              className="p-6 shadow-inner text-center group hover:bg-white/5 transition-all h-full border-white/5"
             >
               <div className={`w-12 h-12 rounded-2xl bg-${stat.color}-500/10 flex items-center justify-center mx-auto mb-4 border border-${stat.color}-500/20 group-hover:scale-110 transition-transform`}>
                 <stat.icon className={`w-6 h-6 text-${stat.color}-500`} />
@@ -503,7 +503,7 @@ export default function DriverPortal() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-8 border-white/5 shadow-inner h-full"
+            className="p-8 border-white/5 shadow-inner h-full"
           >
             <h3 className="text-lg font-black text-white mb-6 tracking-tighter uppercase clay-text-3d italic">Diagnostic Status</h3>
             <div className="space-y-4">
@@ -534,7 +534,7 @@ export default function DriverPortal() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="clay-card p-8 border-blue-500/20 relative overflow-hidden h-full"
+            className="p-8 border-blue-500/20 relative overflow-hidden h-full"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Activity className="w-24 h-24 text-blue-500" />
@@ -560,7 +560,7 @@ export default function DriverPortal() {
         backgroundColor="#120F17"
         glowRadius={40}
         glowIntensity={1}
-        className="clay-card p-8 border-white/5 h-full"
+        className="p-8 border-white/5 h-full"
       >
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Achievement Nodes</h2>
 
@@ -584,7 +584,7 @@ export default function DriverPortal() {
                 : 'bg-black/20 opacity-40 grayscale'
                 }`}
             >
-              <div className={`w-20 h-20 clay-card mx-auto mb-6 flex items-center justify-center transition-transform ${badge.earned
+              <div className={`w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center transition-transform ${badge.earned
                 ? `bg-${badge.color}-500 border-none shadow-${badge.color}-900/40 hover:scale-110`
                 : 'bg-zinc-800 border-white/5'
                 }`}>
@@ -606,11 +606,11 @@ export default function DriverPortal() {
     <div className="min-h-screen bg-zinc-950 text-white flex font-['Space_Grotesk'] overflow-hidden">
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-500 p-4 flex flex-col z-20`}>
-        <div className="clay-card h-full flex flex-col bg-zinc-900/50 border-white/5 shadow-2xl overflow-hidden">
+        <div className="h-full flex flex-col bg-[#120F17]/50 border-white/5 shadow-2xl overflow-hidden">
           <div className={`mb-4 flex ${sidebarOpen ? 'p-6' : 'p-4 justify-center'}`}>
             <div className="flex items-center space-x-4">
               {!sidebarOpen && (
-                <div className="w-10 h-10 clay-card bg-white border-none flex items-center justify-center font-black text-lg text-black shadow-xl rounded-full">
+                <div className="w-10 h-10 bg-white border-none flex items-center justify-center font-black text-lg text-black shadow-xl rounded-full">
                   S
                 </div>
               )}
@@ -635,7 +635,7 @@ export default function DriverPortal() {
                     to={item.href}
                     className="flex items-center p-1 mt-2"
                   >
-                    <div className={`w-full clay-card ${isHighlighted
+                    <div className={`w-full ${isHighlighted
                       ? 'bg-orange-500 animate-pulse'
                       : 'bg-blue-600'
                       } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95`}>
@@ -686,7 +686,7 @@ export default function DriverPortal() {
           <div className="flex items-center space-x-6">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-12 h-12 clay-card bg-white/5 border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90"
+              className="w-12 h-12 bg-white/5 border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90"
             >
               <Settings className="w-5 h-5 text-gray-400" />
             </button>
@@ -707,14 +707,14 @@ export default function DriverPortal() {
               <span className="text-[8px] font-black uppercase tracking-widest text-gray-600 italic">Auth Level 4</span>
               <span className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</span>
             </div>
-            <div className="w-14 h-14 clay-card bg-zinc-800 border-white/5 flex items-center justify-center group overflow-hidden">
+            <div className="w-14 h-14 rounded-2xl bg-zinc-800 border-white/5 flex items-center justify-center group overflow-hidden">
               <div className="w-full h-full bg-blue-600 flex items-center justify-center transition-transform group-hover:scale-110">
                 <User className="w-6 h-6 text-white" />
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center px-4 py-2 clay-card bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
+              className="flex items-center px-4 py-2 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
             >
               <LogOut className="w-4 h-4 mr-2" />
               <span className="text-[10px] font-black uppercase tracking-widest">Logout</span>

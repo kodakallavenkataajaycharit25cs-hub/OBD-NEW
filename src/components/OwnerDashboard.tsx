@@ -59,11 +59,11 @@ export default function OwnerDashboard() {
     <div className="min-h-screen bg-zinc-950 text-white flex font-['Space_Grotesk'] overflow-hidden">
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-500 p-4 flex flex-col z-20`}>
-        <div className="clay-card h-full flex flex-col bg-zinc-900/50 border-white/5 shadow-2xl overflow-hidden">
+        <div className="h-full flex flex-col bg-[#120F17]/50 border-white/5 shadow-2xl overflow-hidden">
           <div className={`mb-4 flex ${sidebarOpen ? 'p-6' : 'p-4 justify-center'}`}>
             <div className="flex items-center space-x-4">
               {!sidebarOpen && (
-                <div className="w-10 h-10 clay-card bg-white border-none flex items-center justify-center font-black text-lg text-black shadow-xl rounded-full">
+                <div className="w-10 h-10 bg-white border-none flex items-center justify-center font-black text-lg text-black shadow-xl rounded-full">
                   S
                 </div>
               )}
@@ -128,15 +128,17 @@ export default function OwnerDashboard() {
               <span className="text-[8px] font-black uppercase tracking-widest text-gray-600">Operations Lead</span>
               <span className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</span>
             </div>
-            <div className="w-14 h-14 bg-zinc-800 border-white/5 flex items-center justify-center group overflow-hidden">
+            <div className="w-14 h-14 rounded-2xl bg-zinc-800 border-white/5 flex items-center justify-center group overflow-hidden">
               <div className="w-full h-full bg-blue-600 flex items-center justify-center transition-transform group-hover:scale-110">
                 <Users className="w-6 h-6 text-white" />
               </div>
             </div>
             <button
               onClick={logout}
-              className="flex items-center px-4 py-2 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
+              className="flex items-center px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
             >
+
+
               <LogOut className="w-4 h-4 mr-2" />
               <span className="text-[10px] font-black uppercase tracking-widest">Logout</span>
             </button>

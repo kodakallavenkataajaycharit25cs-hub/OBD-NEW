@@ -161,7 +161,7 @@ export default function SafetyEmergency() {
           glowRadius={40}
           glowIntensity={1}
           backgroundColor="#120F17"
-          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          className="p-6 border-white/5 shadow-2xl h-full"
         >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <AlertTriangle className="w-6 h-6 mr-2 text-yellow-500" />
@@ -221,7 +221,7 @@ export default function SafetyEmergency() {
           glowRadius={40}
           glowIntensity={1}
           backgroundColor="#120F17"
-          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          className="p-6 border-white/5 shadow-2xl h-full"
         >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Activity className="w-6 h-6 mr-2 text-blue-500" />
@@ -278,7 +278,7 @@ export default function SafetyEmergency() {
           glowRadius={40}
           glowIntensity={1}
           backgroundColor="#120F17"
-          className="clay-card p-6 border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-4"
+          className="p-6 border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-4"
         >
           <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Incident Dossier: {selectedIncidentData.id}</h4>
 

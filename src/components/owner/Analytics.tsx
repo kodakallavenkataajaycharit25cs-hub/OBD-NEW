@@ -192,7 +192,7 @@ export default function Analytics() {
       {/* Header */}
       <BorderGlow
         borderRadius={32}
-        backgroundColor="#18181b"
+        backgroundColor="#120F17"
         className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-500/50 p-6"
       >
         <div className="flex items-center justify-between mb-6">
@@ -239,8 +239,8 @@ export default function Analytics() {
         {/* ML Insights */}
         <BorderGlow
           borderRadius={32}
-          backgroundColor="#18181b"
-          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          backgroundColor="#120F17"
+          className="p-6 border-white/5 shadow-2xl h-full"
         >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Zap className="w-6 h-6 mr-2 text-yellow-500" />
@@ -309,8 +309,8 @@ export default function Analytics() {
         {/* Demand Forecasting */}
         <BorderGlow
           borderRadius={32}
-          backgroundColor="#18181b"
-          className="clay-card p-6 border-white/5 shadow-2xl h-full"
+          backgroundColor="#120F17"
+          className="p-6 border-white/5 shadow-2xl h-full"
         >
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <TrendingUp className="w-6 h-6 mr-2 text-blue-500" />
@@ -319,7 +319,7 @@ export default function Analytics() {
 
           <div className="space-y-4">
             {demandForecast.map((forecast, index) => (
-              <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-black text-white uppercase tracking-tight">{forecast.route}</h4>
                   <span className={`font-bold ${forecast.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
@@ -357,7 +357,7 @@ export default function Analytics() {
       </div>
 
       {/* Hotspot Mapping */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+      <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <MapPin className="w-6 h-6 mr-2 text-red-500" />
           Demand Hotspot Analysis
@@ -365,7 +365,7 @@ export default function Analytics() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {hotspotData.map((hotspot, index) => (
-            <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner hover:bg-white/10 transition-colors">
+            <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner hover:bg-white/10 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-black text-white uppercase tracking-tight">{hotspot.city}</h4>
                 <span className="text-green-400 font-bold">{hotspot.growth}</span>
@@ -395,7 +395,7 @@ export default function Analytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Driver Clustering */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Users className="w-6 h-6 mr-2 text-purple-500" />
             Driver Performance Clustering
@@ -429,7 +429,7 @@ export default function Analytics() {
         </div>
 
         {/* Vehicle Performance Analytics */}
-        <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+        <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <BarChart3 className="w-6 h-6 mr-2 text-green-500" />
             Vehicle Performance & Resale Analysis
@@ -440,7 +440,7 @@ export default function Analytics() {
               const trendColor = getTrendColor(vehicle.trend);
               
               return (
-                <div key={index} className="clay-card p-4 bg-black/20 border-white/5 shadow-inner">
+                <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className="font-black text-white uppercase tracking-tight">{vehicle.vehicle}</h4>
@@ -477,7 +477,7 @@ export default function Analytics() {
       </div>
 
       {/* Anomaly Detection */}
-      <div className="clay-card p-6 bg-zinc-900 border-white/5 shadow-2xl">
+      <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <Activity className="w-6 h-6 mr-2 text-red-500" />
           Real-time Anomaly Detection
