@@ -225,7 +225,7 @@ export default function BillingFinance() {
                 </div>
               </div>
 
-              <div className="p-4 bg-black/20 border-white/5 shadow-inner mb-4">
+              <div className="p-4 bg-black/20 border-white/5 shadow-inner mb-4 rounded-2xl">
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Base Amount:</span>
@@ -424,7 +424,7 @@ export default function BillingFinance() {
                 </div>
               </div>
 
-              <div className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                   <div className="text-center">
                     <span className="text-gray-400">Basic Salary</span>
@@ -544,7 +544,7 @@ export default function BillingFinance() {
               integration.status === 'pending' ? 'yellow' : 'red';
 
             return (
-              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="flex items-center justify-between mb-3">
                   <h5 className="font-black text-white uppercase tracking-tight">{integration.name}</h5>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium bg-${statusColor}-500/30 text-${statusColor}-300`}>

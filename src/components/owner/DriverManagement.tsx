@@ -301,7 +301,7 @@ export default function DriverManagement() {
             const status = getDocumentStatus(docData.status);
 
             return (
-              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-black text-white uppercase tracking-tight">{doc.name}</h4>
                   <status.icon className={`w-5 h-5 text-${status.color}-400`} />

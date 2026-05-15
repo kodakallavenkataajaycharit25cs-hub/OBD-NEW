@@ -11,25 +11,28 @@ export interface OBDData {
 }
 
 export const fetchRPM = async () => {
-  const response = await fetch('/api/obd/rpm');
-  if (!response.ok) throw new Error('Failed to fetch RPM');
-  return response.json();
+  // Mocking RPM data
+  return { rpm: Math.floor(Math.random() * (3000 - 800 + 1)) + 800 };
 };
 
 export const fetchSpeed = async () => {
-  const response = await fetch('/api/obd/speed');
-  if (!response.ok) throw new Error('Failed to fetch speed');
-  return response.json();
+  // Mocking Speed data
+  return { speed: Math.floor(Math.random() * (120 - 0 + 1)) + 0 };
 };
 
 export const fetchFuelLevel = async () => {
-  const response = await fetch('/api/obd/fuel_level');
-  if (!response.ok) throw new Error('Failed to fetch fuel level');
-  return response.json();
+  // Mocking Fuel Level data
+  return { fuel_level: Math.floor(Math.random() * (100 - 15 + 1)) + 15 };
 };
 
 export const fetchDiagnostics = async () => {
-  const response = await fetch('/api/obd/diagnostics');
-  if (!response.ok) throw new Error('Failed to fetch diagnostics');
-  return response.json();
+  // Mocking Diagnostics data
+  return {
+    diagnostics: {
+      dtc: Math.random() > 0.8 ? ['P0300', 'P0171'] : [],
+      mil_status: Math.random() > 0.8 ? 'ON' : 'OFF',
+      engine_load: Math.floor(Math.random() * 100) + '%',
+      coolant_temp: (Math.floor(Math.random() * 20) + 85) + '°C'
+    }
+  };
 };

@@ -59,7 +59,7 @@ export default function OwnerDashboard() {
     <div className="min-h-screen bg-zinc-950 text-white flex font-['Space_Grotesk'] overflow-hidden">
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-500 p-4 flex flex-col z-20`}>
-        <div className="h-full flex flex-col bg-[#120F17]/50 border-white/5 shadow-2xl overflow-hidden">
+        <div className="h-full flex flex-col bg-[#120F17]/50 border-white/5 shadow-2xl overflow-hidden rounded-2xl">
           <div className={`mb-4 flex ${sidebarOpen ? 'p-6' : 'p-4 justify-center'}`}>
             <div className="flex items-center space-x-4">
               {!sidebarOpen && (
@@ -135,7 +135,7 @@ export default function OwnerDashboard() {
             </div>
             <button
               onClick={logout}
-              className="flex items-center px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
+              className="flex items-center px-4 py-2 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
             >
 
 

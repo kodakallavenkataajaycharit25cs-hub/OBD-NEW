@@ -138,11 +138,11 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
   }
 
   return (
-    <div className="fixed bottom-8 right-8 w-[360px] h-[550px] bg-[#120F17] border-white/10 shadow-3xl z-[100] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500">
+    <div className="fixed bottom-8 right-8 w-[360px] h-[550px] bg-[#120F17] border-white/10 shadow-3xl z-[100] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-500 rounded-2xl">
       {/* Header */}
       <div className="flex items-center justify-between p-6 bg-black/40 border-b border-white/5">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40">
+          <div className="w-12 h-12 bg-blue-600 border-none flex items-center justify-center shadow-blue-900/40 rounded-2xl">
             <Brain className="w-6 h-6 text-white" />
           </div>
           <div>

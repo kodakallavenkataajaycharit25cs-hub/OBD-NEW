@@ -319,7 +319,7 @@ export default function Analytics() {
 
           <div className="space-y-4">
             {demandForecast.map((forecast, index) => (
-              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-black text-white uppercase tracking-tight">{forecast.route}</h4>
                   <span className={`font-bold ${forecast.change.startsWith('+') ? 'text-green-400' : 'text-red-400'
@@ -357,7 +357,7 @@ export default function Analytics() {
       </div>
 
       {/* Hotspot Mapping */}
-      <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
+      <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl rounded-2xl">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <MapPin className="w-6 h-6 mr-2 text-red-500" />
           Demand Hotspot Analysis
@@ -365,7 +365,7 @@ export default function Analytics() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {hotspotData.map((hotspot, index) => (
-            <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner hover:bg-white/10 transition-colors">
+            <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner hover:bg-white/10 transition-colors rounded-2xl">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-black text-white uppercase tracking-tight">{hotspot.city}</h4>
                 <span className="text-green-400 font-bold">{hotspot.growth}</span>
@@ -395,7 +395,7 @@ export default function Analytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Driver Clustering */}
-        <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
+        <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl rounded-2xl">
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <Users className="w-6 h-6 mr-2 text-purple-500" />
             Driver Performance Clustering
@@ -429,7 +429,7 @@ export default function Analytics() {
         </div>
 
         {/* Vehicle Performance Analytics */}
-        <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
+        <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl rounded-2xl">
           <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
             <BarChart3 className="w-6 h-6 mr-2 text-green-500" />
             Vehicle Performance & Resale Analysis
@@ -440,7 +440,7 @@ export default function Analytics() {
               const trendColor = getTrendColor(vehicle.trend);
               
               return (
-                <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
+                <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className="font-black text-white uppercase tracking-tight">{vehicle.vehicle}</h4>
@@ -477,7 +477,7 @@ export default function Analytics() {
       </div>
 
       {/* Anomaly Detection */}
-      <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl">
+      <div className="p-6 bg-[#120F17] border-white/5 shadow-2xl rounded-2xl">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <Activity className="w-6 h-6 mr-2 text-red-500" />
           Real-time Anomaly Detection

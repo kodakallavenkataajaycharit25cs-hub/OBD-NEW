@@ -369,7 +369,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                   <button
                     key={index}
                     onClick={() => setBooking(prev => ({ ...prev, pickup: route.from, dropoff: route.to }))}
-                    className="w-full p-5 bg-black/20 border-white/5 hover:bg-white/5 transition-all text-left flex items-center justify-between group shadow-inner"
+                    className="w-full p-5 bg-black/20 border-white/5 hover:bg-white/5 transition-all text-left flex items-center justify-between group shadow-inner rounded-2xl"
                   >
                     <div>
                       <div className="text-[10px] font-black text-white uppercase tracking-tight group-hover:text-blue-500 transition-colors">

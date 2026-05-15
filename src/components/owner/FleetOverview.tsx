@@ -118,7 +118,7 @@ export default function FleetOverview() {
           </div>
           <div className="space-y-4">
             {topRoutes.map((route, index) => (
-              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group rounded-2xl">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-black text-white uppercase tracking-tight group-hover:text-blue-400 transition-colors">{route.route}</h4>
                   <div className="px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-[10px] font-black text-green-500 uppercase tracking-widest font-['Space_Grotesk'] not-italic">{route.margin} Yield</div>
@@ -149,7 +149,7 @@ export default function FleetOverview() {
           </div>
           <div className="space-y-4">
             {topDrivers.map((driver, index) => (
-              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 rounded-xl bg-zinc-800 border-none flex items-center justify-center text-white font-black text-xs shadow-lg">

@@ -261,7 +261,7 @@ export default function VehicleHealth() {
                 { type: 'Geofence', location: 'Unauthorized route deviation', time: '1 day ago', severity: 'medium' },
                 { type: 'Idle', location: 'Extended idling at toll plaza', time: '2 days ago', severity: 'low' }
               ].map((violation, index) => (
-                <div key={index} className="clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all">
+                <div key={index} className="clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all rounded-2xl">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${violation.severity === 'high' ? 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30' :
                         violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30' :

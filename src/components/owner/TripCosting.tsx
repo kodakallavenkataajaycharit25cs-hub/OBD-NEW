@@ -64,7 +64,7 @@ export default function TripCosting() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-1">
       {/* Header Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {tripStats.map((stat, i) => (
@@ -108,17 +108,17 @@ export default function TripCosting() {
           {/* Detailed Breakdown */}
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="text-[10px] uppercase font-black tracking-widest text-gray-600 mb-2">Fuel Expenditures</div>
                 <div className="text-xl font-bold text-white tracking-tight">{formatIndianCurrency(112400)}</div>
                 <div className="text-[10px] text-blue-400 font-bold mt-1 uppercase tracking-widest leading-none">36% of Net Ops</div>
               </div>
-              <div className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="text-[10px] uppercase font-black tracking-widest text-gray-600 mb-2">Toll & Tariffs</div>
                 <div className="text-xl font-bold text-white tracking-tight">{formatIndianCurrency(24500)}</div>
                 <div className="text-[10px] text-purple-400 font-bold mt-1 uppercase tracking-widest leading-none">8% of Net Ops</div>
               </div>
-              <div className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="text-[10px] uppercase font-black tracking-widest text-gray-600 mb-2">Labor/Pilot Pay</div>
                 <div className="text-xl font-bold text-white tracking-tight">{formatIndianCurrency(85600)}</div>
                 <div className="text-[10px] text-green-400 font-bold mt-1 uppercase tracking-widest leading-none">27% of Net Ops</div>
@@ -126,7 +126,7 @@ export default function TripCosting() {
             </div>
 
             {/* Performance Chart Placeholder */}
-            <div className="h-64 bg-black/40 border-white/5 shadow-inner flex items-center justify-center relative overflow-hidden">
+            <div className="h-64 bg-black/40 border-white/5 shadow-inner flex items-center justify-center relative overflow-hidden rounded-2xl">
               <div className="absolute inset-0 bg-blue-500/5 backdrop-blur-[2px]" />
               <div className="text-center z-10 p-8">
                 <div className="inline-block px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-xl mb-4">
@@ -190,7 +190,7 @@ export default function TripCosting() {
 
         <div className="space-y-4">
           {recentTrips.map((trip) => (
-            <div key={trip.id} className="p-6 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group">
+            <div key={trip.id} className="p-6 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group rounded-2xl">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">

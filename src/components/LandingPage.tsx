@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import {
   Car,
   Shield,
@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import MagicBento from './MagicBento';
+import TiltedCard from './TiltedCard';
 
 interface LandingPageProps {
   onLoginClick: () => void;
@@ -23,20 +24,6 @@ interface LandingPageProps {
 export default function LandingPage({ onLoginClick }: LandingPageProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const heroRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const scrolled = window.pageYOffset;
-        const parallax = scrolled * 0.5;
-        heroRef.current.style.transform = `translateY(${parallax}px)`;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleDashboardAccess = () => {
     if (user?.role === 'owner') {
@@ -123,15 +110,21 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
 
             <div className="lg:col-span-4 relative mt-12 lg:mt-0">
               <div className="animate-float relative lg:top-[-70px]">
-                <div ref={heroRef} className="aspect-square relative flex items-center justify-center">
-                  <div className="absolute inset-0 bg-blue-600/10 rounded-[4rem] rotate-6 scale-95 border border-blue-500/20 shadow-2xl" />
-                  <div className="relative z-10 w-full h-full overflow-hidden group p-4 border-white/30">
-                    <img
-                      src="https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg"
-                      alt="Fleet"
-                      className="w-full h-full object-cover rounded-[2.5rem] opacity-90 group-hover:scale-105 transition-all duration-1000"
-                    />
-                    <div className="absolute bottom-6 right-6 p-5 border-none bg-blue-600/80 backdrop-blur-md max-w-[200px]">
+                <TiltedCard
+                  imageSrc="https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg"
+                  altText="Sukrutha Fleet Vehicle"
+                  captionText="Sukrutha Fleet Intelligence"
+                  containerHeight="400px"
+                  containerWidth="100%"
+                  imageHeight="350px"
+                  imageWidth="350px"
+                  rotateAmplitude={12}
+                  scaleOnHover={1.08}
+                  showMobileWarning={false}
+                  showTooltip={true}
+                  displayOverlayContent={true}
+                  overlayContent={
+                    <div className="absolute bottom-6 right-6 p-5 border-none bg-blue-600/80 backdrop-blur-md max-w-[200px] rounded-2xl">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-[8px] font-black uppercase tracking-widest text-blue-100 leading-none">Live Data</span>
                         <Activity className="w-4 h-4 text-blue-100" />
@@ -139,8 +132,8 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                       <div className="text-2xl font-black tracking-tighter text-white">84,203 km</div>
                       <div className="text-[10px] text-blue-100/60 font-bold uppercase tracking-widest mt-0.5">Fleet Mileage</div>
                     </div>
-                  </div>
-                </div>
+                  }
+                />
               </div>
             </div>
           </div>
@@ -180,7 +173,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
             </h2>
           </div>
 
-          <MagicBento 
+          <MagicBento
             textAutoHide={true}
             enableStars={true}
             enableSpotlight={true}
@@ -227,7 +220,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
       {/* Puffy CTA */}
       <section className="py-40 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="relative p-[4.39rem] md:p-[8.39rem] overflow-hidden text-center bg-blue-600 border-none">
+          <div className="relative p-[4.39rem] md:p-[8.39rem] overflow-hidden text-center bg-blue-600 border-none rounded-2xl">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
             <h2 className="text-[2rem] md:text-[5rem] font-black tracking-tighter mb-12 leading-[0.85] text-white clay-text-3d">
               READY FOR THE<br />LONG HAUL?

@@ -386,7 +386,7 @@ export default function Maintenance() {
 
           <div className="space-y-4">
             {vendors.map((vendor, index) => (
-              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner">
+              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
                 <div className="flex items-center justify-between mb-2">
                   <h5 className="font-black text-white uppercase tracking-tight">{vendor.name}</h5>
                   <div className="flex items-center space-x-1">

@@ -47,7 +47,7 @@ export default function DriverPortal() {
           rpm: rpmData.rpm,
           speed: speedData.speed,
           fuel_level: fuelData.fuel_level,
-          diagnostics: diagData
+          diagnostics: diagData.diagnostics
         });
       } catch (error) {
         console.error('Failed to update telemetry:', error);
@@ -210,7 +210,7 @@ export default function DriverPortal() {
             { label: 'Distance Vector', val: driverData.totalDistance, icon: TrendingUp },
             { label: 'Pilot Rating', val: `${driverData.customerRating}/5`, icon: Award }
           ].map((stat, i) => (
-            <div key={i} className="p-6 bg-black/20 border-white/5 shadow-inner text-center">
+            <div key={i} className="p-6 bg-black/20 border-white/5 shadow-inner text-center rounded-2xl">
               <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-4 border border-white/5">
                 <stat.icon className="w-5 h-5 text-gray-500" />
               </div>
@@ -281,7 +281,7 @@ export default function DriverPortal() {
                   {formatIndianCurrency(driverData.previousPeriodEarnings)}
                 </div>
               </div>
-              <div className="px-5 py-3 bg-green-500 border-none text-xs md:text-sm font-black text-white uppercase tracking-widest shadow-green-900/40">
+              <div className="px-5 py-3 bg-green-500 border-none text-xs md:text-sm font-black text-white uppercase tracking-widest shadow-green-900/40 rounded-2xl">
                 +{(((driverData.currentPeriodEarnings - driverData.previousPeriodEarnings) / driverData.previousPeriodEarnings) * 100).toFixed(1)}% Yield
               </div>
             </div>
@@ -388,7 +388,7 @@ export default function DriverPortal() {
   const EarningsSection = () => (
     <div className="space-y-8">
       {/* Time Period Selector */}
-      <div className="p-6 bg-[#120F17] border-white/5">
+      <div className="p-6 bg-[#120F17] border-white/5 rounded-2xl">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-white tracking-tighter uppercase clay-text-3d">Earnings Analysis</h3>
           <div className="flex p-1 bg-black/20 rounded-2xl shadow-inner">
@@ -413,25 +413,25 @@ export default function DriverPortal() {
         </div>
       </div>
 
-      <div className="p-8 bg-[#120F17] border-white/5">
+      <div className="p-8 bg-[#120F17] border-white/5 rounded-2xl">
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Credit Summary</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="p-6 bg-green-500/10 border-green-500/20 text-center">
+          <div className="p-6 bg-green-500/10 border-green-500/20 text-center rounded-2xl">
             <div className="text-4xl md:text-5xl font-black text-green-400 tracking-tighter mb-1">{formatIndianCurrency(driverData.currentPeriodEarnings)}</div>
             <div className="text-xs text-green-500 font-black uppercase tracking-widest mt-2 italic">{driverData.periodLabel}</div>
           </div>
-          <div className="p-6 bg-blue-500/10 border-blue-500/20 text-center">
+          <div className="p-6 bg-blue-500/10 border-blue-500/20 text-center rounded-2xl">
             <div className="text-4xl md:text-5xl font-black text-blue-400 tracking-tighter mb-1">{formatIndianCurrency(driverData.previousPeriodEarnings)}</div>
             <div className="text-xs text-blue-500 font-black uppercase tracking-widest mt-2 italic">{driverData.previousLabel}</div>
           </div>
-          <div className="p-6 bg-purple-500/10 border-purple-500/20 text-center">
+          <div className="p-6 bg-purple-500/10 border-purple-500/20 text-center rounded-2xl">
             <div className="text-4xl md:text-5xl font-black text-purple-400 tracking-tighter mb-1">{formatIndianCurrency(driverData.currentPeriodEarnings + driverData.previousPeriodEarnings)}</div>
             <div className="text-xs text-purple-500 font-black uppercase tracking-widest mt-2 italic">Total Ops Credit</div>
           </div>
         </div>
 
-        <div className="p-8 bg-black/20 border-white/5 shadow-inner">
+        <div className="p-8 bg-black/20 border-white/5 shadow-inner rounded-2xl">
           <h3 className="text-sm font-black text-white mb-8 uppercase tracking-[0.3em] italic">Settlement Cycles</h3>
           <div className="space-y-6">
             {[
@@ -606,7 +606,7 @@ export default function DriverPortal() {
     <div className="min-h-screen bg-zinc-950 text-white flex font-['Space_Grotesk'] overflow-hidden">
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-500 p-4 flex flex-col z-20`}>
-        <div className="h-full flex flex-col bg-[#120F17]/50 border-white/5 shadow-2xl overflow-hidden">
+        <div className="h-full flex flex-col bg-[#120F17]/50 border-white/5 shadow-2xl overflow-hidden rounded-2xl">
           <div className={`mb-4 flex ${sidebarOpen ? 'p-6' : 'p-4 justify-center'}`}>
             <div className="flex items-center space-x-4">
               {!sidebarOpen && (
@@ -638,7 +638,7 @@ export default function DriverPortal() {
                     <div className={`w-full ${isHighlighted
                       ? 'bg-orange-500 animate-pulse'
                       : 'bg-blue-600'
-                      } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95`}>
+                      } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95 rounded-2xl`}>
                       <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                         <item.icon className="w-5 h-5 text-white" />
                       </div>
@@ -686,7 +686,7 @@ export default function DriverPortal() {
           <div className="flex items-center space-x-6">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-12 h-12 bg-white/5 border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90"
+              className="w-12 h-12 bg-white/5 border-white/10 flex items-center justify-center hover:bg-white/10 transition-all active:scale-90 rounded-2xl"
             >
               <Settings className="w-5 h-5 text-gray-400" />
             </button>
@@ -714,7 +714,7 @@ export default function DriverPortal() {
             </div>
             <button
               onClick={logout}
-              className="flex items-center px-4 py-2 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"
+              className="flex items-center px-4 py-2 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none rounded-2xl"
             >
               <LogOut className="w-4 h-4 mr-2" />
               <span className="text-[10px] font-black uppercase tracking-widest">Logout</span>
