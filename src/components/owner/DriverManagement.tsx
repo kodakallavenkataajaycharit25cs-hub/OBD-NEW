@@ -19,6 +19,15 @@ export default function DriverManagement() {
   const [selectedDriver, setSelectedDriver] = useState('driver-1');
 
   const formatIndianCurrency = (amount: number) => {
+    if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(1).replace(/\.0$/, '')} cr`;
+    }
+    if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(1).replace(/\.0$/, '')} lacs`;
+    }
+    if (amount >= 1000) {
+      return `₹${(amount / 1000).toFixed(1).replace(/\.0$/, '')} K`;
+    }
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',

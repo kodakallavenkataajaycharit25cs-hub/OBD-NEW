@@ -49,17 +49,17 @@ class SciFiSynth {
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    
+
     // Low hum sweep
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(80, now);
     osc.frequency.exponentialRampToValueAtTime(320, now + 1.2);
-    
+
     gain.gain.setValueAtTime(0.15, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-    
+
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -84,20 +84,20 @@ class SciFiSynth {
     this.init();
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    
+
     // Siren Sweep
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    
+
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(600, now);
     osc.frequency.linearRampToValueAtTime(850, now + 0.3);
     osc.frequency.linearRampToValueAtTime(600, now + 0.6);
-    
+
     gain.gain.setValueAtTime(0.2, now);
     gain.gain.linearRampToValueAtTime(0.2, now + 0.5);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-    
+
     osc.connect(gain);
     gain.connect(this.ctx.destination);
     osc.start(now);
@@ -123,15 +123,279 @@ class SciFiSynth {
 
 const synth = new SciFiSynth();
 
+// Real-time Live Monitoring Map stable component
+const TrackingView = () => {
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>('TRIP-429');
+  const [mapMode, setMapMode] = useState<'k' | 'm' | 'p'>('k'); // k=satellite, m=roadmap, p=terrain
+  const [zoomLevel, setZoomLevel] = useState<number>(13);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const vehicles = [
+    { id: 'TRIP-429', label: 'MH-12-PQ-8890', speed: 75, location: 'Pune, Maharashtra, India', coords: '18.5204° N, 73.8567° E', pilot: 'Rohan Sharma', status: 'ACTIVE IN TRANSIT' },
+    { id: 'TRIP-108', label: 'KA-03-MN-4421', speed: 62, location: 'Bangalore, Karnataka, India', coords: '12.9716° N, 77.5946° E', pilot: 'Aditya Hegde', status: 'LOADING BAY' },
+    { id: 'TRIP-749', label: 'DL-01-AB-1092', speed: 80, location: 'New Delhi, Delhi, India', coords: '28.6139° N, 77.2090° E', pilot: 'Vikram Singh', status: 'EXPRESS DELIVERY' }
+  ];
+
+  const activeVehicle = vehicles.find(v => v.id === selectedVehicleId) || vehicles[0];
+  const mapTarget = searchQuery || activeVehicle.location;
+  const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapTarget)}&t=${mapMode}&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500 font-['Space_Grotesk']">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+        {/* Active Real Google Map Workspace */}
+        <div className="lg:col-span-3 bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col relative overflow-hidden min-h-[580px]">
+
+          {/* Control Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 z-20">
+            <div className="flex items-center space-x-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
+              <span className="text-[10px] text-white font-black uppercase tracking-[0.25em]">REAL TIME TELEMETRY MAP</span>
+            </div>
+
+            {/* Dynamic Map HUD Controls */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Real-time Location Search Input */}
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Enter location, grid, city..."
+                className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors w-44"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-[9px] font-bold text-gray-400 hover:text-white transition-colors"
+                >
+                  Reset Lock
+                </button>
+              )}
+
+              {/* Styled Map Type Switcher */}
+              <div className="bg-white/5 p-0.5 border border-white/5 rounded-xl flex">
+                <button
+                  onClick={() => setMapMode('k')}
+                  className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${mapMode === 'k' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'
+                    }`}
+                >
+                  Satellite
+                </button>
+                <button
+                  onClick={() => setMapMode('m')}
+                  className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${mapMode === 'm' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'
+                    }`}
+                >
+                  Street
+                </button>
+                <button
+                  onClick={() => setMapMode('p')}
+                  className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${mapMode === 'p' ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'
+                    }`}
+                >
+                  Terrain
+                </button>
+              </div>
+
+              {/* Digital Zoom Orbit Controller */}
+              <div className="flex items-center space-x-1 bg-white/5 p-0.5 border border-white/5 rounded-xl">
+                <button
+                  onClick={() => setZoomLevel(prev => Math.max(9, prev - 1))}
+                  className="w-6 h-6 flex items-center justify-center text-[10px] font-black text-gray-500 hover:text-white transition-all"
+                >
+                  -
+                </button>
+                <span className="text-[8px] font-black text-blue-400 px-1.5 uppercase">L-Zoom {zoomLevel}</span>
+                <button
+                  onClick={() => setZoomLevel(prev => Math.min(19, prev + 1))}
+                  className="w-6 h-6 flex items-center justify-center text-[10px] font-black text-gray-500 hover:text-white transition-all"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Real Google Maps iframe embed */}
+          <div className="flex-1 min-h-[440px] bg-zinc-950 rounded-2xl border border-white/5 overflow-hidden relative group shadow-2xl">
+            <iframe
+              title="Active Google Map Stream Feed"
+              src={embedUrl}
+              className="w-full h-full border-0 absolute inset-0 transition-opacity duration-300"
+              allowFullScreen={false}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              style={{
+                filter: mapMode === 'm'
+                  ? 'invert(90%) hue-rotate(180deg) brightness(85%) contrast(120%) saturate(80%)'
+                  : mapMode === 'p'
+                    ? 'invert(90%) hue-rotate(170deg) brightness(85%) contrast(110%) saturate(70%)'
+                    : 'brightness(80%) contrast(110%) saturate(90%)'
+              }}
+            />
+
+            {/* SciFi HUD floating Overlay card */}
+            <div className="absolute bottom-4 right-4 bg-black/90 backdrop-blur-md border border-white/5 p-4 rounded-2xl text-[9px] pointer-events-none text-left min-w-[200px] shadow-[0_4px_24px_rgba(0,0,0,0.85)] z-10">
+              <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-1">LOGISTICS BEACON TARGET</div>
+              <div className="text-white font-black text-[12px] mb-0.5 truncate">{mapTarget.split(',')[0].toUpperCase()}</div>
+              <div className="text-blue-400 font-bold text-[8px] mb-2">{activeVehicle.coords}</div>
+
+              <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-2 border-t border-white/5">
+                <div>
+                  <span className="text-gray-600 text-[6px] font-black uppercase tracking-wider block">STREAM STATE</span>
+                  <span className="text-green-400 font-bold">100% ONLINE</span>
+                </div>
+                <div>
+                  <span className="text-gray-600 text-[6px] font-black uppercase tracking-wider block">TRACK MODE</span>
+                  <span className="text-white font-bold">
+                    {mapMode === 'k' ? 'SATELLITE' : mapMode === 'm' ? 'STREET' : 'TERRAIN'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* SciFi overlay neon border decoration */}
+            <div className="absolute inset-0 pointer-events-none border border-blue-500/10 rounded-2xl shadow-[inset_0_0_40px_rgba(59,130,246,0.15)]" />
+          </div>
+        </div>
+
+        {/* Telemetry Status sidebar */}
+        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between">
+          <div>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">PILOT LOG ORBITS</h3>
+
+            <div className="space-y-6">
+              {vehicles.map(veh => {
+                const isSelected = veh.id === selectedVehicleId;
+                return (
+                  <div
+                    key={veh.id}
+                    onClick={() => {
+                      setSelectedVehicleId(veh.id);
+                      setSearchQuery(''); // clear custom search to focus on pilot
+                    }}
+                    className={`p-4 border transition-all cursor-pointer rounded-2xl ${isSelected
+                        ? 'bg-blue-500/10 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
+                        : 'bg-white/5 border-white/5 hover:bg-white/10'
+                      }`}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <span className={`text-xs font-black uppercase tracking-wider ${isSelected ? 'text-blue-400' : 'text-white'}`}>{veh.label}</span>
+                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded-lg border ${isSelected ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-white/5 text-gray-400 border-white/10'
+                        }`}>{veh.id}</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Velocity</span>
+                        <span className="text-[9px] font-bold text-white">{veh.speed} km/h</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Target Grid</span>
+                        <span className="text-[9px] font-bold text-gray-300">{veh.location.split(',')[0]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Pilot Operator</span>
+                        <span className="text-[9px] font-bold text-white">{veh.pilot}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Beacon Signal</span>
+                        <span className={`text-[8px] font-bold ${isSelected ? 'text-blue-400' : 'text-green-400'}`}>
+                          {isSelected ? 'ORBIT FOCUSED' : veh.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-white/5">
+            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+              <h4 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2">SYSTEM SCAN STATS</h4>
+              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider leading-relaxed">
+                Real time Google Satellite feeds locked onto pilots MH-12, KA-03, and DL-01. Live stream secure.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
 export default function SuperAdminPortal() {
   const { user, logout, loginAs } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const formatShorthand = (amount: number) => {
+    if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(1).replace(/\.0$/, '')} cr`;
+    }
+    if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(1).replace(/\.0$/, '')} lacs`;
+    }
+    if (amount >= 1000) {
+      return `₹${(amount / 1000).toFixed(1).replace(/\.0$/, '')} K`;
+    }
+    return `₹${amount.toLocaleString('en-IN')}`;
+  };
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hoveredMissions, setHoveredMissions] = useState<{ x: number; y: number; val: number; time: string } | null>(null);
+  const [hoveredRevenueCycle, setHoveredRevenueCycle] = useState<number | null>(null);
+
+  const handleMissionsMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const clampedX = Math.max(0, Math.min(100, x));
+
+    const vertices = [
+      { x: 0, y: 90, val: 12 },
+      { x: 20, y: 60, val: 38 },
+      { x: 40, y: 75, val: 24 },
+      { x: 60, y: 58, val: 32 },
+      { x: 80, y: 40, val: 56 },
+      { x: 100, y: 20, val: 78 }
+    ];
+
+    let y = 90;
+    let val = 12;
+    for (let i = 0; i < vertices.length - 1; i++) {
+      const p1 = vertices[i];
+      const p2 = vertices[i + 1];
+      if (clampedX >= p1.x && clampedX <= p2.x) {
+        const t = (clampedX - p1.x) / (p2.x - p1.x);
+        y = p1.y + t * (p2.y - p1.y);
+        val = Math.round(p1.val + t * (p2.val - p1.val));
+        break;
+      }
+    }
+
+    const totalMinutes = Math.round((clampedX / 100) * 24 * 60);
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    const timeStr = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+
+    setHoveredMissions({ x: clampedX, y, val, time: timeStr });
+  };
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
   const [isBooted, setIsBooted] = useState(false);
   const [bootText, setBootText] = useState('CONNECTING SYSTEM UPLINK...');
+  const [animateBars, setAnimateBars] = useState(false);
+
+  useEffect(() => {
+    if (isBooted) {
+      const timer = setTimeout(() => setAnimateBars(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      setAnimateBars(false);
+    }
+  }, [isBooted]);
 
   // Mock Database states for administration
   const [owners, setOwners] = useState([
@@ -206,7 +470,7 @@ export default function SuperAdminPortal() {
       const randomHost = randomHosts[Math.floor(Math.random() * randomHosts.length)];
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
       const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
-      
+
       setLogs((prev) => [
         `[${timestamp}] ${randomHost} -> ${randomAction}`,
         ...prev.slice(0, 4)
@@ -234,8 +498,8 @@ export default function SuperAdminPortal() {
 
   const handleOwnerStatus = (id: string) => {
     playClick();
-    setOwners(prev => prev.map(owner => 
-      owner.id === id 
+    setOwners(prev => prev.map(owner =>
+      owner.id === id
         ? { ...owner, status: owner.status === 'active' ? 'suspended' : 'active' }
         : owner
     ));
@@ -243,8 +507,8 @@ export default function SuperAdminPortal() {
 
   const handlePilotStatus = (id: string) => {
     playClick();
-    setPilots(prev => prev.map(pilot => 
-      pilot.id === id 
+    setPilots(prev => prev.map(pilot =>
+      pilot.id === id
         ? { ...pilot, status: pilot.status === 'active' ? 'suspended' : 'active' }
         : pilot
     ));
@@ -252,8 +516,8 @@ export default function SuperAdminPortal() {
 
   const handleDeviceFirmware = (id: string) => {
     playClick();
-    setDevices(prev => prev.map(dev => 
-      dev.id === id 
+    setDevices(prev => prev.map(dev =>
+      dev.id === id
         ? { ...dev, firmware: 'v4.2.1-stable', health: 100 }
         : dev
     ));
@@ -282,35 +546,35 @@ export default function SuperAdminPortal() {
 
   const navigation = [
     { name: 'Dashboard', href: '/super-admin-dashboard', icon: Activity },
+    { name: 'System Stats', href: '/super-admin-dashboard/stats', icon: ShieldCheck },
     { name: 'Fleet Owners', href: '/super-admin-dashboard/owners', icon: Users },
     { name: 'Pilot Accounts', href: '/super-admin-dashboard/pilots', icon: Car },
     { name: 'Device Management', href: '/super-admin-dashboard/devices', icon: Cpu },
     { name: 'Live Tracking', href: '/super-admin-dashboard/tracking', icon: MapPin },
     { name: 'Analytics', href: '/super-admin-dashboard/analytics', icon: BarChart2 },
     { name: 'Emergency Alerts', href: '/super-admin-dashboard/alerts', icon: AlertTriangle },
-    { name: 'System Logs', href: '/super-admin-dashboard/logs', icon: Terminal },
   ];
 
   if (!isBooted) {
     return (
       <div className="fixed inset-0 bg-[#120F17] flex flex-col items-center justify-center font-['Space_Grotesk',sans-serif] z-[9999] overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.02]" 
-             style={{ 
-               backgroundImage: `linear-gradient(to right, #2563EB 1px, transparent 1px), linear-gradient(to bottom, #2563EB 1px, transparent 1px)`,
-               backgroundSize: '30px 30px' 
-             }} />
-        
+        <div className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `linear-gradient(to right, #2563EB 1px, transparent 1px), linear-gradient(to bottom, #2563EB 1px, transparent 1px)`,
+            backgroundSize: '30px 30px'
+          }} />
+
         <div className="text-center relative max-w-lg w-full px-8">
           <div className="w-24 h-24 rounded-3xl bg-blue-600/10 border-2 border-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.4)] flex items-center justify-center mx-auto mb-8 animate-pulse">
             <ShieldAlert className="w-12 h-12 text-blue-400" />
           </div>
-          
+
           <h2 className="text-2xl font-extrabold text-white tracking-widest uppercase mb-2 font-['Syne']">SUKRUTHA MOBILITY</h2>
           <p className="text-blue-500 text-[10px] font-bold uppercase tracking-[0.4em] mb-12">CONTROL CORE UPLINK</p>
 
           <div className="relative w-full h-2 bg-white/5 border border-white/10 rounded-full overflow-hidden mb-6">
-            <div 
-              className="absolute left-0 top-0 bottom-0 bg-blue-500 shadow-[0_0_15px_#2563EB] transition-all duration-100 ease-out" 
+            <div
+              className="absolute left-0 top-0 bottom-0 bg-blue-500 shadow-[0_0_15px_#2563EB] transition-all duration-100 ease-out"
               style={{ width: `${bootProgress}%` }}
             />
           </div>
@@ -326,47 +590,100 @@ export default function SuperAdminPortal() {
   // Dashboard Overview View
   const DashboardView = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
-      
-      {/* 10 Stats Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {[
-          { label: 'Total Devices', value: '4,520', desc: 'Installed units', icon: Cpu, color: 'blue' },
-          { label: 'Active Devices', value: '4,289', desc: 'Online now', icon: ShieldCheck, color: 'green' },
-          { label: 'Offline Devices', value: '184', desc: 'Loss of sync', icon: XCircle, color: 'red' },
-          { label: 'Maintenance', value: '47', desc: 'Repairs/Updates', icon: RefreshCw, color: 'orange' },
-          { label: 'Fleet Owners', value: owners.length, desc: 'Registered corps', icon: Users, color: 'blue' },
-          { label: 'Total Pilots', value: pilots.length, desc: 'Unit roster', icon: Car, color: 'purple' },
-          { label: 'Active Trips', value: '342', desc: 'Realtime vectors', icon: MapPin, color: 'green' },
-          { label: 'Emergency Alerts', value: alerts.length, desc: 'Unresolved SOS', icon: AlertTriangle, color: 'red' },
-          { label: 'Daily Revenue', value: '₹5,82,400', desc: 'Cleared today', icon: TrendingUp, color: 'green' },
-          { label: 'System Health', value: '98.4%', desc: 'Nominal condition', icon: Activity, color: 'blue' }
-        ].map((stat, i) => (
-          <BorderGlow
-            key={i}
-            borderRadius={28}
-            glowColor={stat.color === 'red' ? '239 68 68' : stat.color === 'green' ? '34 197 94' : stat.color === 'orange' ? '245 158 11' : '59 130 246'}
-            glowRadius={30}
-            glowIntensity={0.8}
-            backgroundColor="#120F17"
-            className="p-6 border-white/5 hover:translate-y-[-4px] transition-all duration-300 relative overflow-hidden group shadow-xl"
-          >
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
-            
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{stat.label}</span>
-              <div className={`p-2 rounded-xl bg-white/5 border border-white/10 group-hover:border-blue-500/30 transition-colors`}>
-                <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
-              </div>
-            </div>
 
-            <div className="text-2xl font-black text-white tracking-tighter mb-1 font-['Syne']">{stat.value}</div>
-            <p className="text-[9px] text-gray-500 uppercase tracking-wide font-bold">{stat.desc}</p>
-          </BorderGlow>
-        ))}
-      </div>
+      {/* Top 5 Clients Bar Graph */}
+      <BorderGlow
+        borderRadius={28}
+        glowColor="59 130 246"
+        glowRadius={40}
+        glowIntensity={0.8}
+        backgroundColor="#120F17"
+        className="p-6 border border-white/5 backdrop-blur-xl rounded-3xl relative shadow-xl overflow-hidden group"
+      >
+        <div className="absolute top-0 left-0 w-32 h-[2px] bg-blue-500" />
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center font-['Syne']">
+            <TrendingUp className="w-4 h-4 text-blue-500 mr-2" /> Client Yield Radar: Top 5 Performing Organizations
+          </h3>
+          <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+            Units of Yield: INR (₹)
+          </span>
+        </div>
+
+        {/* Bar Chart Grid */}
+        <div className="relative pt-6 px-4 h-72 flex flex-col justify-end">
+          {/* Background Grid Lines */}
+          <div className="absolute inset-x-0 bottom-[12%] top-6 flex flex-col justify-between pointer-events-none opacity-40">
+            <div className="w-full border-t border-dashed border-white/10 relative">
+              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹20L</span>
+            </div>
+            <div className="w-full border-t border-dashed border-white/10 relative">
+              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹15L</span>
+            </div>
+            <div className="w-full border-t border-dashed border-white/10 relative">
+              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹10L</span>
+            </div>
+            <div className="w-full border-t border-dashed border-white/10 relative">
+              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹5L</span>
+            </div>
+            <div className="w-full border-b border-white/20 relative" />
+          </div>
+
+          {/* Columns of Bars */}
+          <div className="flex items-end justify-around relative z-10 h-[88%] w-full">
+            {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
+              const percentHeight = (client.revenue / 2000000) * 100;
+              const colors = index === 0
+                ? 'from-yellow-500 via-amber-500 to-orange-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                : index === 1
+                  ? 'from-blue-600 via-indigo-500 to-indigo-400 shadow-[0_0_15px_rgba(37,99,235,0.4)]'
+                  : index === 2
+                    ? 'from-cyan-500 via-teal-500 to-emerald-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
+                    : index === 3
+                      ? 'from-purple-600 via-purple-500 to-pink-500 shadow-[0_0_15px_rgba(147,51,234,0.4)]'
+                      : 'from-gray-500 via-slate-600 to-slate-500 shadow-[0_0_15px_rgba(100,116,139,0.3)]';
+
+              const initials = client.name.split(' ').map(n => n[0]).join('').slice(0, 3);
+
+              return (
+                <div key={client.id} className="flex flex-col items-center w-full max-w-[15%] group relative">
+
+
+                  {/* Bar Cylinder */}
+                  <div className="relative w-full h-44 flex items-end">
+                    {/* Bar Glow Base */}
+                    <div
+                      className={`w-full bg-gradient-to-t ${colors} rounded-t-2xl transition-all duration-700 ease-out`}
+                      style={{ height: animateBars ? `${percentHeight}%` : '0%' }}
+                    >
+                      {/* Shimmer reflection effect */}
+                      <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 opacity-50" />
+
+                      {/* Floating numeric label inside/above the bar */}
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-white font-['Space_Grotesk'] bg-black/80 px-2 py-0.5 rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        ₹{(client.revenue / 100000).toFixed(1)}L
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Label Area */}
+                  <div className="mt-3 text-center">
+                    <span className="text-[10px] font-black text-white font-['Space_Grotesk'] tracking-wider uppercase block group-hover:text-blue-400 transition-colors">
+                      {initials}
+                    </span>
+                    <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mt-0.5 block">
+                      Rank {index + 1}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </BorderGlow>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Top 5 Performing Clients Board */}
         <div className="lg:col-span-2 bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl relative shadow-xl">
           <div className="absolute top-0 left-0 w-32 h-[2px] bg-blue-500" />
@@ -375,12 +692,12 @@ export default function SuperAdminPortal() {
           </h3>
 
           <div className="space-y-4">
-            {owners.slice(0, 5).sort((a,b) => b.revenue - a.revenue).map((client, index) => {
+            {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
               const rankColor = index === 0 ? 'text-yellow-400 font-black' : index === 1 ? 'text-gray-300 font-bold' : index === 2 ? 'text-amber-600 font-bold' : 'text-gray-500';
               return (
                 <div key={client.id} className="p-4 bg-white/5 border border-white/5 hover:border-blue-500/20 transition-all rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                   <div className="flex items-center space-x-4">
-                    <span className={`text-lg ${rankColor} w-6 text-center font-['Syne']`}>0{index+1}</span>
+                    <span className={`text-lg ${rankColor} w-6 text-center font-['Space_Grotesk']`}>0{index + 1}</span>
                     <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">{client.name}</h4>
                       <p className="text-[8px] text-gray-500 uppercase tracking-widest font-bold mt-0.5">Fleet: {client.fleetSize} Units</p>
@@ -390,7 +707,7 @@ export default function SuperAdminPortal() {
                   <div className="flex items-center justify-between md:justify-end gap-8">
                     <div className="text-right">
                       <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest block">Yield</span>
-                      <span className="text-xs font-bold text-green-400 font-['Space_Grotesk']">₹{client.revenue.toLocaleString()}</span>
+                      <span className="text-xs font-bold text-green-400 font-['Space_Grotesk']">{formatShorthand(client.revenue)}</span>
                     </div>
 
                     <div>
@@ -440,8 +757,8 @@ export default function SuperAdminPortal() {
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">{alt.type}</h4>
                       <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mt-1">{alt.vehicle}</p>
                       <p className="text-[9px] text-gray-500 font-bold mt-1 leading-relaxed">{alt.description}</p>
-                      
-                      <button 
+
+                      <button
                         onClick={() => handleDismissAlert(alt.id)}
                         className="mt-3 px-3 py-1 bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all text-[8px] font-black uppercase tracking-widest text-red-400 rounded-lg"
                       >
@@ -458,12 +775,56 @@ export default function SuperAdminPortal() {
     </div>
   );
 
+  // System Stats Overview View
+  const StatsView = () => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+
+      {/* 10 Stats Cards Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {[
+          { label: 'Total Devices', value: '4,520', desc: 'Installed units', icon: Cpu, color: 'blue' },
+          { label: 'Active Devices', value: '4,289', desc: 'Online now', icon: ShieldCheck, color: 'green' },
+          { label: 'Offline Devices', value: '184', desc: 'Loss of sync', icon: XCircle, color: 'red' },
+          { label: 'Maintenance', value: '47', desc: 'Repairs/Updates', icon: RefreshCw, color: 'orange' },
+          { label: 'Fleet Owners', value: owners.length, desc: 'Registered corps', icon: Users, color: 'blue' },
+          { label: 'Total Pilots', value: pilots.length, desc: 'Unit roster', icon: Car, color: 'purple' },
+          { label: 'Active Trips', value: '342', desc: 'Realtime vectors', icon: MapPin, color: 'green' },
+          { label: 'Emergency Alerts', value: alerts.length, desc: 'Unresolved SOS', icon: AlertTriangle, color: 'red' },
+          { label: 'Daily Revenue', value: formatShorthand(582000), desc: 'Cleared today', icon: TrendingUp, color: 'green' },
+          { label: 'System Health', value: '98.4%', desc: 'Nominal condition', icon: Activity, color: 'blue' }
+        ].map((stat, i) => (
+          <BorderGlow
+            key={i}
+            borderRadius={28}
+            glowColor={stat.color === 'red' ? '239 68 68' : stat.color === 'green' ? '34 197 94' : stat.color === 'orange' ? '245 158 11' : '59 130 246'}
+            glowRadius={30}
+            glowIntensity={0.8}
+            backgroundColor="#120F17"
+            className="p-6 border-white/5 hover:translate-y-[-4px] transition-all duration-300 relative overflow-hidden group shadow-xl"
+          >
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
+
+            <div className="flex justify-between items-start mb-4">
+              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{stat.label}</span>
+              <div className={`p-2 rounded-xl bg-white/5 border border-white/10 group-hover:border-blue-500/30 transition-colors`}>
+                <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
+              </div>
+            </div>
+
+            <div className="text-3xl font-black text-white tracking-tight mb-1 font-['Space_Grotesk']">{stat.value}</div>
+            <p className="text-[9px] text-gray-500 uppercase tracking-wide font-bold">{stat.desc}</p>
+          </BorderGlow>
+        ))}
+      </div>
+    </div>
+  );
+
   // Fleet Owner Management
   const OwnersView = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
         <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Fleet Owners Database</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {owners.map(owner => (
             <BorderGlow
@@ -480,9 +841,8 @@ export default function SuperAdminPortal() {
                   <h4 className="text-sm font-black text-white uppercase tracking-wider">{owner.name}</h4>
                   <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mt-1">{owner.email}</p>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
-                  owner.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}>
+                <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${owner.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                  }`}>
                   {owner.status}
                 </span>
               </div>
@@ -494,7 +854,7 @@ export default function SuperAdminPortal() {
                 </div>
                 <div className="p-3 bg-white/5 border border-white/5 rounded-2xl text-center">
                   <span className="text-[8px] text-gray-500 uppercase tracking-widest font-bold">Monthly Yield</span>
-                  <div className="text-lg font-black text-green-400 mt-1 font-['Space_Grotesk']">₹{owner.revenue.toLocaleString()}</div>
+                  <div className="text-lg font-black text-green-400 mt-1 font-['Space_Grotesk']">{formatShorthand(owner.revenue)}</div>
                 </div>
               </div>
 
@@ -503,7 +863,7 @@ export default function SuperAdminPortal() {
                   <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Index:</span>
                   <span className="text-xs font-black text-blue-400">{owner.score}/10</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleImpersonateUser({
@@ -518,11 +878,10 @@ export default function SuperAdminPortal() {
                   </button>
                   <button
                     onClick={() => handleOwnerStatus(owner.id)}
-                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                      owner.status === 'active' 
-                        ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20' 
-                        : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
-                    }`}
+                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${owner.status === 'active'
+                      ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                      : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
+                      }`}
                   >
                     {owner.status === 'active' ? 'Suspend' : 'Activate'}
                   </button>
@@ -540,7 +899,7 @@ export default function SuperAdminPortal() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
         <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Unit Pilots Directory</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pilots.map(pilot => (
             <BorderGlow
@@ -561,9 +920,8 @@ export default function SuperAdminPortal() {
                     <span className="text-[9px] text-blue-400 font-bold uppercase tracking-widest">{pilot.availability}</span>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
-                  pilot.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}>
+                <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${pilot.status === 'active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                  }`}>
                   {pilot.status}
                 </span>
               </div>
@@ -588,7 +946,7 @@ export default function SuperAdminPortal() {
                   <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Safety Vector:</span>
                   <span className={`text-xs font-black ${pilot.safetyScore >= 8.5 ? 'text-green-400' : pilot.safetyScore >= 7.0 ? 'text-yellow-500' : 'text-red-500'}`}>{pilot.safetyScore}/10</span>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => {
@@ -610,11 +968,10 @@ export default function SuperAdminPortal() {
                   </button>
                   <button
                     onClick={() => handlePilotStatus(pilot.id)}
-                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                      pilot.status === 'active' 
-                        ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20' 
-                        : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
-                    }`}
+                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${pilot.status === 'active'
+                      ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                      : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
+                      }`}
                   >
                     {pilot.status === 'active' ? 'Suspend' : 'Activate'}
                   </button>
@@ -632,8 +989,8 @@ export default function SuperAdminPortal() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDevice, setSelectedDevice] = useState<any | null>(null);
 
-    const filteredDevices = devices.filter(dev => 
-      dev.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const filteredDevices = devices.filter(dev =>
+      dev.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dev.owner.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -644,9 +1001,9 @@ export default function SuperAdminPortal() {
             <h3 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">Telemetry Node Network</h3>
             <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4 py-2 w-full md:w-80">
               <Search className="w-4 h-4 text-gray-500" />
-              <input 
-                type="text" 
-                placeholder="Search Device / Owner..." 
+              <input
+                type="text"
+                placeholder="Search Device / Owner..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="bg-transparent border-none focus:outline-none text-xs font-bold text-white placeholder-gray-500 w-full ml-2 uppercase tracking-widest"
@@ -686,9 +1043,8 @@ export default function SuperAdminPortal() {
                       </div>
                     </td>
                     <td className="py-4">
-                      <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
-                        dev.gps === 'Connected' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                      }`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${dev.gps === 'Connected' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                        }`}>
                         {dev.gps}
                       </span>
                     </td>
@@ -731,7 +1087,7 @@ export default function SuperAdminPortal() {
           <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="relative w-full max-w-lg bg-[#120F17]/90 border border-blue-500/30 shadow-[0_0_50px_rgba(37,99,235,0.2)] rounded-3xl overflow-hidden p-6">
               <div className="absolute top-0 left-0 w-full h-1 bg-blue-500" />
-              
+
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <h4 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">SYNC HISTORY: {selectedDevice.id}</h4>
@@ -768,179 +1124,73 @@ export default function SuperAdminPortal() {
     );
   };
 
-  // Real-time Live Monitoring Map simulation
-  const TrackingView = () => {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const [vehicles, setVehicles] = useState([
-      { id: 'TRIP-429', lat: 150, lng: 120, targetLat: 280, targetLng: 320, speed: 75, color: '#3B82F6', label: 'MH-12-PQ-8890' },
-      { id: 'TRIP-108', lat: 300, lng: 80, targetLat: 100, targetLng: 400, speed: 62, color: '#22C55E', label: 'KA-03-MN-4421' },
-      { id: 'TRIP-749', lat: 50, lng: 300, targetLat: 350, targetLng: 220, speed: 80, color: '#EF4444', label: 'DL-01-AB-1092' }
-    ]);
 
-    useEffect(() => {
-      let animationFrameId: number;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      const drawMap = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.05)';
-        ctx.lineWidth = 1;
-        const gridSize = 40;
-        for (let x = 0; x < canvas.width; x += gridSize) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-        }
-        for (let y = 0; y < canvas.height; y += gridSize) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(canvas.width, y);
-          ctx.stroke();
-        }
-
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.1)';
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 180, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.03)';
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 300, 0, Math.PI * 2);
-        ctx.stroke();
-
-        vehicles.forEach(veh => {
-          const dx = veh.targetLat - veh.lat;
-          const dy = veh.targetLng - veh.lng;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          if (dist > 2) {
-            veh.lat += (dx / dist) * 0.4;
-            veh.lng += (dy / dist) * 0.4;
-          } else {
-            const tempX = veh.targetLat;
-            const tempY = veh.targetLng;
-            veh.targetLat = Math.random() * (canvas.width - 100) + 50;
-            veh.targetLng = Math.random() * (canvas.height - 100) + 50;
-          }
-
-          ctx.fillStyle = veh.color + '20';
-          ctx.beginPath();
-          ctx.arc(veh.lat, veh.lng, 12 + Math.sin(Date.now() / 150) * 4, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = veh.color;
-          ctx.beginPath();
-          ctx.arc(veh.lat, veh.lng, 5, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 8px Space Grotesk';
-          ctx.fillText(veh.label, veh.lat + 10, veh.lng + 3);
-
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-          ctx.font = '7px Space Grotesk';
-          ctx.fillText(`${veh.speed} km/h`, veh.lat + 10, veh.lng + 12);
-        });
-
-        animationFrameId = requestAnimationFrame(drawMap);
-      };
-
-      drawMap();
-      return () => cancelAnimationFrame(animationFrameId);
-    }, [vehicles]);
-
-    return (
-      <div className="space-y-8 animate-in fade-in duration-500">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
-          {/* Active Live Vector Map Screen */}
-          <div className="lg:col-span-3 bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
-            <div className="absolute top-4 left-6 flex items-center space-x-2 z-20">
-              <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping" />
-              <span className="text-[10px] text-white font-black uppercase tracking-[0.2em]">LIVE RADAR FEED</span>
-            </div>
-
-            <canvas 
-              ref={canvasRef} 
-              width={800} 
-              height={500} 
-              className="w-full bg-zinc-950 rounded-2xl border border-white/5 shadow-inner relative max-w-full"
-            />
-          </div>
-
-          {/* Telemetry Status sidebar */}
-          <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between">
-            <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">UPLINK TELEMETRY</h3>
-              
-              <div className="space-y-6">
-                {vehicles.map(veh => (
-                  <div key={veh.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-xs font-black text-white uppercase tracking-wider">{veh.label}</span>
-                      <span className="text-[8px] font-bold px-2 py-0.5 bg-white/5 text-blue-400 border border-blue-500/20 rounded-lg">{veh.id}</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-[8px] text-gray-500 uppercase tracking-widest font-black block">Velocity</span>
-                        <span className="text-xs font-bold text-white">{veh.speed} km/h</span>
-                      </div>
-                      <div>
-                        <span className="text-[8px] text-gray-500 uppercase tracking-widest font-black block">Vector</span>
-                        <span className="text-xs font-bold text-white">NNE 24°</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-white/5">
-              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
-                <h4 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2">SYSTEM SCAN STATS</h4>
-                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider leading-relaxed">
-                  3 active missions tracked over grid sector 4-B. High throughput verified.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // Premium Custom Neon SVG Analytics Section
   const AnalyticsView = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
+
         {/* Core Fleet Activity Area Graph */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Missions Stream (Daily)</h3>
-          
-          <div className="h-64 flex items-end justify-between relative pt-6 px-4">
-            <div className="absolute inset-x-0 top-1/4 h-[1px] bg-white/5" />
-            <div className="absolute inset-x-0 top-2/4 h-[1px] bg-white/5" />
-            <div className="absolute inset-x-0 top-3/4 h-[1px] bg-white/5" />
 
-            <svg className="absolute inset-0 w-full h-full p-6" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <div
+            onMouseMove={handleMissionsMouseMove}
+            onMouseLeave={() => setHoveredMissions(null)}
+            className="h-64 flex items-end justify-between relative pt-6 px-4 cursor-crosshair select-none"
+          >
+            <div className="absolute inset-x-0 top-1/4 h-[1px] bg-white/5 pointer-events-none" />
+            <div className="absolute inset-x-0 top-2/4 h-[1px] bg-white/5 pointer-events-none" />
+            <div className="absolute inset-x-0 top-3/4 h-[1px] bg-white/5 pointer-events-none" />
+
+            <svg className="absolute inset-0 w-full h-full p-6 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#2563EB" stopOpacity="0.4" />
                   <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
-              <path d="M 0 90 Q 20 50 40 70 T 80 30 T 100 10 L 100 100 L 0 100 Z" fill="url(#areaGrad)" />
-              <path d="M 0 90 Q 20 50 40 70 T 80 30 T 100 10" fill="none" stroke="#3B82F6" strokeWidth="2.5" />
+              <path d="M 0 90 Q 20 60 40 75 T 80 40 T 100 20 L 100 100 L 0 100 Z" fill="url(#areaGrad)" />
+              <path d="M 0 90 Q 20 60 40 75 T 80 40 T 100 20" fill="none" stroke="#3B82F6" strokeWidth="2.5" />
+
+              {/* Pulsing indicator on the SVG line */}
+              {hoveredMissions && (
+                <g>
+                  <circle cx={hoveredMissions.x} cy={hoveredMissions.y} r="2" fill="#60A5FA" />
+                  <circle cx={hoveredMissions.x} cy={hoveredMissions.y} r="2" fill="none" stroke="#3B82F6" strokeWidth="0.8" opacity="0.8">
+                    <animate attributeName="r" values="2;5.5" dur="1.2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="0.8;0" dur="1.2s" repeatCount="indefinite" />
+                  </circle>
+                </g>
+              )}
             </svg>
 
-            <div className="absolute bottom-1 inset-x-0 flex justify-between px-6 text-[8px] text-gray-500 font-bold font-['Space_Grotesk']">
+            {/* Interactive Tracker Line & Futuristic Tooltip */}
+            {hoveredMissions && (
+              <>
+                <div
+                  className="absolute top-0 bottom-6 w-[1px] bg-blue-500/20 border-l border-dashed border-blue-400/40 pointer-events-none"
+                  style={{ left: `${hoveredMissions.x}%` }}
+                />
+                <div
+                  className="absolute z-30 bg-black/95 backdrop-blur-md border border-blue-500/30 p-2.5 rounded-2xl text-[10px] pointer-events-none text-left min-w-[125px] transition-all duration-75 shadow-[0_0_15px_rgba(59,130,246,0.25)]"
+                  style={{
+                    left: `${Math.min(72, Math.max(8, hoveredMissions.x - 15))}%`,
+                    top: `${Math.min(65, Math.max(10, hoveredMissions.y - 30))}%`
+                  }}
+                >
+                  <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-0.5">UPLINK TIME</div>
+                  <div className="text-white font-bold text-sm mb-1">{hoveredMissions.time}</div>
+                  <div className="flex items-center space-x-1.5 text-blue-400 font-black">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    <span>{hoveredMissions.val} ACTIVE NODES</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            <div className="absolute bottom-1 inset-x-0 flex justify-between px-6 text-[8px] text-gray-500 font-bold font-['Space_Grotesk'] pointer-events-none">
               <span>00:00</span>
               <span>06:00</span>
               <span>12:00</span>
@@ -953,17 +1203,43 @@ export default function SuperAdminPortal() {
         {/* System Load Analytics Bar Chart */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Active Node Revenue Cycles</h3>
-          
+
           <div className="h-64 flex items-end justify-around relative pt-6 px-4">
-            {[72, 85, 90, 64, 98, 80, 88].map((val, i) => (
-              <div key={i} className="flex flex-col items-center w-full max-w-[28px] group">
+            {[
+              { day: 'Mon-1', val: 72, revenue: 145000, change: '+12.4%' },
+              { day: 'Mon-2', val: 85, revenue: 168000, change: '+15.8%' },
+              { day: 'Mon-3', val: 90, revenue: 182000, change: '+18.2%' },
+              { day: 'Mon-4', val: 64, revenue: 124000, change: '+8.5%' },
+              { day: 'Mon-5', val: 98, revenue: 198000, change: '+24.1%' },
+              { day: 'Mon-6', val: 80, revenue: 156000, change: '+14.7%' },
+              { day: 'Mon-7', val: 88, revenue: 178000, change: '+19.5%' }
+            ].map((cycle, i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center w-full max-w-[28px] group cursor-pointer relative"
+                onMouseEnter={() => setHoveredRevenueCycle(i)}
+                onMouseLeave={() => setHoveredRevenueCycle(null)}
+              >
+                {/* Floating Glassmorphic Tooltip */}
+                {hoveredRevenueCycle === i && (
+                  <div className="absolute bottom-48 z-30 bg-black/95 backdrop-blur-md border border-cyan-500/40 p-2.5 rounded-2xl text-[10px] w-32 shadow-[0_0_20px_rgba(34,211,238,0.25)] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-0.5">{cycle.day} YIELD</div>
+                    <div className="text-cyan-400 font-black text-sm">{formatShorthand(cycle.revenue)}</div>
+                    <div className="text-green-400 font-bold text-[8px] mt-0.5">{cycle.change} vs prev</div>
+                  </div>
+                )}
+
                 <div className="relative w-full h-44 bg-white/5 rounded-t-lg overflow-hidden flex items-end">
-                  <div 
-                    className="w-full bg-gradient-to-t from-blue-600 to-cyan-400 group-hover:shadow-[0_0_15px_rgba(37,99,235,0.6)] group-hover:from-blue-500 group-hover:to-cyan-300 transition-all duration-500 rounded-t-lg" 
-                    style={{ height: `${val}%` }}
+                  <div
+                    className={`w-full bg-gradient-to-t from-blue-600 to-cyan-400 group-hover:shadow-[0_0_15px_rgba(37,99,235,0.6)] group-hover:from-blue-500 group-hover:to-cyan-300 transition-all duration-300 rounded-t-lg ${hoveredRevenueCycle === i ? 'scale-x-110 brightness-110 shadow-[0_0_20px_rgba(6,182,212,0.8)]' : ''
+                      }`}
+                    style={{ height: `${cycle.val}%` }}
                   />
                 </div>
-                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-3">Mon-{i+1}</span>
+                <span className={`text-[8px] font-bold uppercase tracking-widest mt-3 transition-colors ${hoveredRevenueCycle === i ? 'text-cyan-400' : 'text-gray-500'
+                  }`}>
+                  {cycle.day}
+                </span>
               </div>
             ))}
           </div>
@@ -981,14 +1257,13 @@ export default function SuperAdminPortal() {
             <h3 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">CRITICAL SOS MANAGEMENT</h3>
             <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mt-1">Real-time Emergency Events & Intercept Status</p>
           </div>
-          
-          <button 
+
+          <button
             onClick={toggleSound}
-            className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${
-              soundEnabled 
-                ? 'bg-blue-600/10 border-blue-500/20 text-blue-400' 
-                : 'bg-white/5 border-white/10 text-gray-500 hover:text-white'
-            }`}
+            className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${soundEnabled
+              ? 'bg-blue-600/10 border-blue-500/20 text-blue-400'
+              : 'bg-white/5 border-white/10 text-gray-500 hover:text-white'
+              }`}
           >
             {soundEnabled ? <Volume2 className="w-4 h-4 mr-1.5" /> : <VolumeX className="w-4 h-4 mr-1.5" />}
             <span>{soundEnabled ? 'Synthesizer Active' : 'Muted'}</span>
@@ -997,8 +1272,8 @@ export default function SuperAdminPortal() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {alerts.map(alt => (
-            <div 
-              key={alt.id} 
+            <div
+              key={alt.id}
               className="p-6 bg-red-950/15 border border-red-500/30 shadow-[0_0_30px_rgba(239,68,68,0.05)] rounded-3xl relative overflow-hidden flex flex-col justify-between"
             >
               <div className="absolute top-0 left-0 w-full h-[2px] bg-red-500 shadow-[0_0_10px_#EF4444]" />
@@ -1029,88 +1304,14 @@ export default function SuperAdminPortal() {
     </div>
   );
 
-  // System Logs & AI Monitoring Panel
-  const LogsView = () => (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Terminal logs */}
-        <div className="lg:col-span-2 bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col min-h-[400px]">
-          <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-            <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center font-['Syne']">
-              <Terminal className="w-4 h-4 text-blue-500 mr-2" /> Live System Logs
-            </h3>
-            <span className="text-[8px] text-gray-500 uppercase tracking-widest font-black">STREAM ACTIVE</span>
-          </div>
 
-          <div className="flex-1 bg-black/40 border border-white/5 rounded-2xl p-4 font-mono text-xs text-blue-400 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
-            {logs.map((log, index) => (
-              <div key={index} className="flex items-start">
-                <span className="text-blue-600 mr-3 select-none">&gt;</span>
-                <span className="tracking-wide">{log}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Security Gauge & AI assistant info */}
-        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">INTEGRITY ANALYSIS</h3>
-            
-            <div className="relative w-40 h-40 mx-auto flex items-center justify-center mb-6">
-              <svg className="absolute inset-0 w-full h-full transform -rotate-90">
-                <circle cx="80" cy="80" r="60" stroke="rgba(255,255,255,0.05)" strokeWidth="6" fill="none" />
-                <circle 
-                  cx="80" 
-                  cy="80" 
-                  r="60" 
-                  stroke="#2563EB" 
-                  strokeWidth="8" 
-                  strokeDasharray="376" 
-                  strokeDashoffset="37" 
-                  strokeLinecap="round" 
-                  fill="none" 
-                  className="shadow-[0_0_15px_#2563EB]"
-                />
-              </svg>
-              <div className="text-center z-10">
-                <span className="text-3xl font-black text-white font-['Syne']">90%</span>
-                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest block mt-1">Grid Shield</span>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-white/5 text-xs">
-                <span className="text-gray-500 font-bold uppercase tracking-widest text-[8px]">Encryption</span>
-                <span className="text-green-400 font-bold">AES-256</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/5 text-xs">
-                <span className="text-gray-500 font-bold uppercase tracking-widest text-[8px]">Auth Roster</span>
-                <span className="text-blue-400 font-bold">Secure Access 4</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-white/5">
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start space-x-3">
-              <ShieldCheck className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider leading-relaxed">
-                Zero security leaks detected inside system parameters today. Grid is highly nominal.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-[#120F17] text-gray-200 flex font-['Space_Grotesk',sans-serif] overflow-hidden selection:bg-blue-500/30 relative">
-      
+
       {/* Laser HUD Scanlines overlay */}
       <div className="fixed inset-0 pointer-events-none z-[999] opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%]" />
-      
+
       {/* Soft Background Depth */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" />
@@ -1120,7 +1321,7 @@ export default function SuperAdminPortal() {
       {/* Cybernetic Sidebar */}
       <div className={`${sidebarOpen ? 'w-72' : 'w-20'} transition-all duration-500 p-4 flex flex-col z-20 relative`}>
         <div className="h-full flex flex-col bg-[#120F17]/80 backdrop-blur-xl border border-white/5 shadow-2xl overflow-hidden rounded-2xl relative">
-          
+
           <div className={`mb-8 flex ${sidebarOpen ? 'p-6' : 'p-4 justify-center'} items-center`}>
             {sidebarOpen ? (
               <div className="flex flex-col">
@@ -1141,17 +1342,16 @@ export default function SuperAdminPortal() {
           <nav className={`flex-1 ${sidebarOpen ? 'px-4' : 'px-2'} space-y-2 overflow-y-auto custom-scrollbar`}>
             {navigation.map((item) => {
               const isActive = location.pathname === item.href || (location.pathname === '/super-admin-dashboard' && item.href === '/super-admin-dashboard');
-              
+
               return (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={playClick}
-                  className={`group flex items-center ${sidebarOpen ? 'px-4 justify-start' : 'justify-center'} py-3 rounded-2xl transition-all duration-300 relative overflow-hidden ${
-                    isActive 
-                      ? 'bg-blue-600 border border-transparent text-white shadow-lg shadow-blue-900/30' 
-                      : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
+                  className={`group flex items-center ${sidebarOpen ? 'px-4 justify-start' : 'justify-center'} py-3 rounded-2xl transition-all duration-300 relative overflow-hidden ${isActive
+                    ? 'bg-blue-600 border border-transparent text-white shadow-lg shadow-blue-900/30'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                    }`}
                 >
                   <div className={`p-2 rounded-xl transition-all ${isActive ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5 group-hover:scale-110'}`}>
                     <item.icon className="w-4 h-4" />
@@ -1170,7 +1370,7 @@ export default function SuperAdminPortal() {
 
       {/* Dynamic Content Panel */}
       <div className="flex-1 flex flex-col min-w-0 bg-transparent relative z-10">
-        
+
         {/* Top Header */}
         <header className="h-20 px-8 flex items-center justify-between border-b border-white/5 bg-[#120F17]/50 backdrop-blur-md">
           <div className="flex items-center space-x-6">
@@ -1198,17 +1398,18 @@ export default function SuperAdminPortal() {
 
         {/* Dynamic Inner Router view Rendering */}
         <main className="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
-          
+
           <div className="flex justify-between items-end mb-8 border-b border-white/5 pb-4">
             <div>
               <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-1 font-['Syne']" style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
-                {location.pathname === '/super-admin-dashboard' ? 'Command Center Dashboard' : 
-                 location.pathname.includes('owners') ? 'Fleet Owner Accounts' : 
-                 location.pathname.includes('pilots') ? 'Pilot Network Node Access' : 
-                 location.pathname.includes('devices') ? 'Device Monitoring Panel' : 
-                 location.pathname.includes('tracking') ? 'Real-time Live Monitoring radar' : 
-                 location.pathname.includes('analytics') ? 'Real-time Analytics grid' : 
-                 location.pathname.includes('alerts') ? 'Emergency Alert Console' : 'Core Command Terminal'}
+                {location.pathname === '/super-admin-dashboard' ? 'Command Center Dashboard' :
+                  location.pathname.includes('stats') ? 'System Telemetry Stats' :
+                    location.pathname.includes('owners') ? 'Fleet Owner Accounts' :
+                      location.pathname.includes('pilots') ? 'Pilot Network Node Access' :
+                        location.pathname.includes('devices') ? 'Device Monitoring Panel' :
+                          location.pathname.includes('tracking') ? 'Real-time Live Monitoring radar' :
+                            location.pathname.includes('analytics') ? 'Real-time Analytics grid' :
+                              location.pathname.includes('alerts') ? 'Emergency Alert Console' : 'Core Command Terminal'}
               </h2>
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest font-['Space_Grotesk']">SUKRUTHA MOBILITY CONTROL CORE</p>
             </div>
@@ -1226,13 +1427,13 @@ export default function SuperAdminPortal() {
           <div className="max-w-[1600px] mx-auto font-['Space_Grotesk']">
             <Routes>
               <Route index element={<DashboardView />} />
+              <Route path="/stats" element={<StatsView />} />
               <Route path="/owners" element={<OwnersView />} />
               <Route path="/pilots" element={<PilotsView />} />
               <Route path="/devices" element={<DevicesView />} />
               <Route path="/tracking" element={<TrackingView />} />
               <Route path="/analytics" element={<AnalyticsView />} />
               <Route path="/alerts" element={<AlertsView />} />
-              <Route path="/logs" element={<LogsView />} />
               <Route path="*" element={<Navigate to="/super-admin-dashboard" replace />} />
             </Routes>
           </div>
