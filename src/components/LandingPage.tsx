@@ -10,7 +10,8 @@ import {
   Activity,
   ArrowUpRight,
   Zap,
-  Globe
+  Globe,
+  Phone
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -83,14 +84,14 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
             </span>
-            <span className="text-[10px] font-black tracking-[0.3em] text-blue-100 uppercase">Live V4.0 Active</span>
+            <span className="text-[10px] font-black tracking-[0.3em] text-blue-100 uppercase">Live V4.5 Active</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
             <div className="lg:col-span-8 z-10">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.85] mb-10 clay-text-3d text-white">
-                ENGINEERING<br />
-                <span className="text-blue-500 underline decoration-white/20">TOTAL</span> CONTROL
+                TRACK<br />
+                <span className="text-blue-500">ANALYZE</span> OPTIMIZE
               </h1>
               <p className="text-xl md:text-2xl text-gray-400 max-w-2xl leading-relaxed font-light mb-12">
                 The Indian fleet landscape is brutal. We give you the <span className="text-white font-bold">OBD-powered neural edge</span> to master it. Diagnostics, AI safety, and extreme efficiency.
@@ -218,48 +219,86 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
       </section>
 
       {/* Puffy CTA */}
-      <section className="py-40 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative p-[4.39rem] md:p-[8.39rem] overflow-hidden text-center bg-blue-600 border-none rounded-2xl">
+      <section className="py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative py-20 px-8 md:px-16 overflow-hidden text-center bg-blue-600 border-none rounded-2xl">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-            <h2 className="text-[2rem] md:text-[5rem] font-black tracking-tighter mb-12 leading-[0.85] text-white clay-text-3d">
-              READY FOR THE<br />LONG HAUL?
+            
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 relative z-10 uppercase font-['Syne'] tracking-wide">
+              READY FOR THE LONG HAUL?
             </h2>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            
+            <p className="text-base md:text-lg text-blue-100 mb-10 max-w-2xl mx-auto relative z-10 font-normal tracking-wide">
+              
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
               <button
                 onClick={handleDashboardAccess}
-                className="clay-btn clay-btn-white text-xl"
+                className="px-8 py-3 bg-white text-black rounded-xl font-semibold hover:bg-gray-100 transition-colors"
               >
                 JOIN THE NETWORK
               </button>
-              <Link to="/booking" className="clay-btn bg-black text-white hover:bg-[#120F17] border border-white/10 text-xl">
+              <Link to="/booking" className="px-8 py-3 bg-[#120F17] text-white rounded-xl font-semibold hover:bg-black transition-colors">
                 DEMO RIDE
               </Link>
             </div>
-            <p className="mt-16 text-blue-200 text-[10px] font-black uppercase tracking-[0.5em] opacity-60">Certified AIS-140 Intelligent Platform</p>
+            
           </div>
         </div>
       </section>
 
-      {/* Simple Footer */}
-      <footer id="contact" className="py-24 border-t border-white/5 bg-black/20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12">
-            <div className="flex items-center space-x-6">
-              <div className="w-14 h-14 bg-white text-black rounded-[1.2rem] flex items-center justify-center font-black text-2xl shadow-xl">S</div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-tighter leading-none text-white">SUKRUTHA</span>
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Mobility</span>
+      {/* Modern Footer */}
+      <footer id="contact" className="py-16 border-t border-white/5 bg-black">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            
+            {/* Left Column */}
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-4 mb-8">
+                <div className="w-12 h-12 bg-white text-black rounded-[1.2rem] flex items-center justify-center font-black text-2xl shadow-xl">
+                  S
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black tracking-tighter leading-none text-white">SUKRUTHA</span>
+                  <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-blue-400 mt-1">Intelligence</span>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm mb-6 max-w-sm leading-relaxed">
+                Premium fleet management solutions for India's most demanding travel operators.
+              </p>
+              <div className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors cursor-pointer w-fit">
+                <Phone className="w-4 h-4" />
+                <span className="text-sm">+91 6363390074</span>
               </div>
             </div>
 
-            <div className="flex gap-16">
-              {['Legal', 'Privacy', 'API', 'Portal'].map(item => (
-                <a key={item} href="#" className="text-[10px] uppercase font-black tracking-[0.3em] text-gray-600 hover:text-white transition-colors">{item}</a>
-              ))}
+            {/* Middle Column */}
+            <div>
+              <h3 className="text-white font-semibold mb-6">Solutions</h3>
+              <ul className="space-y-4">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">OBD Telematics</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Fleet Analytics</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Driver Management</a></li>
+              </ul>
             </div>
 
-            <p className="text-[10px] uppercase font-black tracking-[0.3em] text-gray-800">© 2025 Sukrutha Mobility Services</p>
+            {/* Right Column */}
+            <div>
+              <h3 className="text-white font-semibold mb-6">Company</h3>
+              <ul className="space-y-4">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Support</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Privacy</a></li>
+              </ul>
+            </div>
+            
+          </div>
+          
+          <div className="pt-8 border-t border-white/10 text-center">
+            <p className="text-gray-400 text-sm">
+              © 2025 Sukrutha Mobility Services. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

@@ -6,7 +6,6 @@ import OwnerDashboard from './components/OwnerDashboard';
 import DriverPortal from './components/DriverPortal';
 import SuperAdminPortal from './components/admin/SuperAdminPortal';
 import LoginModal from './components/LoginModal';
-import CustomCursor from './components/CustomCursor';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 function AppContent() {
@@ -16,7 +15,6 @@ function AppContent() {
   return (
     <Router>
       <div className="min-h-screen bg-black text-white font-sans">
-        <CustomCursor />
         <Routes>
           <Route path="/" element={<LandingPage onLoginClick={() => setShowLogin(true)} />} />
           <Route path="/booking" element={<BookingPage onLoginClick={() => setShowLogin(true)} />} />

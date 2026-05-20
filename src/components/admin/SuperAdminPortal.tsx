@@ -552,7 +552,7 @@ export default function SuperAdminPortal() {
     { name: 'Device Management', href: '/super-admin-dashboard/devices', icon: Cpu },
     { name: 'Live Tracking', href: '/super-admin-dashboard/tracking', icon: MapPin },
     { name: 'Analytics', href: '/super-admin-dashboard/analytics', icon: BarChart2 },
-    { name: 'Emergency Alerts', href: '/super-admin-dashboard/alerts', icon: AlertTriangle },
+
   ];
 
   if (!isBooted) {
@@ -600,7 +600,6 @@ export default function SuperAdminPortal() {
         backgroundColor="#120F17"
         className="p-6 border border-white/5 backdrop-blur-xl rounded-3xl relative shadow-xl overflow-hidden group"
       >
-        <div className="absolute top-0 left-0 w-32 h-[2px] bg-blue-500" />
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center font-['Syne']">
             <TrendingUp className="w-4 h-4 text-blue-500 mr-2" /> Client Yield Radar: Top 5 Performing Organizations
@@ -682,10 +681,10 @@ export default function SuperAdminPortal() {
         </div>
       </BorderGlow>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8">
 
         {/* Top 5 Performing Clients Board */}
-        <div className="lg:col-span-2 bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl relative shadow-xl">
+        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl relative shadow-xl">
           <div className="absolute top-0 left-0 w-32 h-[2px] bg-blue-500" />
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center font-['Syne']">
             <TrendingUp className="w-4 h-4 text-blue-500 mr-2" /> Top Performing Clients
@@ -728,49 +727,7 @@ export default function SuperAdminPortal() {
           </div>
         </div>
 
-        {/* Live Warning / SOS Monitor panel */}
-        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl flex flex-col shadow-xl">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center font-['Syne']">
-            <AlertTriangle className="w-4 h-4 text-red-500 mr-2" /> Live SOS Console
-          </h3>
 
-          <div className="flex-1 space-y-4">
-            {alerts.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center">
-                <div>
-                  <CheckCircle className="w-12 h-12 text-green-500/30 mx-auto mb-4" />
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">No Alerts Detected</p>
-                </div>
-              </div>
-            ) : (
-              alerts.map(alt => (
-                <div key={alt.id} className="p-4 bg-red-950/10 border border-red-500/20 hover:bg-red-950/20 transition-all rounded-2xl relative group">
-                  <div className="absolute top-2 right-2 flex items-center space-x-2">
-                    <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-500 text-[7px] font-black uppercase tracking-widest rounded-full">{alt.severity}</span>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/25 flex items-center justify-center flex-shrink-0 animate-pulse mt-0.5">
-                      <AlertTriangle className="w-4 h-4 text-red-400" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-black text-white uppercase tracking-wider">{alt.type}</h4>
-                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mt-1">{alt.vehicle}</p>
-                      <p className="text-[9px] text-gray-500 font-bold mt-1 leading-relaxed">{alt.description}</p>
-
-                      <button
-                        onClick={() => handleDismissAlert(alt.id)}
-                        className="mt-3 px-3 py-1 bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all text-[8px] font-black uppercase tracking-widest text-red-400 rounded-lg"
-                      >
-                        Acknowledge & Dismiss
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -789,7 +746,7 @@ export default function SuperAdminPortal() {
           { label: 'Fleet Owners', value: owners.length, desc: 'Registered corps', icon: Users, color: 'blue' },
           { label: 'Total Pilots', value: pilots.length, desc: 'Unit roster', icon: Car, color: 'purple' },
           { label: 'Active Trips', value: '342', desc: 'Realtime vectors', icon: MapPin, color: 'green' },
-          { label: 'Emergency Alerts', value: alerts.length, desc: 'Unresolved SOS', icon: AlertTriangle, color: 'red' },
+
           { label: 'Daily Revenue', value: formatShorthand(582000), desc: 'Cleared today', icon: TrendingUp, color: 'green' },
           { label: 'System Health', value: '98.4%', desc: 'Nominal condition', icon: Activity, color: 'blue' }
         ].map((stat, i) => (
