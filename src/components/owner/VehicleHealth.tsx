@@ -195,7 +195,7 @@ export default function VehicleHealth() {
           >
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
               <Car className="w-6 h-6 mr-2 text-blue-500" />
-              Real-time OBD Data - {selectedVehicleData.id}
+              Real-time OBD Data
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

@@ -30,7 +30,8 @@ import {
   Clock,
   Unlock,
   Lock,
-  DownloadCloud
+  DownloadCloud,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
@@ -125,19 +126,42 @@ const synth = new SciFiSynth();
 
 // Real-time Live Monitoring Map stable component
 const TrackingView = () => {
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string>('TRIP-429');
+  const [selectedFleetId, setSelectedFleetId] = useState<string | null>(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [mapMode, setMapMode] = useState<'k' | 'm' | 'p'>('k'); // k=satellite, m=roadmap, p=terrain
   const [zoomLevel, setZoomLevel] = useState<number>(13);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const vehicles = [
-    { id: 'TRIP-429', label: 'MH-12-PQ-8890', speed: 75, location: 'Pune, Maharashtra, India', coords: '18.5204° N, 73.8567° E', pilot: 'Rohan Sharma', status: 'ACTIVE IN TRANSIT' },
-    { id: 'TRIP-108', label: 'KA-03-MN-4421', speed: 62, location: 'Bangalore, Karnataka, India', coords: '12.9716° N, 77.5946° E', pilot: 'Aditya Hegde', status: 'LOADING BAY' },
-    { id: 'TRIP-749', label: 'DL-01-AB-1092', speed: 80, location: 'New Delhi, Delhi, India', coords: '28.6139° N, 77.2090° E', pilot: 'Vikram Singh', status: 'EXPRESS DELIVERY' }
+  const fleets = [
+    {
+      id: 'FLEET-1',
+      name: 'Alpha Logistics',
+      location: 'Mumbai, Maharashtra, India',
+      coords: '19.0760° N, 72.8777° E',
+      status: 'ACTIVE',
+      vehicles: [
+        { id: 'TRIP-429', label: 'MH-12-PQ-8890', speed: 75, location: 'Pune, Maharashtra, India', coords: '18.5204° N, 73.8567° E', pilot: 'Rohan Sharma', status: 'ACTIVE IN TRANSIT' },
+        { id: 'TRIP-108', label: 'KA-03-MN-4421', speed: 62, location: 'Bangalore, Karnataka, India', coords: '12.9716° N, 77.5946° E', pilot: 'Aditya Hegde', status: 'LOADING BAY' },
+      ]
+    },
+    {
+      id: 'FLEET-2',
+      name: 'Giga Mobility Corp',
+      location: 'New Delhi, Delhi, India',
+      coords: '28.6139° N, 77.2090° E',
+      status: 'ACTIVE',
+      vehicles: [
+        { id: 'TRIP-749', label: 'DL-01-AB-1092', speed: 80, location: 'Gurgaon, Haryana, India', coords: '28.4595° N, 77.0266° E', pilot: 'Vikram Singh', status: 'EXPRESS DELIVERY' }
+      ]
+    }
   ];
 
-  const activeVehicle = vehicles.find(v => v.id === selectedVehicleId) || vehicles[0];
-  const mapTarget = searchQuery || activeVehicle.location;
+  const activeFleet = fleets.find(f => f.id === selectedFleetId);
+  const activeVehicle = activeFleet?.vehicles.find(v => v.id === selectedVehicleId);
+  
+  // Default map target logic: Search Query -> Selected Vehicle -> Selected Fleet -> Default India view
+  const mapTarget = searchQuery || (activeVehicle ? activeVehicle.location : (activeFleet ? activeFleet.location : 'India'));
+  const displayCoords = activeVehicle ? activeVehicle.coords : (activeFleet ? activeFleet.coords : '20.5937° N, 78.9629° E');
   const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapTarget)}&t=${mapMode}&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
 
   return (
@@ -201,7 +225,7 @@ const TrackingView = () => {
               {/* Digital Zoom Orbit Controller */}
               <div className="flex items-center space-x-1 bg-white/5 p-0.5 border border-white/5 rounded-xl">
                 <button
-                  onClick={() => setZoomLevel(prev => Math.max(9, prev - 1))}
+                  onClick={() => setZoomLevel(prev => Math.max(5, prev - 1))}
                   className="w-6 h-6 flex items-center justify-center text-[10px] font-black text-gray-500 hover:text-white transition-all"
                 >
                   -
@@ -239,7 +263,7 @@ const TrackingView = () => {
             <div className="absolute bottom-4 right-4 bg-black/90 backdrop-blur-md border border-white/5 p-4 rounded-2xl text-[9px] pointer-events-none text-left min-w-[200px] shadow-[0_4px_24px_rgba(0,0,0,0.85)] z-10">
               <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-1">LOGISTICS BEACON TARGET</div>
               <div className="text-white font-black text-[12px] mb-0.5 truncate">{mapTarget.split(',')[0].toUpperCase()}</div>
-              <div className="text-blue-400 font-bold text-[8px] mb-2">{activeVehicle.coords}</div>
+              <div className="text-blue-400 font-bold text-[8px] mb-2">{displayCoords}</div>
 
               <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-2 border-t border-white/5">
                 <div>
@@ -263,60 +287,113 @@ const TrackingView = () => {
         {/* Telemetry Status sidebar */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">PILOT LOG ORBITS</h3>
+            {!selectedFleetId ? (
+              <>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">FLEET ORBITS</h3>
+                <div className="space-y-6">
+                  {fleets.map(fleet => (
+                    <div
+                      key={fleet.id}
+                      onClick={() => {
+                        setSelectedFleetId(fleet.id);
+                        setSelectedVehicleId(null);
+                        setSearchQuery('');
+                      }}
+                      className="p-4 border border-white/5 bg-white/5 hover:bg-white/10 transition-all cursor-pointer rounded-2xl"
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="text-xs font-black uppercase tracking-wider text-white">{fleet.name}</span>
+                        <span className="text-[8px] font-bold px-2 py-0.5 rounded-lg border bg-white/5 text-gray-400 border-white/10">{fleet.id}</span>
+                      </div>
 
-            <div className="space-y-6">
-              {vehicles.map(veh => {
-                const isSelected = veh.id === selectedVehicleId;
-                return (
-                  <div
-                    key={veh.id}
-                    onClick={() => {
-                      setSelectedVehicleId(veh.id);
-                      setSearchQuery(''); // clear custom search to focus on pilot
-                    }}
-                    className={`p-4 border transition-all cursor-pointer rounded-2xl ${isSelected
-                        ? 'bg-blue-500/10 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
-                        : 'bg-white/5 border-white/5 hover:bg-white/10'
-                      }`}
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <span className={`text-xs font-black uppercase tracking-wider ${isSelected ? 'text-blue-400' : 'text-white'}`}>{veh.label}</span>
-                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded-lg border ${isSelected ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-white/5 text-gray-400 border-white/10'
-                        }`}>{veh.id}</span>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Velocity</span>
-                        <span className="text-[9px] font-bold text-white">{veh.speed} km/h</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Target Grid</span>
-                        <span className="text-[9px] font-bold text-gray-300">{veh.location.split(',')[0]}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Pilot Operator</span>
-                        <span className="text-[9px] font-bold text-white">{veh.pilot}</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
-                        <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Beacon Signal</span>
-                        <span className={`text-[8px] font-bold ${isSelected ? 'text-blue-400' : 'text-green-400'}`}>
-                          {isSelected ? 'ORBIT FOCUSED' : veh.status}
-                        </span>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Base Location</span>
+                          <span className="text-[9px] font-bold text-gray-300">{fleet.location.split(',')[0]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Active Pilots</span>
+                          <span className="text-[9px] font-bold text-white">{fleet.vehicles.length} Nodes</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+                          <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Status</span>
+                          <span className="text-[8px] font-bold text-green-400">{fleet.status}</span>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center space-x-3 mb-6 cursor-pointer group" onClick={() => {
+                  setSelectedFleetId(null);
+                  setSelectedVehicleId(null);
+                  setSearchQuery('');
+                }}>
+                  <div className="w-8 h-8 rounded-full bg-white/5 group-hover:bg-blue-500/20 flex items-center justify-center transition-colors">
+                    <ArrowLeft className="w-4 h-4 text-gray-400 group-hover:text-blue-400 transition-colors" />
                   </div>
-                );
-              })}
-            </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">{activeFleet?.name}</h3>
+                    <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Select Pilot</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {activeFleet?.vehicles.map(veh => {
+                    const isSelected = veh.id === selectedVehicleId;
+                    return (
+                      <div
+                        key={veh.id}
+                        onClick={() => {
+                          setSelectedVehicleId(veh.id);
+                          setSearchQuery('');
+                        }}
+                        className={`p-4 border transition-all cursor-pointer rounded-2xl ${isSelected
+                            ? 'bg-blue-500/10 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
+                            : 'bg-white/5 border-white/5 hover:bg-white/10'
+                          }`}
+                      >
+                        <div className="flex justify-between items-center mb-3">
+                          <span className={`text-xs font-black uppercase tracking-wider ${isSelected ? 'text-blue-400' : 'text-white'}`}>{veh.label}</span>
+                          <span className={`text-[8px] font-bold px-2 py-0.5 rounded-lg border ${isSelected ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-white/5 text-gray-400 border-white/10'
+                            }`}>{veh.id}</span>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Velocity</span>
+                            <span className="text-[9px] font-bold text-white">{veh.speed} km/h</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Target Grid</span>
+                            <span className="text-[9px] font-bold text-gray-300">{veh.location.split(',')[0]}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Pilot Operator</span>
+                            <span className="text-[9px] font-bold text-white">{veh.pilot}</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-1.5 border-t border-white/5">
+                            <span className="text-[7px] text-gray-500 uppercase tracking-widest font-black">Beacon Signal</span>
+                            <span className={`text-[8px] font-bold ${isSelected ? 'text-blue-400' : 'text-green-400'}`}>
+                              {isSelected ? 'ORBIT FOCUSED' : veh.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="pt-6 border-t border-white/5">
+          <div className="pt-6 mt-6 border-t border-white/5">
             <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
               <h4 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2">SYSTEM SCAN STATS</h4>
               <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider leading-relaxed">
-                Real time Google Satellite feeds locked onto pilots MH-12, KA-03, and DL-01. Live stream secure.
+                {activeFleet ? `Real time Google Satellite feeds locked onto ${activeFleet.name} pilots. Live stream secure.` : 'Real time Google Satellite feeds locked onto active fleets. Select a fleet to view pilots.'}
               </p>
             </div>
           </div>
@@ -1047,7 +1124,7 @@ export default function SuperAdminPortal() {
 
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h4 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">SYNC HISTORY: {selectedDevice.id}</h4>
+                  <h4 className="text-sm font-black text-white uppercase tracking-widest font-display">SYNC HISTORY: <span className="font-sans font-bold">{selectedDevice.id}</span></h4>
                   <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-1">Host Entity: {selectedDevice.owner}</p>
                 </div>
                 <button

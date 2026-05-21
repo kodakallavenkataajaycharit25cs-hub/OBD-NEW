@@ -6,7 +6,6 @@ import {
   Users,
   Wrench,
   CreditCard,
-  Brain,
   Settings,
   LogOut,
   Home,
@@ -20,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
-import AIVoiceAssistant from './AIVoiceAssistant';
+
 import FleetOverview from './owner/FleetOverview';
 import VehicleHealth from './owner/VehicleHealth';
 import TripCosting from './owner/TripCosting';
@@ -28,7 +27,7 @@ import DriverManagement from './owner/DriverManagement';
 import SafetyEmergency from './owner/SafetyEmergency';
 import Maintenance from './owner/Maintenance';
 import BillingFinance from './owner/BillingFinance';
-import Analytics from './owner/Analytics';
+
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
 
@@ -53,7 +52,6 @@ export default function OwnerDashboard() {
     { name: 'Maintenance', href: '/owner/maintenance', icon: Wrench, current: location.pathname === '/owner/maintenance' },
     { name: 'Billing & Finance', href: '/owner/billing', icon: CreditCard, current: location.pathname === '/owner/billing' },
     { name: 'Expense Classifier', href: '/owner/expenses', icon: Camera, current: location.pathname === '/owner/expenses' },
-    { name: 'Analytics & ML', href: '/owner/analytics', icon: Brain, current: location.pathname === '/owner/analytics' },
     { name: 'Booking', href: '/owner/booking', icon: MapPin, current: location.pathname === '/owner/booking' },
   ];
 
@@ -183,7 +181,7 @@ export default function OwnerDashboard() {
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/billing" element={<BillingFinance />} />
               <Route path="/expenses" element={<ExpenseClassifier userRole="owner" />} />
-              <Route path="/analytics" element={<Analytics />} />
+
               <Route path="/booking" element={<SpotBooking />} />
               <Route path="*" element={<Navigate to="/owner" replace />} />
             </Routes>
@@ -191,7 +189,7 @@ export default function OwnerDashboard() {
         </main>
 
         {/* AI Voice Assistant */}
-        <AIVoiceAssistant onHighlightSection={handleSectionHighlight} />
+
       </div>
     </div>
   </div>

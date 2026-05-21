@@ -21,6 +21,10 @@ export default {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
+      fontFamily: {
+        sans: ['"Space Grotesk"', 'sans-serif'],
+        display: ['Syne', 'sans-serif'],
+      },
     },
   },
   plugins: [],

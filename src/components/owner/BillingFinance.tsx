@@ -198,7 +198,7 @@ export default function BillingFinance() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h4 className="text-lg font-bold uppercase text-white">{invoice.id}</h4>
+                  <h4 className="text-lg font-bold uppercase text-white font-sans tracking-widest">{invoice.id}</h4>
                   <p className="text-gray-400">{invoice.customer}</p>
                 </div>
                 <div className="flex items-center space-x-4">

@@ -1,0 +1,2 @@
+include elm/*.yaml
+recursive-include elm/plugins task_*.py

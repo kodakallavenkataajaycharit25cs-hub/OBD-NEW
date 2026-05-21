@@ -180,7 +180,7 @@ export default function Maintenance() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h4 className="font-black text-white uppercase tracking-tight">{maintenance.vehicle}</h4>
+                  <h4 className="font-sans font-black text-white uppercase tracking-tight">{maintenance.vehicle}</h4>
                   <p className="text-[10px] uppercase font-black tracking-widest text-gray-500">{maintenance.model}</p>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium bg-${priorityColor}-500/30 text-${priorityColor}-300 uppercase`}>
@@ -301,8 +301,8 @@ export default function Maintenance() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h4 className="text-lg font-black tracking-tight uppercase text-white">{job.id}</h4>
-                  <p className="text-gray-400">{job.vehicle} - {job.type}</p>
+                  <h4 className="text-lg font-black tracking-tight uppercase text-white font-sans tracking-widest">{job.id}</h4>
+                  <p className="text-gray-400 font-sans">{job.vehicle} - {job.type}</p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${statusColor}-500/30 text-${statusColor}-300`}>
                   {job.status}

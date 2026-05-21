@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
-import AIVoiceAssistant from './AIVoiceAssistant';
+
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../services/obdApi';
@@ -72,7 +72,6 @@ export default function DriverPortal() {
     { name: 'Documents', href: '/driver/documents', icon: FileText, current: location.pathname === '/driver/documents' },
     { name: 'Trip Logs', href: '/driver/trips', icon: MapPin, current: location.pathname === '/driver/trips' },
     { name: 'Earnings', href: '/driver/earnings', icon: TrendingUp, current: location.pathname === '/driver/earnings' },
-    { name: 'Badges', href: '/driver/badges', icon: Award, current: location.pathname === '/driver/badges' },
     { name: 'Expenses', href: '/driver/expenses', icon: Camera, current: location.pathname === '/driver/expenses' },
     { name: 'Booking', href: '/driver/booking', icon: MapPin, current: location.pathname === '/driver/booking' },
   ];
@@ -564,54 +563,6 @@ export default function DriverPortal() {
     </div>
   );
 
-  const BadgesSection = () => (
-    <div className="space-y-8">
-      <BorderGlow
-        borderRadius={28}
-        backgroundColor="#120F17"
-        glowRadius={40}
-        glowIntensity={1}
-        className="p-8 border-white/5 h-full"
-      >
-        <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Achievement Nodes</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { name: 'Safe Pilot', description: 'No incidents for 6 months', earned: true, color: 'green' },
-            { name: 'Eco Warrior', description: 'Efficiency Alpha Lead', earned: true, color: 'blue' },
-            { name: 'Unit Favorite', description: '4.8+ Core Rating', earned: true, color: 'yellow' },
-            { name: 'Travel Master', description: '10,000+ km Traversed', earned: true, color: 'purple' },
-            { name: 'Punctual Opt', description: '95% On-Time Stream', earned: false, color: 'gray' },
-            { name: 'Route Expert', description: 'Perfect Geo Navigation', earned: false, color: 'gray' }
-          ].map((badge, index) => (
-            <BorderGlow
-              key={index}
-              borderRadius={28}
-              glowRadius={40}
-              glowIntensity={1}
-              backgroundColor="#120F17"
-              className={`clay-card p-8 border-white/5 text-center transition-all h-full ${badge.earned
-                ? 'bg-blue-600/5 opacity-100'
-                : 'bg-black/20 opacity-40 grayscale'
-                }`}
-            >
-              <div className={`w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center transition-transform ${badge.earned
-                ? `bg-${badge.color}-500 border-none shadow-${badge.color}-900/40 hover:scale-110`
-                : 'bg-zinc-800 border-white/5'
-                }`}>
-                <Award className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="text-sm font-black text-white mb-3 uppercase tracking-tight">{badge.name}</h3>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">{badge.description}</p>
-              {badge.earned && (
-                <div className="text-[10px] text-green-400 mt-4 font-black uppercase tracking-widest shadow-green-500/20">NODE UNLOCKED</div>
-              )}
-            </BorderGlow>
-          ))}
-        </div>
-      </BorderGlow>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-['Space_Grotesk'] overflow-hidden">
@@ -760,7 +711,6 @@ export default function DriverPortal() {
               <Route path="/documents" element={<DocumentsSection />} />
               <Route path="/trips" element={<TripLogsSection />} />
               <Route path="/earnings" element={<EarningsSection />} />
-              <Route path="/badges" element={<BadgesSection />} />
               <Route path="/expenses" element={<ExpenseClassifier userRole="driver" />} />
               <Route path="/booking" element={<SpotBooking />} />
               <Route path="*" element={<Navigate to="/driver" replace />} />
@@ -769,7 +719,7 @@ export default function DriverPortal() {
         </main>
 
         {/* AI Voice Assistant */}
-        <AIVoiceAssistant onHighlightSection={handleSectionHighlight} />
+
       </div>
     </div>
   </div>

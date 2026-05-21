@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+###########################################################################
+# ELM327-emulator
+# ELM327 Emulator for testing software interfacing OBDII via ELM327 adapter
+# https://github.com/Ircama/ELM327-emulator
+# (C) Ircama 2021 - CC-BY-NC-SA-4.0
+###########################################################################
+
+name: Upload ELM327-emulator Package to PyPI and TestPyPI
+
+#on:
+#  release:
+#    types: [created]
+
+#on: [push]
+
+on:
+   push:
+     tags:
+       - 'v*'
+
+jobs:
+  build-n-publish:
+    name: Build and publish Python to PyPI and TestPyPI
+    runs-on: ubuntu-latest
+
+    # Checking out the project and building distributions
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    # This will download your repository into the CI runner and then install and activate Python
+
+    - name: Upgrade pip
+      run: pip install --upgrade pip
+
+    - name: Install build dependencies
+      run: pip install setuptools wheel twine build
+
+    - name: Build the package
+      run: python -m build
+
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        twine upload --repository pypi dist/*.tar.gz --verbose
+
+    - name: Publish to TestPyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      run: |
+        twine upload --repository testpypi dist/*.tar.gz --verbose

@@ -109,7 +109,7 @@ export default function TripCosting() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <TrendingUp className="w-8 h-8 text-blue-500" />
-            <h2 className="text-2xl font-bold tracking-tight uppercase text-white">Trip Economics Interface</h2>
+            <h2 className="text-2xl font-bold tracking-tight uppercase text-white font-display">Trip Economics Interface</h2>
           </div>
         </div>
 
@@ -195,7 +195,7 @@ export default function TripCosting() {
         backgroundColor="#120F17"
         className="p-8 border-white/5 shadow-2xl h-full"
       >
-        <h2 className="text-xl font-bold text-white mb-8 tracking-tight uppercase text-left">Mission Profitability Audit</h2>
+        <h2 className="text-xl font-bold text-white mb-8 tracking-tight uppercase text-left font-display">Mission Profitability Audit</h2>
 
         <div className="space-y-4">
           {recentTrips.map((trip) => (

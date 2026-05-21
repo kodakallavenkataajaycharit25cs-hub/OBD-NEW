@@ -9,8 +9,7 @@
   }
 
   body {
-    @apply bg-black text-white antialiased selection:bg-blue-500/30 selection:text-blue-200;
-    font-family: 'Space Grotesk', sans-serif;
+    @apply bg-black text-white antialiased font-sans selection:bg-blue-500/30 selection:text-blue-200;
   }
 
   h1,
@@ -19,8 +18,7 @@
   h4,
   h5,
   h6 {
-    @apply tracking-tight font-extrabold;
-    font-family: 'Syne', sans-serif;
+    @apply tracking-tight font-extrabold font-display;
   }
 }
 

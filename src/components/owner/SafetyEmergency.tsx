@@ -280,7 +280,7 @@ export default function SafetyEmergency() {
           backgroundColor="#120F17"
           className="p-6 border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-4"
         >
-          <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Incident Dossier: {selectedIncidentData.id}</h4>
+          <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Incident Dossier: <span className="font-sans tracking-widest font-bold">{selectedIncidentData.id}</span></h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="space-y-6">
