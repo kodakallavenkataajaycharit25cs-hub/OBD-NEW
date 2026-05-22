@@ -165,7 +165,7 @@ const TrackingView = () => {
   const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapTarget)}&t=${mapMode}&z=${zoomLevel}&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 font-['Space_Grotesk']">
+    <div className="space-y-8 animate-in fade-in duration-500 font-sans">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
         {/* Active Real Google Map Workspace */}
@@ -634,7 +634,7 @@ export default function SuperAdminPortal() {
 
   if (!isBooted) {
     return (
-      <div className="fixed inset-0 bg-[#120F17] flex flex-col items-center justify-center font-['Space_Grotesk',sans-serif] z-[9999] overflow-hidden">
+      <div className="fixed inset-0 bg-[#120F17] flex flex-col items-center justify-center font-sans z-[9999] overflow-hidden">
         <div className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `linear-gradient(to right, #2563EB 1px, transparent 1px), linear-gradient(to bottom, #2563EB 1px, transparent 1px)`,
@@ -736,7 +736,7 @@ export default function SuperAdminPortal() {
                       <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 opacity-50" />
 
                       {/* Floating numeric label inside/above the bar */}
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-white font-['Space_Grotesk'] bg-black/80 px-2 py-0.5 rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-white font-sans bg-black/80 px-2 py-0.5 rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         ₹{(client.revenue / 100000).toFixed(1)}L
                       </div>
                     </div>
@@ -744,7 +744,7 @@ export default function SuperAdminPortal() {
 
                   {/* Label Area */}
                   <div className="mt-3 text-center">
-                    <span className="text-[10px] font-black text-white font-['Space_Grotesk'] tracking-wider uppercase block group-hover:text-blue-400 transition-colors">
+                    <span className="text-[10px] font-black text-white font-sans tracking-wider uppercase block group-hover:text-blue-400 transition-colors">
                       {initials}
                     </span>
                     <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mt-0.5 block">
@@ -773,7 +773,7 @@ export default function SuperAdminPortal() {
               return (
                 <div key={client.id} className="p-4 bg-white/5 border border-white/5 hover:border-blue-500/20 transition-all rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
                   <div className="flex items-center space-x-4">
-                    <span className={`text-lg ${rankColor} w-6 text-center font-['Space_Grotesk']`}>0{index + 1}</span>
+                    <span className={`text-lg ${rankColor} w-6 text-center font-sans`}>0{index + 1}</span>
                     <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">{client.name}</h4>
                       <p className="text-[8px] text-gray-500 uppercase tracking-widest font-bold mt-0.5">Fleet: {client.fleetSize} Units</p>
@@ -783,7 +783,7 @@ export default function SuperAdminPortal() {
                   <div className="flex items-center justify-between md:justify-end gap-8">
                     <div className="text-right">
                       <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest block">Yield</span>
-                      <span className="text-xs font-bold text-green-400 font-['Space_Grotesk']">{formatShorthand(client.revenue)}</span>
+                      <span className="text-xs font-bold text-green-400 font-sans">{formatShorthand(client.revenue)}</span>
                     </div>
 
                     <div>
@@ -795,7 +795,7 @@ export default function SuperAdminPortal() {
 
                     <div className="text-right">
                       <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest block">Node Index</span>
-                      <span className="text-xs font-black text-blue-400 font-['Space_Grotesk']">{client.score.toFixed(1)}</span>
+                      <span className="text-xs font-black text-blue-400 font-sans">{client.score.toFixed(1)}</span>
                     </div>
                   </div>
                 </div>
@@ -845,7 +845,7 @@ export default function SuperAdminPortal() {
               </div>
             </div>
 
-            <div className="text-3xl font-black text-white tracking-tight mb-1 font-['Space_Grotesk']">{stat.value}</div>
+            <div className="text-3xl font-black text-white tracking-tight mb-1 font-sans">{stat.value}</div>
             <p className="text-[9px] text-gray-500 uppercase tracking-wide font-bold">{stat.desc}</p>
           </BorderGlow>
         ))}
@@ -888,7 +888,7 @@ export default function SuperAdminPortal() {
                 </div>
                 <div className="p-3 bg-white/5 border border-white/5 rounded-2xl text-center">
                   <span className="text-[8px] text-gray-500 uppercase tracking-widest font-bold">Monthly Yield</span>
-                  <div className="text-lg font-black text-green-400 mt-1 font-['Space_Grotesk']">{formatShorthand(owner.revenue)}</div>
+                  <div className="text-lg font-black text-green-400 mt-1 font-sans">{formatShorthand(owner.revenue)}</div>
                 </div>
               </div>
 
@@ -1062,7 +1062,7 @@ export default function SuperAdminPortal() {
               <tbody className="divide-y divide-white/5 text-xs">
                 {filteredDevices.map(dev => (
                   <tr key={dev.id} className="hover:bg-white/[0.02] transition-colors group">
-                    <td className="py-4 font-black text-white uppercase tracking-wider font-['Space_Grotesk']">{dev.id}</td>
+                    <td className="py-4 font-black text-white uppercase tracking-wider font-sans">{dev.id}</td>
                     <td className="py-4 text-gray-400 font-bold uppercase">{dev.owner}</td>
                     <td className="py-4">
                       <div className="flex items-center space-x-2">
@@ -1088,7 +1088,7 @@ export default function SuperAdminPortal() {
                         <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div className={`h-full ${dev.health > 80 ? 'bg-green-500' : dev.health > 50 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${dev.health}%` }} />
                         </div>
-                        <span className="font-black text-blue-400 font-['Space_Grotesk']">{dev.health}%</span>
+                        <span className="font-black text-blue-400 font-sans">{dev.health}%</span>
                       </div>
                     </td>
                     <td className="py-4">
@@ -1224,7 +1224,7 @@ export default function SuperAdminPortal() {
               </>
             )}
 
-            <div className="absolute bottom-1 inset-x-0 flex justify-between px-6 text-[8px] text-gray-500 font-bold font-['Space_Grotesk'] pointer-events-none">
+            <div className="absolute bottom-1 inset-x-0 flex justify-between px-6 text-[8px] text-gray-500 font-bold font-sans pointer-events-none">
               <span>00:00</span>
               <span>06:00</span>
               <span>12:00</span>
@@ -1315,7 +1315,7 @@ export default function SuperAdminPortal() {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-[8px] text-red-500 font-black uppercase tracking-[0.2em]">{alt.severity}</span>
-                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest font-['Space_Grotesk']">{alt.time}</span>
+                  <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest font-sans">{alt.time}</span>
                 </div>
 
                 <h4 className="text-sm font-black text-white uppercase tracking-wider mb-2">{alt.type}</h4>
@@ -1341,7 +1341,7 @@ export default function SuperAdminPortal() {
 
 
   return (
-    <div className="min-h-screen bg-[#120F17] text-gray-200 flex font-['Space_Grotesk',sans-serif] overflow-hidden selection:bg-blue-500/30 relative">
+    <div className="min-h-screen bg-[#120F17] text-gray-200 flex font-sans overflow-hidden selection:bg-blue-500/30 relative">
 
       {/* Laser HUD Scanlines overlay */}
       <div className="fixed inset-0 pointer-events-none z-[999] opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,3px_100%]" />
@@ -1387,11 +1387,11 @@ export default function SuperAdminPortal() {
                     : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                     }`}
                 >
-                  <div className={`p-2 rounded-xl transition-all ${isActive ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5 group-hover:scale-110'}`}>
+                  <div className={`p-2 rounded-xl transition-all shrink-0 ${isActive ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5 group-hover:scale-110'}`}>
                     <item.icon className="w-4 h-4" />
                   </div>
                   {sidebarOpen && (
-                    <span className="ml-4 text-xs font-bold uppercase tracking-widest leading-none relative z-10 font-['Space_Grotesk']">
+                    <span className="ml-4 text-xs font-bold uppercase tracking-widest leading-none relative z-10 font-sans">
                       {item.name}
                     </span>
                   )}
@@ -1409,7 +1409,7 @@ export default function SuperAdminPortal() {
         <header className="h-20 px-8 flex items-center justify-between border-b border-white/5 bg-[#120F17]/50 backdrop-blur-md">
           <div className="flex items-center space-x-6">
             <div>
-              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 leading-none mb-1.5 font-['Space_Grotesk']">Operations Control Center</h2>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 leading-none mb-1.5 font-sans">Operations Control Center</h2>
               <span className="text-xl font-black text-white tracking-tighter uppercase font-['Syne']">Admin Core Interface</span>
             </div>
           </div>
@@ -1445,9 +1445,9 @@ export default function SuperAdminPortal() {
                             location.pathname.includes('analytics') ? 'Real-time Analytics grid' :
                               location.pathname.includes('alerts') ? 'Emergency Alert Console' : 'Core Command Terminal'}
               </h2>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest font-['Space_Grotesk']">SUKRUTHA MOBILITY CONTROL CORE</p>
+              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest font-sans">SUKRUTHA MOBILITY CONTROL CORE</p>
             </div>
-            <div className="text-right font-['Space_Grotesk']">
+            <div className="text-right font-sans">
               <div className="text-xl font-black text-blue-400 flex items-center justify-end space-x-2">
                 <Clock className="w-4 h-4 text-blue-500 animate-spin" style={{ animationDuration: '6s' }} />
                 <span>{new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
@@ -1458,7 +1458,7 @@ export default function SuperAdminPortal() {
             </div>
           </div>
 
-          <div className="max-w-[1600px] mx-auto font-['Space_Grotesk']">
+          <div className="max-w-[1600px] mx-auto font-sans">
             <Routes>
               <Route index element={<DashboardView />} />
               <Route path="/stats" element={<StatsView />} />

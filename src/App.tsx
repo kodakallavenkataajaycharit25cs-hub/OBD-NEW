@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import BookingPage from './components/BookingPage';
+import FeaturesPage from './components/FeaturesPage';
+import ContactPage from './components/ContactPage';
 import OwnerDashboard from './components/OwnerDashboard';
 import DriverPortal from './components/DriverPortal';
 import SuperAdminPortal from './components/admin/SuperAdminPortal';
@@ -18,6 +20,8 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<LandingPage onLoginClick={() => setShowLogin(true)} />} />
           <Route path="/booking" element={<BookingPage onLoginClick={() => setShowLogin(true)} />} />
+          <Route path="/features" element={<FeaturesPage onLoginClick={() => setShowLogin(true)} />} />
+          <Route path="/contact" element={<ContactPage onLoginClick={() => setShowLogin(true)} />} />
           <Route 
             path="/owner/*" 
             element={

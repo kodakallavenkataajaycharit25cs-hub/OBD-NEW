@@ -565,7 +565,7 @@ export default function DriverPortal() {
 
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-['Space_Grotesk'] overflow-hidden">
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans overflow-hidden">
       {sessionStorage.getItem('admin_impersonating') === 'true' && (
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 text-xs flex justify-between items-center z-[999] relative border-b border-white/10 font-bold shrink-0">
           <div className="flex items-center space-x-2">
@@ -625,10 +625,10 @@ export default function DriverPortal() {
                       ? 'bg-orange-500 animate-pulse'
                       : 'bg-blue-600'
                       } border-none shadow-blue-900/40 py-4 px-6 flex items-center space-x-4 group transition-all active:scale-95 rounded-2xl`}>
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
                         <item.icon className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-sm font-black uppercase tracking-[0.2em] text-white">
+                      <span className="text-xs font-black uppercase tracking-[0.2em] text-white">
                         {item.name}
                       </span>
                     </div>
@@ -645,7 +645,7 @@ export default function DriverPortal() {
                     : 'text-gray-500 hover:text-white hover:bg-white/5'
                     } ${isHighlighted ? 'ring-2 ring-orange-500 ring-offset-2 ring-offset-zinc-900 animate-bounce' : ''}`}
                 >
-                  <div className={`p-2 rounded-xl transition-colors ${item.current || isHighlighted ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5'}`}>
+                  <div className={`p-2 rounded-xl transition-colors shrink-0 ${item.current || isHighlighted ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5'}`}>
                     <item.icon className="w-5 h-5" />
                   </div>
                   {sidebarOpen && (

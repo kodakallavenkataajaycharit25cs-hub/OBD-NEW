@@ -72,7 +72,7 @@ const TrackingView = () => {
   const inTransitCount = activeOwner.vehicles.filter(v => v.speed > 0).length;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 font-['Space_Grotesk']">
+    <div className="space-y-8 animate-in fade-in duration-500 font-sans">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
         {/* Active Real Google Map Workspace */}
@@ -216,7 +216,7 @@ const TrackingView = () => {
                       onClick={() => setSelectedVehicleId(veh.id)}
                       className={`text-xs cursor-pointer transition-all ${selectedVehicleId === veh.id ? 'bg-blue-500/10' : 'hover:bg-white/[0.03]'}`}
                     >
-                      <td className="px-4 py-3 font-black text-white uppercase tracking-wider font-['Space_Grotesk']">{veh.plate}</td>
+                      <td className="px-4 py-3 font-black text-white uppercase tracking-wider font-sans">{veh.plate}</td>
                       <td className="px-4 py-3 text-gray-300 font-bold">{veh.driver}</td>
                       <td className="px-4 py-3 text-blue-400 font-bold">{veh.route}</td>
                       <td className="px-4 py-3">

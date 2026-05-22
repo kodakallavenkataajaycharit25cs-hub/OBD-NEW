@@ -107,7 +107,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-['Space_Grotesk'] overflow-x-hidden">
+    <div className="min-h-screen bg-zinc-950 text-white font-sans overflow-x-hidden">
       {/* Dynamic Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/5 blur-[120px] rounded-full" />
@@ -122,8 +122,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
               S
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tighter leading-none clay-text-3d uppercase">SUKRUTHA</span>
-              <span className="text-[8px] uppercase tracking-[0.4em] font-bold text-blue-500 mt-1">Mobility</span>
+              <span className="text-xl font-black tracking-tighter leading-none clay-text-3d uppercase text-white">SUKRUTHA</span>
             </div>
           </Link>
           

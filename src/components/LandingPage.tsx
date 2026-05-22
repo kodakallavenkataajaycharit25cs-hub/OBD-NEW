@@ -1,22 +1,14 @@
 import React from 'react';
 import {
-  Car,
-  Shield,
-  TrendingUp,
-  Wrench,
   Brain,
   ArrowRight,
-  Star,
-  Activity,
-  ArrowUpRight,
-  Zap,
-  Globe,
-  Phone
+  Star
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
-import MagicBento from './MagicBento';
 import TiltedCard from './TiltedCard';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 interface LandingPageProps {
   onLoginClick: () => void;
@@ -37,59 +29,21 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#120F17] text-white selection:bg-blue-500/30 font-['Space_Grotesk'] overflow-x-hidden">
+    <div className="min-h-screen bg-[#120F17] text-white selection:bg-blue-500/30 font-sans overflow-x-hidden">
       {/* Soft Background Depth */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[10%] left-[5%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* Modern Navigation */}
-      <nav className="glass-navbar border-b border-white/5 py-4">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4 cursor-pointer group">
-              <div className="w-14 h-14 bg-white text-black rounded-[1.5rem] flex items-center justify-center font-black text-2xl shadow-xl transition-all group-hover:rotate-6">
-                S
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-tighter leading-none clay-text-3d text-white">SUKRUTHA</span>
-                <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-blue-400 mt-1">Intelligence</span>
-              </div>
-            </div>
-
-            <div className="hidden lg:flex items-center space-x-12">
-              {['Booking', 'Features', 'Network', 'Contact'].map((item) => (
-                <a key={item} href={`#${item.toLowerCase()}`} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors tracking-[0.2em]">
-                  {item}
-                </a>
-              ))}
-              <button
-                onClick={user ? handleDashboardAccess : onLoginClick}
-                className="clay-btn clay-btn-blue text-[10px] uppercase tracking-[0.2em]"
-              >
-                {user ? 'View Dashboard' : 'Member Login'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar onLoginClick={onLoginClick} />
 
       {/* Claymorphic Hero */}
-      <section className="relative pt-32 pb-20 px-6 lg:px-12 overflow-hidden">
+      <section className="relative pt-16 pb-20 px-6 lg:px-12 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          {/* Status Badge - Outside grid for safety */}
-          <div className="inline-flex items-center space-x-3 px-6 py-3 rounded-full bg-blue-500/10 border border-blue-400/20 mb-12 shadow-inner">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-            </span>
-            <span className="text-[10px] font-black tracking-[0.3em] text-blue-100 uppercase">Live V4.5 Active</span>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
             <div className="lg:col-span-8 z-10">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.85] mb-10 clay-text-3d text-white">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.85] mb-10 clay-text-3d text-white font-display">
                 TRACK<br />
                 <span className="text-blue-500">ANALYZE</span> OPTIMIZE
               </h1>
@@ -98,23 +52,18 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-8">
-                <Link to="/booking" className="clay-btn clay-btn-white flex items-center justify-between min-w-[280px]">
-                  <span className="text-lg">START BOOKING</span>
+                <Link to="/features" className="clay-btn clay-btn-white flex items-center justify-between min-w-[280px]">
+                  <span className="text-lg">EXPLORE FEATURES</span>
                   <ArrowRight className="w-6 h-6" />
                 </Link>
-                <button onClick={handleDashboardAccess} className="clay-btn bg-white/5 border border-white/10 text-lg flex items-center justify-between min-w-[280px] text-white">
-                  <span>OPERATOR DEMO</span>
-                  <ArrowUpRight className="w-5 h-5 text-gray-500" />
-                </button>
               </div>
             </div>
 
             <div className="lg:col-span-4 relative mt-12 lg:mt-0">
-              <div className="animate-float relative lg:top-[-70px]">
+              <div className="animate-float relative lg:top-[-40px]">
                 <TiltedCard
                   imageSrc="https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg"
                   altText="Sukrutha Fleet Vehicle"
-                  captionText="Sukrutha Fleet Intelligence"
                   containerHeight="400px"
                   containerWidth="100%"
                   imageHeight="350px"
@@ -122,16 +71,16 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                   rotateAmplitude={12}
                   scaleOnHover={1.08}
                   showMobileWarning={false}
-                  showTooltip={true}
+                  showTooltip={false}
                   displayOverlayContent={true}
                   overlayContent={
                     <div className="absolute bottom-6 right-6 p-5 border-none bg-blue-600/80 backdrop-blur-md max-w-[200px] rounded-2xl">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-blue-100 leading-none">Live Data</span>
-                        <Activity className="w-4 h-4 text-blue-100" />
+                        <span className="text-[8px] font-black uppercase tracking-widest text-blue-100 leading-none">AI Diagnostics</span>
+                        <Brain className="w-4 h-4 text-blue-100" />
                       </div>
-                      <div className="text-2xl font-black tracking-tighter text-white">84,203 km</div>
-                      <div className="text-[10px] text-blue-100/60 font-bold uppercase tracking-widest mt-0.5">Fleet Mileage</div>
+                      <div className="text-xl font-black tracking-tighter text-white">100% HEALTH</div>
+                      <div className="text-[10px] text-blue-100/60 font-bold uppercase tracking-widest mt-0.5">System Optimized</div>
                     </div>
                   }
                 />
@@ -161,38 +110,10 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Magic Bento Features */}
-      <section id="features" className="py-40 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-32">
-            <div className="inline-flex items-center space-x-3 px-6 py-3 rounded-full bg-blue-500/10 border border-blue-400/20 mb-8 shadow-inner">
-              <Zap className="w-4 h-4 text-blue-500" />
-              <span className="text-[10px] font-black tracking-[0.3em] text-blue-100 uppercase">Interactive Intelligence</span>
-            </div>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] clay-text-3d text-white uppercase">
-              NEXT-GEN<br />OPERATIONAL EDGE.
-            </h2>
-          </div>
-
-          <MagicBento
-            textAutoHide={true}
-            enableStars={true}
-            enableSpotlight={true}
-            enableBorderGlow={true}
-            enableTilt={true}
-            enableMagnetism={true}
-            clickEffect={true}
-            spotlightRadius={300}
-            particleCount={15}
-            glowColor="59, 130, 246"
-          />
-        </div>
-      </section>
-
       {/* Clay Testimonials */}
       <section className="py-40 bg-zinc-800/30">
         <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-          <h2 className="text-[10px] uppercase font-black tracking-[0.5em] text-blue-400 mb-20">Elite Fleet Leaders</h2>
+          <h2 className="text-2xl md:text-3xl font-black tracking-wide text-blue-400 mb-20 uppercase font-display">Elite Fleet Leaders</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 text-left">
             {[
@@ -224,23 +145,17 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
           <div className="relative py-20 px-8 md:px-16 overflow-hidden text-center bg-blue-600 border-none rounded-2xl">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
             
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 relative z-10 uppercase font-['Syne'] tracking-wide">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 relative z-10 uppercase font-display tracking-wide">
               READY FOR THE LONG HAUL?
             </h2>
             
             <p className="text-base md:text-lg text-blue-100 mb-10 max-w-2xl mx-auto relative z-10 font-normal tracking-wide">
-              
+              Connect with our mobility experts to scale and optimize your fleet operations.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-              <button
-                onClick={handleDashboardAccess}
-                className="px-8 py-3 bg-white text-black rounded-xl font-semibold hover:bg-gray-100 transition-colors"
-              >
-                JOIN THE NETWORK
-              </button>
-              <Link to="/booking" className="px-8 py-3 bg-[#120F17] text-white rounded-xl font-semibold hover:bg-black transition-colors">
-                DEMO RIDE
+            <div className="flex justify-center relative z-10">
+              <Link to="/contact" className="px-8 py-3.5 bg-white text-black rounded-xl font-black hover:bg-gray-100 transition-colors uppercase tracking-widest text-xs">
+                GET IN TOUCH
               </Link>
             </div>
             
@@ -248,60 +163,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Modern Footer */}
-      <footer id="contact" className="py-16 border-t border-white/5 bg-black">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            
-            {/* Left Column */}
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-4 mb-8">
-                <div className="w-12 h-12 bg-white text-black rounded-[1.2rem] flex items-center justify-center font-black text-2xl shadow-xl">
-                  S
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-black tracking-tighter leading-none text-white">SUKRUTHA</span>
-                  <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-blue-400 mt-1">Intelligence</span>
-                </div>
-              </div>
-              <p className="text-gray-400 text-sm mb-6 max-w-sm leading-relaxed">
-                Premium fleet management solutions for India's most demanding travel operators.
-              </p>
-              <div className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors cursor-pointer w-fit">
-                <Phone className="w-4 h-4" />
-                <span className="text-sm">+91 6363390074</span>
-              </div>
-            </div>
-
-            {/* Middle Column */}
-            <div>
-              <h3 className="text-white font-semibold mb-6">Solutions</h3>
-              <ul className="space-y-4">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">OBD Telematics</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Fleet Analytics</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Driver Management</a></li>
-              </ul>
-            </div>
-
-            {/* Right Column */}
-            <div>
-              <h3 className="text-white font-semibold mb-6">Company</h3>
-              <ul className="space-y-4">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">About Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Support</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Privacy</a></li>
-              </ul>
-            </div>
-            
-          </div>
-          
-          <div className="pt-8 border-t border-white/10 text-center">
-            <p className="text-gray-400 text-sm">
-              © 2025 Sukrutha Mobility Services. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

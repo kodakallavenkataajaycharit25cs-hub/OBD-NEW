@@ -1,4 +1,20 @@
 
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local('Inter'), local('sans-serif');
+}
+
+@font-face {
+  font-family: 'Space_Grotesk';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local('Inter'), local('sans-serif');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,6 +22,10 @@
 @layer base {
   html {
     font-size: 15px;
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {

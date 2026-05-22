@@ -10,29 +10,55 @@ export interface OBDData {
   };
 }
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
 export const fetchRPM = async () => {
-  // Mocking RPM data
-  return { rpm: Math.floor(Math.random() * (3000 - 800 + 1)) + 800 };
+  try {
+    const response = await fetch(`${API_BASE_URL}/rpm`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching RPM:', error);
+    return { rpm: 0 };
+  }
 };
 
 export const fetchSpeed = async () => {
-  // Mocking Speed data
-  return { speed: Math.floor(Math.random() * (120 - 0 + 1)) + 0 };
+  try {
+    const response = await fetch(`${API_BASE_URL}/speed`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching speed:', error);
+    return { speed: 0 };
+  }
 };
 
 export const fetchFuelLevel = async () => {
-  // Mocking Fuel Level data
-  return { fuel_level: Math.floor(Math.random() * (100 - 15 + 1)) + 15 };
+  try {
+    const response = await fetch(`${API_BASE_URL}/fuel`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching fuel level:', error);
+    return { fuel_level: 0 };
+  }
 };
 
 export const fetchDiagnostics = async () => {
-  // Mocking Diagnostics data
-  return {
-    diagnostics: {
-      dtc: Math.random() > 0.8 ? ['P0300', 'P0171'] : [],
-      mil_status: Math.random() > 0.8 ? 'ON' : 'OFF',
-      engine_load: Math.floor(Math.random() * 100) + '%',
-      coolant_temp: (Math.floor(Math.random() * 20) + 85) + '°C'
-    }
-  };
+  try {
+    const response = await fetch(`${API_BASE_URL}/diagnostics`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching diagnostics:', error);
+    return {
+      diagnostics: {
+        dtc: [],
+        mil_status: 'UNKNOWN',
+        engine_load: '0%',
+        coolant_temp: '0°C'
+      }
+    };
+  }
 };

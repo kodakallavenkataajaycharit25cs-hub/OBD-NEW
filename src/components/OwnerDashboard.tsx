@@ -56,7 +56,7 @@ export default function OwnerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-['Space_Grotesk'] overflow-hidden">
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col font-sans overflow-hidden">
       {sessionStorage.getItem('admin_impersonating') === 'true' && (
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 text-xs flex justify-between items-center z-[999] relative border-b border-white/10 font-bold shrink-0">
           <div className="flex items-center space-x-2">
@@ -94,7 +94,6 @@ export default function OwnerDashboard() {
               {sidebarOpen && (
                 <div className="flex flex-col">
                   <h1 className="text-lg font-black tracking-tighter leading-none clay-text-3d uppercase">SUKRUTHA</h1>
-                  <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mt-1">Intelligence</span>
                 </div>
               )}
             </div>
@@ -110,7 +109,7 @@ export default function OwnerDashboard() {
                   : 'text-gray-500 hover:text-white hover:bg-white/5'
                   }`}
               >
-                <div className={`p-2 rounded-xl transition-colors ${item.current ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5'}`}>
+                <div className={`p-2 rounded-xl transition-colors shrink-0 ${item.current ? 'bg-white/10' : 'bg-transparent group-hover:bg-white/5'}`}>
                   <item.icon className="w-5 h-5" />
                 </div>
                 {sidebarOpen && (
