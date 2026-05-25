@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   Activity,
   Users,
+  User,
   Car,
   AlertTriangle,
   LogOut,
@@ -35,6 +36,67 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
+import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../../services/obdApi';
+
+// Impersonate Modal Component
+const ImpersonateModal = ({ isOpen, onClose, targetUser, onConfirm }: { isOpen: boolean; onClose: () => void; targetUser: any; onConfirm: () => void }) => {
+  if (!isOpen || !targetUser) return null;
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 md:p-8">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-[#120F17] border border-white/10 shadow-3xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 rounded-[32px] p-8">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-purple-600" />
+        
+        <div className="flex items-center space-x-4 mb-8">
+          <div className="w-16 h-16 rounded-3xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+            <Unlock className="w-8 h-8 text-blue-500" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-black text-white tracking-tighter uppercase leading-none">Authorize Access</h3>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-2">Impersonation Protocol v4.0</p>
+          </div>
+        </div>
+
+        <div className="bg-white/5 border border-white/5 rounded-2xl p-6 mb-8">
+          <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Target Identity Node</div>
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+              <User className="w-6 h-6 text-white/40" />
+            </div>
+            <div>
+              <div className="text-lg font-black text-white uppercase tracking-tight">{targetUser.name}</div>
+              <div className="text-xs text-blue-400 font-bold uppercase tracking-widest">{targetUser.role}</div>
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-white/5 text-[10px] text-gray-500 font-bold">
+            <span className="opacity-50 uppercase tracking-widest mr-2">Email Hash:</span>
+            <span className="text-white/80">{targetUser.email}</span>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-400 leading-relaxed mb-8 px-2 italic">
+          You are about to initiate an administrative override to access this account. All actions will be logged to the security audit trail.
+        </p>
+
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            onClick={onClose}
+            className="px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95"
+          >
+            Abort Protocol
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-6 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 shadow-[0_10px_30px_rgba(37,99,235,0.3)]"
+          >
+            Confirm Override
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Audio Synthesizer for Cyberpunk Ambiance and Emergency Warnings
 class SciFiSynth {
@@ -125,7 +187,7 @@ class SciFiSynth {
 const synth = new SciFiSynth();
 
 // Real-time Live Monitoring Map stable component
-const TrackingView = () => {
+const TrackingView = ({ telemetry }: { telemetry: OBDData }) => {
   const [selectedFleetId, setSelectedFleetId] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [mapMode, setMapMode] = useState<'k' | 'm' | 'p'>('k'); // k=satellite, m=roadmap, p=terrain
@@ -140,7 +202,7 @@ const TrackingView = () => {
       coords: '19.0760° N, 72.8777° E',
       status: 'ACTIVE',
       vehicles: [
-        { id: 'TRIP-429', label: 'MH-12-PQ-8890', speed: 75, location: 'Pune, Maharashtra, India', coords: '18.5204° N, 73.8567° E', pilot: 'Rohan Sharma', status: 'ACTIVE IN TRANSIT' },
+        { id: 'TRIP-429', label: 'MH-12-PQ-8890', speed: telemetry.speed || 0, location: 'Pune, Maharashtra, India', coords: '18.5204° N, 73.8567° E', pilot: 'Rohan Sharma', status: 'ACTIVE IN TRANSIT' },
         { id: 'TRIP-108', label: 'KA-03-MN-4421', speed: 62, location: 'Bangalore, Karnataka, India', coords: '12.9716° N, 77.5946° E', pilot: 'Aditya Hegde', status: 'LOADING BAY' },
       ]
     },
@@ -408,6 +470,33 @@ export default function SuperAdminPortal() {
   const { user, logout, loginAs } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [telemetry, setTelemetry] = useState<OBDData>({});
+  const [impersonateTarget, setImpersonateTarget] = useState<any | null>(null);
+
+  useEffect(() => {
+    const updateTelemetry = async () => {
+      try {
+        const [rpmData, speedData, fuelData, diagData] = await Promise.all([
+          fetchRPM(),
+          fetchSpeed(),
+          fetchFuelLevel(),
+          fetchDiagnostics()
+        ]);
+        setTelemetry({
+          rpm: rpmData.rpm,
+          speed: speedData.speed,
+          fuel_level: fuelData.fuel_level,
+          diagnostics: diagData.diagnostics
+        });
+      } catch (error) {
+        console.error('Failed to update telemetry:', error);
+      }
+    };
+
+    updateTelemetry();
+    const interval = setInterval(updateTelemetry, 2000); // Admin also polls every 2 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   const formatShorthand = (amount: number) => {
     if (amount >= 10000000) {
@@ -612,13 +701,19 @@ export default function SuperAdminPortal() {
 
   const handleImpersonateUser = (targetUser: { id: string; name: string; email: string; role: 'owner' | 'driver' }) => {
     playClick();
+    setImpersonateTarget(targetUser);
+  };
+
+  const confirmImpersonation = () => {
+    if (!impersonateTarget) return;
     sessionStorage.setItem('admin_impersonating', 'true');
-    loginAs(targetUser);
-    if (targetUser.role === 'owner') {
+    loginAs(impersonateTarget);
+    if (impersonateTarget.role === 'owner') {
       navigate('/owner');
     } else {
       navigate('/driver');
     }
+    setImpersonateTarget(null);
   };
 
   const navigation = [
@@ -1465,7 +1560,7 @@ export default function SuperAdminPortal() {
               <Route path="/owners" element={<OwnersView />} />
               <Route path="/pilots" element={<PilotsView />} />
               <Route path="/devices" element={<DevicesView />} />
-              <Route path="/tracking" element={<TrackingView />} />
+              <Route path="/tracking" element={<TrackingView telemetry={telemetry} />} />
               <Route path="/analytics" element={<AnalyticsView />} />
               <Route path="/alerts" element={<AlertsView />} />
               <Route path="*" element={<Navigate to="/super-admin-dashboard" replace />} />
@@ -1473,6 +1568,12 @@ export default function SuperAdminPortal() {
           </div>
         </main>
       </div>
+      <ImpersonateModal
+        isOpen={!!impersonateTarget}
+        onClose={() => setImpersonateTarget(null)}
+        targetUser={impersonateTarget}
+        onConfirm={confirmImpersonation}
+      />
     </div>
   );
 }

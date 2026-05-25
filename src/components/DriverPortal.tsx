@@ -57,7 +57,7 @@ export default function DriverPortal() {
     };
 
     updateTelemetry();
-    const interval = setInterval(updateTelemetry, 10000); // Update every 10 seconds
+    const interval = setInterval(updateTelemetry, 2000); // Update every 2 seconds
     return () => clearInterval(interval);
   }, []);
 

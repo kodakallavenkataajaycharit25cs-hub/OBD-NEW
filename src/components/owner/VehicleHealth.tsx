@@ -42,7 +42,7 @@ export default function VehicleHealth() {
       };
 
       updateTelemetry();
-      const interval = setInterval(updateTelemetry, 10000);
+      const interval = setInterval(updateTelemetry, 2000);
       return () => clearInterval(interval);
     } else {
       setTelemetry({});

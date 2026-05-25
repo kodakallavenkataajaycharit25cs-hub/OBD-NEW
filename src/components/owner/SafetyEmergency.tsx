@@ -120,14 +120,14 @@ export default function SafetyEmergency() {
   const selectedIncidentData = recentIncidents.find(i => i.id === selectedIncident);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header with Emergency Stats */}
       <BorderGlow
         borderRadius={28}
         glowRadius={40}
         glowIntensity={1}
         backgroundColor="#120F17"
-        className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-500/50 p-6"
+        className="p-6 border-white/5 shadow-2xl"
       >
         <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
           <Shield className="w-8 h-8 mr-3 text-red-400" />
