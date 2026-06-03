@@ -62,3 +62,47 @@ export const fetchDiagnostics = async () => {
     };
   }
 };
+
+export const fetchOwners = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/owners`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching owners:', error);
+    return [];
+  }
+};
+
+export const fetchPilots = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilots`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching pilots:', error);
+    return [];
+  }
+};
+
+export const fetchDevices = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/devices`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching devices:', error);
+    return [];
+  }
+};
+
+export const fetchAlerts = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/alerts`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching alerts:', error);
+    return [];
+  }
+};

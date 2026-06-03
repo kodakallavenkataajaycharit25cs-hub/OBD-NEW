@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TrendingUp,
   Truck,
@@ -13,8 +13,55 @@ import {
   Car
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchOwners, fetchPilots, fetchDevices, fetchAlerts } from '../../services/obdApi';
 
 export default function FleetOverview() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [ownerData, setOwnerData] = useState<any>(null);
+  const [fleetDevices, setFleetDevices] = useState<any[]>([]);
+  const [fleetPilots, setFleetPilots] = useState<any[]>([]);
+  const [fleetAlerts, setFleetAlerts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const [owners, devices, pilots, alerts] = await Promise.all([
+          fetchOwners(),
+          fetchDevices(),
+          fetchPilots(),
+          fetchAlerts()
+        ]);
+
+        // Find the current owner record
+        const currentOwner = owners.find((o: any) => o.id === user?.id || o.name === user?.name);
+        setOwnerData(currentOwner);
+
+        // Filter devices belonging to this owner
+        const myDevices = devices.filter((d: any) => d.ownerId === currentOwner?.id || d.owner === currentOwner?.name);
+        setFleetDevices(myDevices);
+
+        // Filter alerts for this owner's vehicles
+        const vehicleIds = myDevices.map((d: any) => d.id);
+        const myAlerts = alerts.filter((a: any) => vehicleIds.includes(a.vehicle) || a.vehicle.includes(currentOwner?.name));
+        setFleetAlerts(myAlerts);
+
+        // For demo, we'll show all pilots as being part of the network
+        setFleetPilots(pilots);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load owner dashboard data:', error);
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+    const interval = setInterval(loadDashboardData, 10000); // Sync every 10 seconds
+    return () => clearInterval(interval);
+  }, [user]);
+
   const formatIndianCurrency = (amount: number) => {
     if (amount >= 10000000) {
       return `₹${(amount / 10000000).toFixed(1).replace(/\.0$/, '')} cr`;
@@ -32,32 +79,41 @@ export default function FleetOverview() {
     }).format(amount);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] animate-pulse">Syncing with Supabase Cluster...</p>
+      </div>
+    );
+  }
+
   const kpiData = [
     {
       title: 'Gross Revenue',
-      value: formatIndianCurrency(284760),
-      change: '+12.5%',
+      value: formatIndianCurrency(ownerData?.revenue || 0),
+      change: '+8.4%',
       icon: IndianRupee,
       color: 'blue'
     },
     {
       title: 'Active Nodes',
-      value: '34/38',
-      change: '+2',
+      value: `${fleetDevices.filter(d => d.status === 'active').length}/${fleetDevices.length || 0}`,
+      change: '+1',
       icon: Car,
       color: 'blue'
     },
     {
       title: 'Pilot Network',
-      value: '42',
-      change: '+3',
+      value: fleetPilots.length.toString(),
+      change: '+2',
       icon: Users,
       color: 'purple'
     },
     {
       title: 'Active Alerts',
-      value: '7',
-      change: '-2',
+      value: fleetAlerts.length.toString(),
+      change: fleetAlerts.length > 0 ? '+1' : '0',
       icon: AlertTriangle,
       color: 'red'
     }
@@ -70,17 +126,19 @@ export default function FleetOverview() {
     { route: 'Mumbai → Goa', trips: 24, profit: 156000, margin: '28.7%' },
   ];
 
-  const topDrivers = [
-    { name: 'Suresh Singh', score: 9.2, trips: 34, earnings: 48600 },
-    { name: 'Ramesh Sharma', score: 9.0, trips: 31, earnings: 44200 },
-    { name: 'Vikram Patel', score: 8.8, trips: 29, earnings: 42800 },
-  ];
+  const topDrivers = fleetPilots.slice(0, 3).map((p, i) => ({
+    name: p.name,
+    score: p.safetyScore,
+    trips: p.trips,
+    earnings: p.trips * 1200 // Demo calculation
+  }));
 
-  const recentAlerts = [
-    { type: 'Service', message: 'MH 02 AB 1234 due for revision', time: '2h ago', severity: 'medium' },
-    { type: 'Efficiency', message: 'DL 01 CD 5678 - Low yield detected', time: '4h ago', severity: 'high' },
-    { type: 'Velocity', message: 'GJ 03 EF 9012 protocol breach', time: '6h ago', severity: 'high' },
-  ];
+  const recentAlerts = fleetAlerts.slice(0, 3).map(a => ({
+    type: a.type,
+    message: a.description,
+    time: 'Live',
+    severity: a.severity === 'CRITICAL' ? 'high' : 'medium'
+  }));
 
   return (
     <div className="space-y-10 pb-12">

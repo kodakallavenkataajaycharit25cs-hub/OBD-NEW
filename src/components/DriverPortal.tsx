@@ -35,6 +35,8 @@ export default function DriverPortal() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
   const [telemetry, setTelemetry] = useState<OBDData>({});
+  const [pilotRecord, setPilotRecord] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const updateTelemetry = async () => {
@@ -56,10 +58,24 @@ export default function DriverPortal() {
       }
     };
 
+    const loadPilotProfile = async () => {
+      try {
+        const pilots = await fetchPilots();
+        // Match by ID or Name
+        const record = pilots.find((p: any) => p.id === user?.id || p.name === user?.name);
+        setPilotRecord(record);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to load pilot profile:', error);
+        setLoading(false);
+      }
+    };
+
     updateTelemetry();
-    const interval = setInterval(updateTelemetry, 2000); // Update every 2 seconds
+    loadPilotProfile();
+    const interval = setInterval(updateTelemetry, 2000); 
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   const handleSectionHighlight = (section: string) => {
     setHighlightedSection(section);
@@ -76,13 +92,15 @@ export default function DriverPortal() {
     { name: 'Booking', href: '/driver/booking', icon: MapPin, current: location.pathname === '/driver/booking' },
   ];
 
-  // Mock driver data
+  // Map Supabase pilot data to the UI format
   const getDriverDataForPeriod = (period: '7d' | '1m' | '3m' | '1y') => {
     const baseData = {
-      vehicleAssigned: 'Toyota Innova Crysta - MH 02 AB 1234',
-      safetyScore: 8.7,
+      vehicleAssigned: 'Toyota Innova Crysta - MH-12-PQ-8890',
+      safetyScore: pilotRecord?.safetyScore || 8.5,
       fuelEfficiencyScore: 7.9,
-      customerRating: 4.8,
+      customerRating: pilotRecord?.rating || 4.5,
+      totalTrips: pilotRecord?.trips || 0,
+      totalDistance: `${(pilotRecord?.hours || 0) * 45} km`, // Simple calc for demo
       documents: [
         { name: 'Driving License', status: 'valid', expiry: '2026-03-15' },
         { name: 'Commercial Permit', status: 'expiring', expiry: '2025-02-20' },
@@ -95,9 +113,7 @@ export default function DriverPortal() {
       case '7d':
         return {
           ...baseData,
-          totalTrips: 12,
-          totalDistance: '1,850 km',
-          currentPeriodEarnings: 8400,
+          currentPeriodEarnings: (pilotRecord?.trips || 0) * 150,
           previousPeriodEarnings: 7800,
           periodLabel: 'This Week',
           previousLabel: 'Last Week'
@@ -105,9 +121,7 @@ export default function DriverPortal() {
       case '1m':
         return {
           ...baseData,
-          totalTrips: 47,
-          totalDistance: '7,240 km',
-          currentPeriodEarnings: 32600,
+          currentPeriodEarnings: (pilotRecord?.trips || 0) * 450,
           previousPeriodEarnings: 29800,
           periodLabel: 'This Month',
           previousLabel: 'Last Month'
@@ -115,9 +129,7 @@ export default function DriverPortal() {
       case '3m':
         return {
           ...baseData,
-          totalTrips: 147,
-          totalDistance: '22,450 km',
-          currentPeriodEarnings: 98400,
+          currentPeriodEarnings: (pilotRecord?.trips || 0) * 1200,
           previousPeriodEarnings: 89200,
           periodLabel: 'Last 3 Months',
           previousLabel: 'Previous 3 Months'
@@ -125,9 +137,7 @@ export default function DriverPortal() {
       case '1y':
         return {
           ...baseData,
-          totalTrips: 584,
-          totalDistance: '88,240 km',
-          currentPeriodEarnings: 395000,
+          currentPeriodEarnings: (pilotRecord?.trips || 0) * 4800,
           previousPeriodEarnings: 362000,
           periodLabel: 'This Year',
           previousLabel: 'Last Year'
@@ -138,6 +148,15 @@ export default function DriverPortal() {
   };
 
   const driverData = getDriverDataForPeriod(selectedPeriod);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-[#120F17] space-y-4">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] animate-pulse">Syncing Pilot Vector with Core...</p>
+      </div>
+    );
+  }
 
   const formatIndianCurrency = (amount: number) => {
     if (amount >= 10000000) {

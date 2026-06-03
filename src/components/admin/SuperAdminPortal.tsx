@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
-import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../../services/obdApi';
+import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, OBDData } from '../../services/obdApi';
 
 // Impersonate Modal Component
 const ImpersonateModal = ({ isOpen, onClose, targetUser, onConfirm }: { isOpen: boolean; onClose: () => void; targetUser: any; onConfirm: () => void }) => {
@@ -187,36 +187,39 @@ class SciFiSynth {
 const synth = new SciFiSynth();
 
 // Real-time Live Monitoring Map stable component
-const TrackingView = ({ telemetry }: { telemetry: OBDData }) => {
+const TrackingView = ({ telemetry, owners, pilots, devices }: { telemetry: OBDData, owners: any[], pilots: any[], devices: any[] }) => {
   const [selectedFleetId, setSelectedFleetId] = useState<string | null>(null);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [mapMode, setMapMode] = useState<'k' | 'm' | 'p'>('k'); // k=satellite, m=roadmap, p=terrain
   const [zoomLevel, setZoomLevel] = useState<number>(13);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const fleets = [
-    {
-      id: 'FLEET-1',
-      name: 'Alpha Logistics',
-      location: 'Mumbai, Maharashtra, India',
-      coords: '19.0760° N, 72.8777° E',
-      status: 'ACTIVE',
-      vehicles: [
-        { id: 'TRIP-429', label: 'MH-12-PQ-8890', speed: telemetry.speed || 0, location: 'Pune, Maharashtra, India', coords: '18.5204° N, 73.8567° E', pilot: 'Rohan Sharma', status: 'ACTIVE IN TRANSIT' },
-        { id: 'TRIP-108', label: 'KA-03-MN-4421', speed: 62, location: 'Bangalore, Karnataka, India', coords: '12.9716° N, 77.5946° E', pilot: 'Aditya Hegde', status: 'LOADING BAY' },
-      ]
-    },
-    {
-      id: 'FLEET-2',
-      name: 'Giga Mobility Corp',
-      location: 'New Delhi, Delhi, India',
-      coords: '28.6139° N, 77.2090° E',
-      status: 'ACTIVE',
-      vehicles: [
-        { id: 'TRIP-749', label: 'DL-01-AB-1092', speed: 80, location: 'Gurgaon, Haryana, India', coords: '28.4595° N, 77.0266° E', pilot: 'Vikram Singh', status: 'EXPRESS DELIVERY' }
-      ]
-    }
-  ];
+  // Dynamically build fleets from Supabase data
+  const fleets = owners.map(owner => {
+    // Find devices belonging to this owner
+    const ownerDevices = devices.filter(d => d.owner === owner.name || d.ownerId === owner.id);
+    
+    return {
+      id: owner.id,
+      name: owner.name,
+      location: 'India', // Default to India, or you could add location to Owner table
+      coords: '20.5937° N, 78.9629° E',
+      status: owner.status.toUpperCase(),
+      vehicles: ownerDevices.map((dev, idx) => {
+        // Map a pilot to this device (for demo purposes, we'll pick one)
+        const pilot = pilots[idx % pilots.length] || { name: 'Automated System' };
+        return {
+          id: dev.id,
+          label: `VEH-${dev.id.split('-')[1] || dev.id}`,
+          speed: dev.status === 'active' ? (telemetry.speed || 45) : 0,
+          location: 'Real-time Vector',
+          coords: 'Dynamic',
+          pilot: pilot.name,
+          status: dev.status.toUpperCase()
+        };
+      })
+    };
+  });
 
   const activeFleet = fleets.find(f => f.id === selectedFleetId);
   const activeVehicle = activeFleet?.vehicles.find(v => v.id === selectedVehicleId);
@@ -472,6 +475,14 @@ export default function SuperAdminPortal() {
   const navigate = useNavigate();
   const [telemetry, setTelemetry] = useState<OBDData>({});
   const [impersonateTarget, setImpersonateTarget] = useState<any | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [bootProgress, setBootProgress] = useState(0);
+  const [isBooted, setIsBooted] = useState(false);
+  const [bootText, setBootText] = useState('CONNECTING SYSTEM UPLINK...');
+  const [animateBars, setAnimateBars] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hoveredMissions, setHoveredMissions] = useState<{ x: number; y: number; val: number; time: string } | null>(null);
+  const [hoveredRevenueCycle, setHoveredRevenueCycle] = useState<number | null>(null);
 
   useEffect(() => {
     const updateTelemetry = async () => {
@@ -498,6 +509,31 @@ export default function SuperAdminPortal() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const updateMockDB = async () => {
+      try {
+        const [ownersData, pilotsData, devicesData, alertsData] = await Promise.all([
+          fetchOwners(),
+          fetchPilots(),
+          fetchDevices(),
+          fetchAlerts()
+        ]);
+        setOwners(ownersData);
+        setPilots(pilotsData);
+        setDevices(devicesData);
+        setAlerts(alertsData);
+      } catch (error) {
+        console.error('Failed to update mock DB:', error);
+      }
+    };
+
+    if (isBooted) {
+      updateMockDB();
+      const interval = setInterval(updateMockDB, 5000); // Sync mock DB every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isBooted]);
+
   const formatShorthand = (amount: number) => {
     if (amount >= 10000000) {
       return `₹${(amount / 10000000).toFixed(1).replace(/\.0$/, '')} cr`;
@@ -510,9 +546,7 @@ export default function SuperAdminPortal() {
     }
     return `₹${amount.toLocaleString('en-IN')}`;
   };
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [hoveredMissions, setHoveredMissions] = useState<{ x: number; y: number; val: number; time: string } | null>(null);
-  const [hoveredRevenueCycle, setHoveredRevenueCycle] = useState<number | null>(null);
+
 
   const handleMissionsMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -548,11 +582,7 @@ export default function SuperAdminPortal() {
 
     setHoveredMissions({ x: clampedX, y, val, time: timeStr });
   };
-  const [soundEnabled, setSoundEnabled] = useState(false);
-  const [bootProgress, setBootProgress] = useState(0);
-  const [isBooted, setIsBooted] = useState(false);
-  const [bootText, setBootText] = useState('CONNECTING SYSTEM UPLINK...');
-  const [animateBars, setAnimateBars] = useState(false);
+
 
   useEffect(() => {
     if (isBooted) {
@@ -1560,7 +1590,7 @@ export default function SuperAdminPortal() {
               <Route path="/owners" element={<OwnersView />} />
               <Route path="/pilots" element={<PilotsView />} />
               <Route path="/devices" element={<DevicesView />} />
-              <Route path="/tracking" element={<TrackingView telemetry={telemetry} />} />
+              <Route path="/tracking" element={<TrackingView telemetry={telemetry} owners={owners} pilots={pilots} devices={devices} />} />
               <Route path="/analytics" element={<AnalyticsView />} />
               <Route path="/alerts" element={<AlertsView />} />
               <Route path="*" element={<Navigate to="/super-admin-dashboard" replace />} />
