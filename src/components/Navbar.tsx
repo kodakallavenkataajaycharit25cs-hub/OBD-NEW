@@ -2,6 +2,8 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+import ThemeToggle from './ThemeToggle';
+
 interface NavbarProps {
   onLoginClick: () => void;
 }
@@ -34,12 +36,16 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
           </Link>
 
           <div className="flex items-center space-x-8 md:space-x-12">
+            <Link to="/about" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
+              About Us
+            </Link>
             <Link to="/features" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
               Features
             </Link>
             <Link to="/contact" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
               Contact
             </Link>
+            <ThemeToggle />
             <button
               onClick={handleDashboardAccess}
               className="clay-btn clay-btn-blue text-[10px] uppercase tracking-[0.2em] px-4 py-2"

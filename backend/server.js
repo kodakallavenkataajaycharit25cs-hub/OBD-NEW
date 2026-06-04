@@ -142,6 +142,7 @@ app.get('/api/owners', async (req, res) => {
             id: r.id,
             name: r.name,
             email: r.email,
+            contact: r.contact,
             fleetSize: r.fleet_size,
             activeVehicles: r.active_vehicles,
             revenue: Number(r.revenue),
@@ -160,6 +161,9 @@ app.get('/api/pilots', async (req, res) => {
         const formatted = rows.map(r => ({
             id: r.id,
             name: r.name,
+            email: r.email,
+            contact: r.contact,
+            owner_id: r.owner_id,
             trips: r.trips,
             hours: r.hours,
             safetyScore: Number(r.safety_score),
@@ -209,6 +213,92 @@ app.get('/api/alerts', async (req, res) => {
             time: r.created_at // Frontend expects 'time'
         }));
         res.json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// CRUD for Owners (Clients)
+app.post('/api/owners', async (req, res) => {
+    try {
+        const { id, name, email, contact, fleetSize, activeVehicles, revenue, score, status } = req.body;
+        await sql`
+            INSERT INTO owners (id, name, email, contact, fleet_size, active_vehicles, revenue, score, status)
+            VALUES (${id}, ${name}, ${email || ''}, ${contact || ''}, ${fleetSize || 0}, ${activeVehicles || 0}, ${revenue || 0}, ${score || 10.0}, ${status || 'active'})
+        `;
+        res.json({ success: true, message: 'Owner created' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/owners/:id', async (req, res) => {
+    try {
+        const { name, email, contact, fleetSize, activeVehicles, status } = req.body;
+        await sql`
+            UPDATE owners 
+            SET name = COALESCE(${name}, name), 
+                email = COALESCE(${email}, email), 
+                contact = COALESCE(${contact}, contact),
+                fleet_size = COALESCE(${fleetSize}, fleet_size), 
+                active_vehicles = COALESCE(${activeVehicles}, active_vehicles), 
+                status = COALESCE(${status}, status)
+            WHERE id = ${req.params.id}
+        `;
+        res.json({ success: true, message: 'Owner updated' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/owners/:id', async (req, res) => {
+    try {
+        // Cascade manually if needed or just let DB handle if FK cascading is set. Let's explicitly delete related pilots first for safety.
+        await sql`DELETE FROM pilots WHERE owner_id = ${req.params.id}`;
+        await sql`DELETE FROM owners WHERE id = ${req.params.id}`;
+        res.json({ success: true, message: 'Owner deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// CRUD for Pilots (Drivers)
+app.post('/api/pilots', async (req, res) => {
+    try {
+        const { id, name, email, contact, owner_id, trips, hours, safetyScore, status, availability, rating } = req.body;
+        await sql`
+            INSERT INTO pilots (id, name, email, contact, owner_id, trips, hours, safety_score, status, availability, rating)
+            VALUES (${id}, ${name}, ${email || ''}, ${contact || ''}, ${owner_id || null}, ${trips || 0}, ${hours || 0}, ${safetyScore || 10.0}, ${status || 'active'}, ${availability || 'off-duty'}, ${rating || 5.0})
+        `;
+        res.json({ success: true, message: 'Pilot created' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/pilots/:id', async (req, res) => {
+    try {
+        const { name, email, contact, owner_id, status, availability } = req.body;
+        await sql`
+            UPDATE pilots 
+            SET name = COALESCE(${name}, name), 
+                email = COALESCE(${email}, email), 
+                contact = COALESCE(${contact}, contact),
+                owner_id = COALESCE(${owner_id}, owner_id), 
+                status = COALESCE(${status}, status),
+                availability = COALESCE(${availability}, availability)
+            WHERE id = ${req.params.id}
+        `;
+        res.json({ success: true, message: 'Pilot updated' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/pilots/:id', async (req, res) => {
+    try {
+        await sql`DELETE FROM pilots WHERE id = ${req.params.id}`;
+        res.json({ success: true, message: 'Pilot deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

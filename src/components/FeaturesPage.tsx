@@ -32,6 +32,14 @@ export default function FeaturesPage({ onLoginClick }: FeaturesPageProps) {
             <p className="mt-8 text-xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
               Explore the advanced telemetry, machine learning cost optimization, and real-time safety controls designed for modern Indian fleets.
             </p>
+            <div className="mt-16 relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 max-w-5xl mx-auto">
+              <img 
+                src="/features-hero.jpg" 
+                alt="AI and Telemetry Dashboard" 
+                className="w-full h-[350px] object-cover transform hover:scale-100 transition-transform duration-1000"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#120F17] via-transparent to-transparent"></div>
+            </div>
           </div>
 
           <MagicBento

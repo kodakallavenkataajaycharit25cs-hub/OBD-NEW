@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Lock, AlertCircle, ShieldCheck, Zap, Globe } from 'lucide-react';
+import { X, User, Lock, AlertCircle, ShieldCheck, Zap, Globe, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,6 +11,7 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -19,7 +20,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const demoCredentials = [
     { email: 'owner@demo.com', password: 'owner123', role: 'Fleet Owner' },
     { email: 'driver1@demo.com', password: 'driver123', role: 'Unit Pilot' },
-    { email: 'admin@test.com', password: 'Admin@123', role: 'Super Admin' }
+    { email: 'admin@test.com', password: 'Admin@123', role: 'Super Admin' },
+    { email: 'regular_admin@test.com', password: 'Admin@123', role: 'Admin' }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,13 +33,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       const success = await login(email, password);
       if (success) {
         onClose();
-        if (email === 'owner@demo.com') {
-          navigate('/owner');
-        } else if (email === 'admin@test.com') {
-          navigate('/super-admin-dashboard');
-        } else if (email.includes('driver')) {
-          navigate('/driver');
-        }
+        
+        // Manual navigation fallback if App.tsx doesn't trigger immediately
+        // We'll use a small delay to ensure context is updated
+        setTimeout(() => {
+          if (email === 'admin@test.com') {
+            navigate('/super-admin-dashboard');
+          } else if (email === 'regular_admin@test.com') {
+            navigate('/admin-dashboard');
+          } else if (email.includes('owner')) {
+            navigate('/owner');
+          } else if (email.includes('driver')) {
+            navigate('/driver');
+          }
+        }, 100);
       } else {
         setError('Invalid credentials sequence');
       }
@@ -151,13 +160,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800 group-focus-within:text-blue-500 transition-colors" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-800 focus:outline-none focus:border-blue-500/40 shadow-inner text-xs font-bold"
+                    className="w-full pl-12 pr-12 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-800 focus:outline-none focus:border-blue-500/40 shadow-inner text-xs font-bold"
                     placeholder="Passkey"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -170,25 +186,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </button>
             </form>
 
-            <div className="mt-12">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="h-[1px] flex-1 bg-white/5" />
-                <span className="text-[8px] font-black text-gray-700 uppercase tracking-[0.3em] italic">Authority Entry Points</span>
-                <div className="h-[1px] flex-1 bg-white/5" />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                {demoCredentials.map((cred, index) => (
-                  <button
-                    key={index}
-                    onClick={() => fillDemo(cred.email, cred.password)}
-                    className="p-4 bg-white/5 border-white/5 hover:bg-white/10 transition-all flex flex-col items-center group shadow-inner rounded-2xl"
-                  >
-                    <span className="text-[9px] font-black text-gray-400 group-hover:text-blue-500 transition-colors uppercase tracking-widest">{cred.role}</span>
-                    <span className="text-[7px] text-gray-700 font-bold uppercase tracking-tighter mt-1">Node {index + 1}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+
           </div>
         </div>
       </div>

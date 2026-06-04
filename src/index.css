@@ -42,6 +42,253 @@
   }
 }
 
+/* Light Mode Overrides */
+.light-mode body {
+  @apply bg-[#EEF2F7] text-[#111827] selection:bg-[#5B82F6]/20 selection:text-[#111827];
+}
+
+.light-mode .bg-black,
+.light-mode .bg-zinc-950 {
+  @apply bg-[#EEF2F7];
+}
+
+.light-mode .bg-zinc-800,
+.light-mode .bg-zinc-800\/30,
+.light-mode .bg-\[\#120F17\] {
+  @apply bg-white;
+}
+
+.light-mode .bg-\[\#120F17\]\/50,
+.light-mode .bg-\[\#120F17\]\/60 {
+  @apply bg-white/80 backdrop-blur-md;
+}
+
+.light-mode .bg-\[\#120F17\]\/80,
+.light-mode .bg-\[\#120F17\]\/90 {
+  @apply bg-white border border-[#E2E8F0];
+}
+
+.light-mode .bg-white\/5 {
+  @apply bg-[#F1F5F9];
+}
+
+.light-mode .bg-white\/10 {
+  @apply bg-white border border-[#E2E8F0];
+}
+
+.light-mode .bg-black\/20,
+.light-mode .bg-black\/30 {
+  @apply bg-[#F8FAFC];
+}
+
+.light-mode .bg-black\/40,
+.light-mode .bg-black\/50 {
+  @apply bg-[#E2E8F0];
+}
+
+.light-mode .bg-black\/60,
+.light-mode .bg-black\/80 {
+  @apply bg-white/80;
+}
+
+/* Text Colors */
+.light-mode .text-white,
+.light-mode .text-white\/80,
+.light-mode .text-white\/90 {
+  @apply text-[#111827];
+}
+
+.light-mode .text-white\/20,
+.light-mode .text-white\/40,
+.light-mode .text-white\/50,
+.light-mode .text-white\/60,
+.light-mode .text-gray-200,
+.light-mode .text-gray-300,
+.light-mode .text-gray-400 {
+  @apply text-[#6B7280];
+}
+
+.light-mode .text-gray-500,
+.light-mode .text-gray-600 {
+  @apply text-[#475569];
+}
+
+.light-mode .text-gray-700 {
+  @apply text-[#94A3B8];
+}
+
+/* Accent Colors - Blue */
+.light-mode .bg-blue-600 {
+  @apply bg-[#5B82F6];
+}
+
+.light-mode .text-blue-500 {
+  @apply text-[#5B82F6];
+}
+
+.light-mode .text-blue-400 {
+  @apply text-[#3B82F6];
+}
+
+.light-mode .bg-blue-500\/10 {
+  @apply bg-[#EFF6FF];
+}
+
+.light-mode .bg-blue-600\/10 {
+  @apply bg-[#EFF6FF];
+}
+
+.light-mode .border-blue-500\/20 {
+  @apply border-[#BFDBFE];
+}
+
+/* Accent Colors - Green */
+.light-mode .text-green-500,
+.light-mode .text-green-400 {
+  @apply text-[#22C55E];
+}
+
+.light-mode .bg-green-500 {
+  @apply bg-[#22C55E];
+}
+
+.light-mode .bg-green-500\/10 {
+  @apply bg-[#DCFCE7];
+}
+
+.light-mode .border-green-500\/20 {
+  @apply border-[#86EFAC];
+}
+
+/* Accent Colors - Purple */
+.light-mode .bg-purple-600\/10 {
+  @apply bg-[#F3E8FF];
+}
+
+.light-mode .text-purple-500,
+.light-mode .text-purple-400 {
+  @apply text-[#9333EA];
+}
+
+/* Accent Colors - Red & Yellow & Orange */
+.light-mode .text-red-500 {
+  @apply text-[#DC2626];
+}
+
+.light-mode .bg-red-500\/10,
+.light-mode .bg-red-600\/10 {
+  @apply bg-[#FEE2E2];
+}
+
+.light-mode .border-red-500\/20 {
+  @apply border-[#FECACA];
+}
+
+.light-mode .border-l-red-600 {
+  @apply border-l-[#EF4444];
+}
+
+.light-mode .text-yellow-500 {
+  @apply text-[#EAB308];
+}
+
+.light-mode .bg-yellow-500\/5,
+.light-mode .bg-yellow-500\/10 {
+  @apply bg-[#FEF9C3];
+}
+
+.light-mode .border-yellow-500\/20 {
+  @apply border-[#FEF08A];
+}
+
+.light-mode .text-orange-500 {
+  @apply text-[#F97316];
+}
+
+.light-mode .bg-orange-500\/5,
+.light-mode .bg-orange-500\/10 {
+  @apply bg-[#FFEDD5];
+}
+
+.light-mode .border-orange-500\/20 {
+  @apply border-[#FED7AA];
+}
+
+/* Borders */
+.light-mode .border-white\/5,
+.light-mode .border-white\/10,
+.light-mode .border-white\/20,
+.light-mode .border-white\/30,
+.light-mode .border-white\/40 {
+  @apply border-[#E2E8F0];
+}
+
+/* Hover States */
+.light-mode .hover\:bg-white\/5:hover,
+.light-mode .hover\:bg-white\/10:hover,
+.light-mode .group:hover .group-hover\:bg-white\/5 {
+  @apply bg-[#F1F5F9];
+}
+
+.light-mode .hover\:bg-white\/20:hover {
+  @apply bg-[#E2E8F0];
+}
+
+.light-mode .hover\:text-white:hover {
+  @apply text-[#111827];
+}
+
+/* Shadows */
+.light-mode .shadow-2xl {
+  box-shadow: 0 10px 40px rgba(15,23,42,0.04);
+}
+
+.light-mode .shadow-xl {
+  box-shadow: 0 10px 25px rgba(15,23,42,0.03);
+}
+
+.light-mode .shadow-inner {
+  box-shadow: inset 0 2px 4px 0 rgba(15,23,42,0.02);
+}
+
+.light-mode .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(15,23,42,0.03), 0 4px 6px -2px rgba(15,23,42,0.015);
+}
+
+/* Specific Component Overrides */
+.light-mode .clay-card {
+  @apply bg-white border border-[#E2E8F0];
+  box-shadow: 0 4px 20px rgba(15,23,42,0.05);
+}
+
+.light-mode .clay-card:hover {
+  @apply border-[#CBD5E1];
+  box-shadow: 0 8px 30px rgba(15,23,42,0.08);
+}
+
+.light-mode .clay-card-hover:hover {
+  @apply border-[#5B82F6]/30;
+  box-shadow: 0 8px 30px rgba(15,23,42,0.08);
+}
+
+.light-mode .glass-navbar {
+  @apply bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0];
+}
+
+/* Scrollbar Overrides */
+.light-mode ::-webkit-scrollbar-track {
+  @apply bg-[#F8FAFC];
+}
+
+.light-mode ::-webkit-scrollbar-thumb {
+  @apply bg-[#CBD5E1] hover:bg-[#94A3B8];
+}
+
+/* Clay text 3D */
+.light-mode .clay-text-3d {
+  text-shadow: 1px 1px 0px rgba(255,255,255,1), 2px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
 @layer components {
   .clay-card {
     @apply bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 transition-all duration-500 ease-out;

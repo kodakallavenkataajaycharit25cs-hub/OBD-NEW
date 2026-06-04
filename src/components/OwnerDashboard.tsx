@@ -30,6 +30,7 @@ import BillingFinance from './owner/BillingFinance';
 
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
+import ThemeToggle from './ThemeToggle';
 
 export default function OwnerDashboard() {
   const { user, logout, loginAs } = useAuth();
@@ -156,6 +157,7 @@ export default function OwnerDashboard() {
                 <Users className="w-6 h-6 text-white" />
               </div>
             </div>
+            <ThemeToggle />
             <button
               onClick={logout}
               className="flex items-center px-4 py-2 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none"

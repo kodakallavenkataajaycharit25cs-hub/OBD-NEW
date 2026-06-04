@@ -1,14 +1,17 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '../services/supabaseClient';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string;
   email: string;
-  role: 'owner' | 'driver' | 'admin';
+  role: 'owner' | 'driver' | 'admin' | 'superadmin';
   name: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   loginAs: (user: User) => void;
@@ -16,63 +19,87 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo users
-const DEMO_USERS: User[] = [
-  {
-    id: '1',
-    email: 'owner@demo.com',
-    role: 'owner',
-    name: 'Rajesh Kumar'
-  },
-  {
-    id: '2',
-    email: 'driver1@demo.com',
-    role: 'driver',
-    name: 'Suresh Singh'
-  },
-  {
-    id: '3',
-    email: 'driver2@demo.com',
-    role: 'driver',
-    name: 'Ramesh Sharma'
-  },
-  {
-    id: '4',
-    email: 'admin@test.com',
-    role: 'admin',
-    name: 'Super Admin'
-  }
-];
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Demo authentication
-    if ((email === 'owner@demo.com' && password === 'owner123') ||
-        (email === 'driver1@demo.com' && password === 'driver123') ||
-        (email === 'driver2@demo.com' && password === 'driver123') ||
-        (email === 'admin@test.com' && password === 'Admin@123')) {
-      
-      const foundUser = DEMO_USERS.find(u => u.email === email);
-      if (foundUser) {
-        setUser(foundUser);
-        return true;
+  useEffect(() => {
+    // Check active sessions and sets the user
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        mapSupabaseUser(session.user);
       }
-    }
-    return false;
+      setLoading(false);
+    };
+
+    checkSession();
+
+    // Listen for changes on auth state (logged in, signed out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        mapSupabaseUser(session.user);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const mapSupabaseUser = (sbUser: SupabaseUser) => {
+    const role = sbUser.user_metadata?.role || deriveRole(sbUser.email || '');
+    const name = sbUser.user_metadata?.name || sbUser.email?.split('@')[0] || 'Unknown User';
+
+    setUser({
+      id: sbUser.id,
+      email: sbUser.email || '',
+      role: role as any,
+      name: name
+    });
   };
 
-  const logout = () => {
+  const deriveRole = (email: string): string => {
+    if (email === 'admin@test.com') return 'superadmin';
+    if (email === 'regular_admin@test.com') return 'admin';
+    if (email.includes('owner')) return 'owner';
+    if (email.includes('driver')) return 'driver';
+    return 'driver'; // Default
+  };
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      if (data.user) {
+        mapSupabaseUser(data.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
   };
 
   const loginAs = (targetUser: User) => {
     setUser(targetUser);
+    // Note: This is for simulation, won't update Supabase session
+    sessionStorage.setItem('admin_impersonating', 'true');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginAs }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, loginAs }}>
       {children}
     </AuthContext.Provider>
   );

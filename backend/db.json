@@ -1,0 +1,178 @@
+{
+  "owners": [
+    {
+      "id": "O1",
+      "name": "Alpha Logistics",
+      "fleetSize": 45,
+      "activeVehicles": 42,
+      "revenue": 1450000,
+      "score": 9.6,
+      "status": "active",
+      "email": "alpha@logistics.com"
+    },
+    {
+      "id": "O2",
+      "name": "Giga Mobility Corp",
+      "fleetSize": 32,
+      "activeVehicles": 28,
+      "revenue": 1080000,
+      "score": 8.9,
+      "status": "active",
+      "email": "giga@mobility.com"
+    },
+    {
+      "id": "O3",
+      "name": "Matrix Transit Systems",
+      "fleetSize": 24,
+      "activeVehicles": 20,
+      "revenue": 840000,
+      "score": 9.2,
+      "status": "active",
+      "email": "matrix@transit.com"
+    },
+    {
+      "id": "O4",
+      "name": "Cyber Delivery Node",
+      "fleetSize": 18,
+      "activeVehicles": 15,
+      "revenue": 520000,
+      "score": 7.8,
+      "status": "suspended",
+      "email": "cyber@delivery.com"
+    },
+    {
+      "id": "O5",
+      "name": "Hyperion Fleet Alliance",
+      "fleetSize": 52,
+      "activeVehicles": 49,
+      "revenue": 1980000,
+      "score": 9.8,
+      "status": "active",
+      "email": "hyperion@fleet.com"
+    }
+  ],
+  "pilots": [
+    {
+      "id": "P1",
+      "name": "Suresh Singh",
+      "trips": 145,
+      "hours": 240,
+      "safetyScore": 8.9,
+      "status": "active",
+      "availability": "on-duty",
+      "rating": 4.8
+    },
+    {
+      "id": "P2",
+      "name": "Ramesh Sharma",
+      "trips": 120,
+      "hours": 198,
+      "safetyScore": 9.2,
+      "status": "active",
+      "availability": "off-duty",
+      "rating": 4.9
+    },
+    {
+      "id": "P3",
+      "name": "Karan Malhotra",
+      "trips": 95,
+      "hours": 164,
+      "safetyScore": 7.4,
+      "status": "active",
+      "availability": "on-duty",
+      "rating": 4.2
+    },
+    {
+      "id": "P4",
+      "name": "Vikram Aditya",
+      "trips": 210,
+      "hours": 380,
+      "safetyScore": 9.5,
+      "status": "active",
+      "availability": "on-duty",
+      "rating": 4.7
+    },
+    {
+      "id": "P5",
+      "name": "Rahul Varma",
+      "trips": 40,
+      "hours": 75,
+      "safetyScore": 5.8,
+      "status": "suspended",
+      "availability": "off-duty",
+      "rating": 3.5
+    }
+  ],
+  "devices": [
+    {
+      "id": "DEV-8890",
+      "owner": "Hyperion Fleet",
+      "battery": 92,
+      "network": "Excellent",
+      "gps": "Connected",
+      "syncTime": "2s ago",
+      "status": "active",
+      "health": 98,
+      "firmware": "v4.2.1-stable"
+    },
+    {
+      "id": "DEV-4421",
+      "owner": "Alpha Logistics",
+      "battery": 84,
+      "network": "Good",
+      "gps": "Connected",
+      "syncTime": "5s ago",
+      "status": "active",
+      "health": 95,
+      "firmware": "v4.2.1-stable"
+    },
+    {
+      "id": "DEV-1092",
+      "owner": "Giga Mobility",
+      "battery": 12,
+      "network": "Poor",
+      "gps": "Intermittent",
+      "syncTime": "12m ago",
+      "status": "warning",
+      "health": 65,
+      "firmware": "v4.1.9-outdated"
+    },
+    {
+      "id": "DEV-7763",
+      "owner": "Cyber Delivery",
+      "battery": 0,
+      "network": "Offline",
+      "gps": "Disconnected",
+      "syncTime": "1d ago",
+      "status": "offline",
+      "health": 0,
+      "firmware": "v3.8.2-legacy"
+    }
+  ],
+  "alerts": [
+    {
+      "id": "ALT-1",
+      "type": "SOS Alert",
+      "vehicle": "MH-12-PQ-8890",
+      "description": "Driver triggered SOS switch manually.",
+      "severity": "CRITICAL",
+      "time": "1m ago"
+    },
+    {
+      "id": "ALT-2",
+      "type": "Battery Failure",
+      "vehicle": "KA-03-MN-4421",
+      "description": "GPS unit battery critically low (< 15%).",
+      "severity": "WARNING",
+      "time": "5m ago"
+    },
+    {
+      "id": "ALT-3",
+      "type": "Unauthorized Access",
+      "vehicle": "DL-01-AB-1092",
+      "description": "OBD port disconnect event caught.",
+      "severity": "CRITICAL",
+      "time": "15m ago"
+    }
+  ]
+}

@@ -106,3 +106,81 @@ export const fetchAlerts = async () => {
     return [];
   }
 };
+
+// CRUD for Owners
+export const createOwner = async (ownerData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/owners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ownerData)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating owner:', error);
+    return { success: false };
+  }
+};
+
+export const updateOwner = async (id: string, ownerData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/owners/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ownerData)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error updating owner:', error);
+    return { success: false };
+  }
+};
+
+export const deleteOwner = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/owners/${id}`, { method: 'DELETE' });
+    return response.json();
+  } catch (error) {
+    console.error('Error deleting owner:', error);
+    return { success: false };
+  }
+};
+
+// CRUD for Pilots
+export const createPilot = async (pilotData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilots`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pilotData)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating pilot:', error);
+    return { success: false };
+  }
+};
+
+export const updatePilot = async (id: string, pilotData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilots/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pilotData)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error updating pilot:', error);
+    return { success: false };
+  }
+};
+
+export const deletePilot = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilots/${id}`, { method: 'DELETE' });
+    return response.json();
+  } catch (error) {
+    console.error('Error deleting pilot:', error);
+    return { success: false };
+  }
+};

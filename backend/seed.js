@@ -5,18 +5,18 @@ const sql = postgres(process.env.DATABASE_URL);
 
 const initialData = {
   owners: [
-    { id: 'O1', name: 'Alpha Logistics', fleet_size: 45, active_vehicles: 42, revenue: 1450000, score: 9.6, status: 'active', email: 'alpha@logistics.com' },
+    { id: 'O1', name: 'Alpha Logistics', fleet_size: 45, active_vehicles: 42, revenue: 1450000, score: 9.6, status: 'active', email: 'owner@demo.com' },
     { id: 'O2', name: 'Giga Mobility Corp', fleet_size: 32, active_vehicles: 28, revenue: 1080000, score: 8.9, status: 'active', email: 'giga@mobility.com' },
     { id: 'O3', name: 'Matrix Transit Systems', fleet_size: 24, active_vehicles: 20, revenue: 840000, score: 9.2, status: 'active', email: 'matrix@transit.com' },
     { id: 'O4', name: 'Cyber Delivery Node', fleet_size: 18, active_vehicles: 15, revenue: 520000, score: 7.8, status: 'suspended', email: 'cyber@delivery.com' },
     { id: 'O5', name: 'Hyperion Fleet Alliance', fleet_size: 52, active_vehicles: 49, revenue: 1980000, score: 9.8, status: 'active', email: 'hyperion@fleet.com' }
   ],
   pilots: [
-    { id: 'P1', name: 'Suresh Singh', trips: 145, hours: 240, safety_score: 8.9, status: 'active', availability: 'on-duty', rating: 4.8 },
-    { id: 'P2', name: 'Ramesh Sharma', trips: 120, hours: 198, safety_score: 9.2, status: 'active', availability: 'off-duty', rating: 4.9 },
-    { id: 'P3', name: 'Karan Malhotra', trips: 95, hours: 164, safety_score: 7.4, status: 'active', availability: 'on-duty', rating: 4.2 },
-    { id: 'P4', name: 'Vikram Aditya', trips: 210, hours: 380, safety_score: 9.5, status: 'active', availability: 'on-duty', rating: 4.7 },
-    { id: 'P5', name: 'Rahul Varma', trips: 40, hours: 75, safety_score: 5.8, status: 'suspended', availability: 'off-duty', rating: 3.5 }
+    { id: 'P1', name: 'Suresh Singh', trips: 145, hours: 240, safety_score: 8.9, status: 'active', availability: 'on-duty', rating: 4.8, email: 'driver1@demo.com', owner_id: 'O1' },
+    { id: 'P2', name: 'Ramesh Sharma', trips: 120, hours: 198, safety_score: 9.2, status: 'active', availability: 'off-duty', rating: 4.9, email: 'driver2@demo.com', owner_id: 'O1' },
+    { id: 'P3', name: 'Karan Malhotra', trips: 95, hours: 164, safety_score: 7.4, status: 'active', availability: 'on-duty', rating: 4.2, email: 'driver3@demo.com', owner_id: 'O2' },
+    { id: 'P4', name: 'Vikram Aditya', trips: 210, hours: 380, safety_score: 9.5, status: 'active', availability: 'on-duty', rating: 4.7, email: 'driver4@demo.com', owner_id: 'O3' },
+    { id: 'P5', name: 'Nakul Varma', trips: 40, hours: 75, safety_score: 5.8, status: 'suspended', availability: 'off-duty', rating: 3.5, email: 'driver5@demo.com', owner_id: 'O5' }
   ],
   devices: [
     { id: 'DEV-8890', owner_id: 'O5', battery: 92, network: 'Excellent', gps: 'Connected', status: 'active', health: 98, firmware: 'v4.2.1-stable' },

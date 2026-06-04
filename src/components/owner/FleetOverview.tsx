@@ -34,8 +34,8 @@ export default function FleetOverview() {
           fetchAlerts()
         ]);
 
-        // Find the current owner record
-        const currentOwner = owners.find((o: any) => o.id === user?.id || o.name === user?.name);
+        // Find the current owner record by email (most reliable across Auth and DB)
+        const currentOwner = owners.find((o: any) => o.email === user?.email);
         setOwnerData(currentOwner);
 
         // Filter devices belonging to this owner
@@ -44,7 +44,10 @@ export default function FleetOverview() {
 
         // Filter alerts for this owner's vehicles
         const vehicleIds = myDevices.map((d: any) => d.id);
-        const myAlerts = alerts.filter((a: any) => vehicleIds.includes(a.vehicle) || a.vehicle.includes(currentOwner?.name));
+        const myAlerts = alerts.filter((a: any) => 
+          vehicleIds.includes(a.vehicle) || 
+          (currentOwner?.name && a.vehicle.includes(currentOwner.name))
+        );
         setFleetAlerts(myAlerts);
 
         // For demo, we'll show all pilots as being part of the network

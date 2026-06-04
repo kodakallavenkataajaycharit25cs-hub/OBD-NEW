@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
+import ThemeToggle from '../ThemeToggle';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, OBDData } from '../../services/obdApi';
 
 // Impersonate Modal Component
@@ -483,6 +484,8 @@ export default function SuperAdminPortal() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hoveredMissions, setHoveredMissions] = useState<{ x: number; y: number; val: number; time: string } | null>(null);
   const [hoveredRevenueCycle, setHoveredRevenueCycle] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDevice, setSelectedDevice] = useState<any | null>(null);
 
   useEffect(() => {
     const updateTelemetry = async () => {
@@ -1017,12 +1020,7 @@ export default function SuperAdminPortal() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                <div className="flex items-center space-x-2">
-                  <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Index:</span>
-                  <span className="text-xs font-black text-blue-400">{owner.score}/10</span>
-                </div>
-
+              <div className="flex flex-col space-y-4 pt-4 border-t border-white/5">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleImpersonateUser({
@@ -1031,19 +1029,23 @@ export default function SuperAdminPortal() {
                       email: owner.email || `${owner.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@demo.com`,
                       role: 'owner'
                     })}
-                    className="px-4 py-2 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 animate-pulse"
+                    className="px-4 py-2 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 animate-pulse flex-1"
                   >
                     Login As
                   </button>
                   <button
                     onClick={() => handleOwnerStatus(owner.id)}
-                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${owner.status === 'active'
+                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex-1 ${owner.status === 'active'
                       ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
                       : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
                       }`}
                   >
                     {owner.status === 'active' ? 'Suspend' : 'Activate'}
                   </button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Index:</span>
+                  <span className="text-xs font-black text-blue-400">{owner.score}/10</span>
                 </div>
               </div>
             </BorderGlow>
@@ -1100,12 +1102,7 @@ export default function SuperAdminPortal() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                <div className="flex items-center space-x-2">
-                  <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Safety Vector:</span>
-                  <span className={`text-xs font-black ${pilot.safetyScore >= 8.5 ? 'text-green-400' : pilot.safetyScore >= 7.0 ? 'text-yellow-500' : 'text-red-500'}`}>{pilot.safetyScore}/10</span>
-                </div>
-
+              <div className="flex flex-col space-y-4 pt-4 border-t border-white/5">
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => {
@@ -1121,19 +1118,23 @@ export default function SuperAdminPortal() {
                         role: 'driver'
                       });
                     }}
-                    className="px-4 py-2 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 animate-pulse"
+                    className="px-4 py-2 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 animate-pulse flex-1"
                   >
                     Login As
                   </button>
                   <button
                     onClick={() => handlePilotStatus(pilot.id)}
-                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${pilot.status === 'active'
+                    className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex-1 ${pilot.status === 'active'
                       ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
                       : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
                       }`}
                   >
                     {pilot.status === 'active' ? 'Suspend' : 'Activate'}
                   </button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Safety Vector:</span>
+                  <span className={`text-xs font-black ${pilot.safetyScore >= 8.5 ? 'text-green-400' : pilot.safetyScore >= 7.0 ? 'text-yellow-500' : 'text-red-500'}`}>{pilot.safetyScore}/10</span>
                 </div>
               </div>
             </BorderGlow>
@@ -1145,8 +1146,6 @@ export default function SuperAdminPortal() {
 
   // Device Management View
   const DevicesView = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedDevice, setSelectedDevice] = useState<any | null>(null);
 
     const filteredDevices = devices.filter(dev =>
       dev.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1545,6 +1544,7 @@ export default function SuperAdminPortal() {
                 <span className="text-[8px] font-black uppercase tracking-widest text-blue-500">SUPER ADMIN</span>
                 <span className="text-xs font-black text-white uppercase tracking-tight">{user?.name}</span>
               </div>
+              <ThemeToggle />
               <button
                 onClick={() => { playClick(); logout(); }}
                 className="w-10 h-10 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center transition-all group"

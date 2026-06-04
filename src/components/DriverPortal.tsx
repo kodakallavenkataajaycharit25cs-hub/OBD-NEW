@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
+import ThemeToggle from './ThemeToggle';
 
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
@@ -61,8 +62,8 @@ export default function DriverPortal() {
     const loadPilotProfile = async () => {
       try {
         const pilots = await fetchPilots();
-        // Match by ID or Name
-        const record = pilots.find((p: any) => p.id === user?.id || p.name === user?.name);
+        // Match by Email (primary key link from Auth)
+        const record = pilots.find((p: any) => p.email === user?.email);
         setPilotRecord(record);
         setLoading(false);
       } catch (error) {
@@ -711,6 +712,7 @@ export default function DriverPortal() {
                 <User className="w-6 h-6 text-white" />
               </div>
             </div>
+            <ThemeToggle />
             <button
               onClick={logout}
               className="flex items-center px-4 py-2 bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-500 transition-all active:scale-95 group shadow-none rounded-2xl"
