@@ -44,12 +44,12 @@
 
 /* Light Mode Overrides */
 .light-mode body {
-  @apply bg-[#EEF2F7] text-[#111827] selection:bg-[#5B82F6]/20 selection:text-[#111827];
+  @apply bg-[#E2E8F0] text-[#0F172A] selection:bg-[#3B82F6]/30 selection:text-[#0F172A];
 }
 
 .light-mode .bg-black,
 .light-mode .bg-zinc-950 {
-  @apply bg-[#EEF2F7];
+  @apply bg-[#E2E8F0];
 }
 
 .light-mode .bg-zinc-800,
@@ -60,12 +60,12 @@
 
 .light-mode .bg-\[\#120F17\]\/50,
 .light-mode .bg-\[\#120F17\]\/60 {
-  @apply bg-white/80 backdrop-blur-md;
+  @apply bg-white/90 backdrop-blur-md;
 }
 
 .light-mode .bg-\[\#120F17\]\/80,
 .light-mode .bg-\[\#120F17\]\/90 {
-  @apply bg-white border border-[#E2E8F0];
+  @apply bg-white border border-[#CBD5E1];
 }
 
 .light-mode .bg-white\/5 {
@@ -73,29 +73,29 @@
 }
 
 .light-mode .bg-white\/10 {
-  @apply bg-white border border-[#E2E8F0];
+  @apply bg-white border border-[#CBD5E1];
 }
 
 .light-mode .bg-black\/20,
 .light-mode .bg-black\/30 {
-  @apply bg-[#F8FAFC];
+  @apply bg-[#F1F5F9];
 }
 
 .light-mode .bg-black\/40,
 .light-mode .bg-black\/50 {
-  @apply bg-[#E2E8F0];
+  @apply bg-[#CBD5E1];
 }
 
 .light-mode .bg-black\/60,
 .light-mode .bg-black\/80 {
-  @apply bg-white/80;
+  @apply bg-white/95;
 }
 
 /* Text Colors */
 .light-mode .text-white,
 .light-mode .text-white\/80,
 .light-mode .text-white\/90 {
-  @apply text-[#111827];
+  @apply text-[#0F172A];
 }
 
 .light-mode .text-white\/20,
@@ -105,29 +105,34 @@
 .light-mode .text-gray-200,
 .light-mode .text-gray-300,
 .light-mode .text-gray-400 {
-  @apply text-[#6B7280];
+  @apply text-[#334155];
 }
 
 .light-mode .text-gray-500,
 .light-mode .text-gray-600 {
-  @apply text-[#475569];
+  @apply text-[#1E293B];
 }
 
 .light-mode .text-gray-700 {
-  @apply text-[#94A3B8];
+  @apply text-[#475569];
 }
 
 /* Accent Colors - Blue */
+.light-mode .text-blue-100,
+.light-mode .text-blue-100\/60 {
+  @apply text-black;
+}
+
 .light-mode .bg-blue-600 {
-  @apply bg-[#5B82F6];
+  @apply bg-[#1D4ED8];
 }
 
 .light-mode .text-blue-500 {
-  @apply text-[#5B82F6];
+  @apply text-[#1D4ED8];
 }
 
 .light-mode .text-blue-400 {
-  @apply text-[#3B82F6];
+  @apply text-[#1D4ED8];
 }
 
 .light-mode .bg-blue-500\/10 {
@@ -139,17 +144,17 @@
 }
 
 .light-mode .border-blue-500\/20 {
-  @apply border-[#BFDBFE];
+  @apply border-[#93C5FD];
 }
 
 /* Accent Colors - Green */
 .light-mode .text-green-500,
 .light-mode .text-green-400 {
-  @apply text-[#22C55E];
+  @apply text-[#15803D];
 }
 
 .light-mode .bg-green-500 {
-  @apply bg-[#22C55E];
+  @apply bg-[#15803D];
 }
 
 .light-mode .bg-green-500\/10 {
@@ -167,12 +172,12 @@
 
 .light-mode .text-purple-500,
 .light-mode .text-purple-400 {
-  @apply text-[#9333EA];
+  @apply text-[#7E22CE];
 }
 
 /* Accent Colors - Red & Yellow & Orange */
 .light-mode .text-red-500 {
-  @apply text-[#DC2626];
+  @apply text-[#B91C1C];
 }
 
 .light-mode .bg-red-500\/10,
@@ -181,15 +186,15 @@
 }
 
 .light-mode .border-red-500\/20 {
-  @apply border-[#FECACA];
+  @apply border-[#FCA5A5];
 }
 
 .light-mode .border-l-red-600 {
-  @apply border-l-[#EF4444];
+  @apply border-l-[#B91C1C];
 }
 
 .light-mode .text-yellow-500 {
-  @apply text-[#EAB308];
+  @apply text-[#A16207];
 }
 
 .light-mode .bg-yellow-500\/5,
@@ -198,11 +203,11 @@
 }
 
 .light-mode .border-yellow-500\/20 {
-  @apply border-[#FEF08A];
+  @apply border-[#FDE047];
 }
 
 .light-mode .text-orange-500 {
-  @apply text-[#F97316];
+  @apply text-[#C2410C];
 }
 
 .light-mode .bg-orange-500\/5,
@@ -211,7 +216,7 @@
 }
 
 .light-mode .border-orange-500\/20 {
-  @apply border-[#FED7AA];
+  @apply border-[#FDBA74];
 }
 
 /* Borders */
@@ -398,4 +403,9 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+/* SciFi HUD Overlay for Light Mode */
+.light-mode .scifi-hud-overlay {
+  @apply bg-white/95 border border-[#CBD5E1] shadow-[0_10px_30px_rgba(15,23,42,0.15)] !important;
 }

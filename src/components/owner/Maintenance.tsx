@@ -18,6 +18,7 @@ export default function Maintenance() {
   const [selectedView, setSelectedView] = useState<'schedule' | 'jobs' | 'analytics'>('schedule');
   const [activeJobsFilter, setActiveJobsFilter] = useState<'progress' | 'cost' | 'startDate'>('startDate');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [scheduledJobs, setScheduledJobs] = useState<Record<string, boolean>>({});
 
   const formatIndianCurrency = (amount: number) => {
     if (amount >= 10000000) {
@@ -209,8 +210,12 @@ export default function Maintenance() {
               <p className="text-sm text-gray-300 mb-4">{maintenance.description}</p>
 
               <div className="flex space-x-3">
-                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors">
-                  Schedule Now
+                <button 
+                  onClick={() => setScheduledJobs(prev => ({...prev, [maintenance.id]: true}))}
+                  disabled={scheduledJobs[maintenance.id]}
+                  className={`flex-1 ${scheduledJobs[maintenance.id] ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-lg font-medium transition-colors`}
+                >
+                  {scheduledJobs[maintenance.id] ? 'Scheduled ✓' : 'Schedule Now'}
                 </button>
                 <button className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium transition-colors">
                   View Details

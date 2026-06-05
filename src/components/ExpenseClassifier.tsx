@@ -13,6 +13,7 @@ import {
   MapPin,
   Car
 } from 'lucide-react';
+import { triggerDownload } from '../utils/download';
 
 interface ExpenseClassifierProps {
   userRole: 'owner' | 'driver';
@@ -134,13 +135,27 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
     }));
     
     console.log(`Exporting ${format.toUpperCase()}:`, data);
-    // In real implementation, this would generate and download the file
+    if (format === 'csv') {
+      const csvContent = "Date,Category,Vendor,Amount,Confidence,Status\n" + 
+        data.map(r => Object.values(r).join(',')).join('\n');
+      triggerDownload('expenses.csv', csvContent, 'text/csv');
+    } else {
+      const textContent = "EXPENSE REPORT\n=====================\n\n" + 
+        data.map(exp => `Date: ${exp.Date}\nVendor: ${exp.Vendor}\nCategory: ${exp.Category.toUpperCase()}\nAmount: ₹${exp.Amount}\nStatus: ${exp.Status.toUpperCase()} (Confidence: ${exp.Confidence})\n---------------------`).join('\n');
+      triggerDownload('expenses.txt', textContent, 'text/plain');
+    }
   };
 
   const expenseSummary = classifiedExpenses.reduce((acc, exp) => {
     acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
     return acc;
   }, {} as Record<string, number>);
+
+  const handleVerify = (id: string) => {
+    setClassifiedExpenses(prev => 
+      prev.map(exp => exp.id === id ? { ...exp, status: 'verified' } : exp)
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -217,7 +232,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
                 className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-3 py-2 rounded-xl text-sm transition-colors"
               >
                 <Download className="w-4 h-4" />
-                <span>PDF</span>
+                <span>TXT/Details</span>
               </button>
             </div>
           </div>
@@ -308,11 +323,18 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
                 )}
 
                 <div className="flex space-x-3 mt-4">
-                  <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-2xl text-sm transition-colors">
+                  <button 
+                    onClick={() => handleVerify(expense.id)}
+                    disabled={expense.status === 'verified'}
+                    className={`flex items-center space-x-2 ${expense.status === 'verified' ? 'bg-gray-600 cursor-default' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-2xl text-sm transition-colors`}
+                  >
                     <CheckCircle className="w-4 h-4" />
-                    <span>Verify</span>
+                    <span>{expense.status === 'verified' ? 'Verified' : 'Verify'}</span>
                   </button>
-                  <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-2xl text-sm transition-colors">
+                  <button 
+                    onClick={() => alert(`FULL RECEIPT DATA\n-----------------\nID: ${expense.id}\nFile: ${expense.fileName}\nVendor: ${expense.vendor}\nDate: ${expense.date}\nAmount: ₹${expense.amount}\nCategory: ${expense.category}\nStatus: ${expense.status}\n\nRAW OCR TEXT:\n${expense.ocrText || 'N/A'}`)}
+                    className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-2xl text-sm transition-colors"
+                  >
                     <FileText className="w-4 h-4" />
                     <span>View Full</span>
                   </button>

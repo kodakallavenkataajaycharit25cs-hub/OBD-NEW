@@ -36,6 +36,9 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
           </Link>
 
           <div className="flex items-center space-x-8 md:space-x-12">
+            <Link to="/" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
+              Home
+            </Link>
             <Link to="/about" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
               About Us
             </Link>

@@ -11,6 +11,7 @@ import {
   IndianRupee
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { triggerDownload } from '../../utils/download';
 
 export default function TripCosting() {
   const [dateRange, setDateRange] = useState('30d');
@@ -177,7 +178,14 @@ export default function TripCosting() {
                   <option value="90d" className="bg-[#120F17]">Last 3 Months</option>
                   <option value="1y" className="bg-[#120F17]">Last Year</option>
                 </select>
-                <button className="w-full clay-btn py-4 text-[13px] flex items-center justify-center">
+                <button 
+                  onClick={() => {
+                    const headers = 'Trip ID,Route,Distance,Fuel Cost,Toll Cost,Driver Pay,Revenue,Status\n';
+                    const rows = recentTrips.map(t => `${t.id},${t.route},${t.distance},${t.fuelCost},${t.tollCost},${t.driverPay},${t.revenue},${t.status}`).join('\n');
+                    triggerDownload('audit_log.csv', headers + rows, 'text/csv');
+                  }}
+                  className="w-full clay-btn py-4 text-[13px] flex items-center justify-center"
+                >
                   <Download className="w-[19px] h-[19px] mr-2" />
                   EXPORT AUDIT LOG
                 </button>

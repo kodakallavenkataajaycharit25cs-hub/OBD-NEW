@@ -2,7 +2,8 @@ import React from 'react';
 import {
   Shield,
   ArrowRight,
-  Star
+  Star,
+  Zap
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -135,6 +136,137 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Sukrutha - Company Features */}
+      <section className="py-32 relative overflow-hidden">
+        {/* Background accents */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 blur-[150px] rounded-full pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          {/* Section Header */}
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center space-x-3 px-5 py-2.5 rounded-full bg-blue-500/10 border border-blue-400/20 mb-8">
+              <Zap className="w-4 h-4 text-blue-400" />
+              <span className="text-[10px] font-black tracking-[0.3em] text-blue-200 uppercase">Why Choose Us</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white uppercase font-display leading-tight">
+              THE SUKRUTHA<br />
+              <span className="text-blue-500">ADVANTAGE</span>
+            </h2>
+            <p className="mt-6 text-lg text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              Built for Indian roads, powered by AI — we deliver what others only promise.
+            </p>
+          </div>
+
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Feature 1 - OBD Intelligence */}
+            <div className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-blue-500/30 via-transparent to-purple-500/20 hover:from-blue-500/60 hover:to-purple-500/40 transition-all duration-500">
+              <div className="relative rounded-3xl bg-[#0f0c15] p-10 h-full overflow-hidden">
+                {/* Glow on hover */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Illustration */}
+                <div className="w-full h-44 rounded-2xl overflow-hidden mb-8 relative">
+                  <img src="/obd-intelligence.png" alt="OBD-II Intelligence" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f0c15] via-transparent to-transparent" />
+                </div>
+
+                {/* Content */}
+                <h3 className="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-blue-400 transition-colors duration-300">
+                  OBD-II Deep Intelligence
+                </h3>
+                <p className="text-gray-400 leading-relaxed text-sm font-light mb-8">
+                  Plug directly into your vehicle's brain. Our OBD-II readers capture 100+ data points per second — engine health, fuel injection rates, emission levels, and real-time diagnostics that prevent breakdowns before they happen.
+                </p>
+
+                {/* Stats */}
+                <div className="flex items-center space-x-6 pt-6 border-t border-white/5">
+                  <div>
+                    <div className="text-2xl font-black text-white tracking-tighter">100+</div>
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Data Points/sec</div>
+                  </div>
+                  <div className="w-px h-10 bg-white/10" />
+                  <div>
+                    <div className="text-2xl font-black text-white tracking-tighter">60%</div>
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Less Downtime</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 2 - AI Safety Shield */}
+            <div className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-emerald-500/30 via-transparent to-cyan-500/20 hover:from-emerald-500/60 hover:to-cyan-500/40 transition-all duration-500">
+              <div className="relative rounded-3xl bg-[#0f0c15] p-10 h-full overflow-hidden">
+                {/* Glow on hover */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Illustration */}
+                <div className="w-full h-44 rounded-2xl overflow-hidden mb-8 relative">
+                  <img src="/ai-safety.png" alt="AI Safety Scoring" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f0c15] via-transparent to-transparent" />
+                </div>
+
+                {/* Content */}
+                <h3 className="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-emerald-400 transition-colors duration-300">
+                  AI-Powered Safety Scoring
+                </h3>
+                <p className="text-gray-400 leading-relaxed text-sm font-light mb-8">
+                  Every trip gets a real-time safety score based on harsh braking, cornering, speeding patterns, and fatigue detection. Our neural models alert you before incidents happen — not after. Built for India's unpredictable roads.
+                </p>
+
+                {/* Stats */}
+                <div className="flex items-center space-x-6 pt-6 border-t border-white/5">
+                  <div>
+                    <div className="text-2xl font-black text-white tracking-tighter">Zero</div>
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Incidents Avg</div>
+                  </div>
+                  <div className="w-px h-10 bg-white/10" />
+                  <div>
+                    <div className="text-2xl font-black text-white tracking-tighter">24/7</div>
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Live Monitoring</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 3 - Cost Optimization */}
+            <div className="group relative rounded-3xl p-[1px] bg-gradient-to-br from-amber-500/30 via-transparent to-orange-500/20 hover:from-amber-500/60 hover:to-orange-500/40 transition-all duration-500">
+              <div className="relative rounded-3xl bg-[#0f0c15] p-10 h-full overflow-hidden">
+                {/* Glow on hover */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 blur-[80px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Illustration */}
+                <div className="w-full h-44 rounded-2xl overflow-hidden mb-8 relative">
+                  <img src="/fleet-analytics.png" alt="Smart Cost Optimization" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ filter: 'hue-rotate(30deg) saturate(1.3)' }} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f0c15] via-transparent to-transparent" />
+                </div>
+
+                {/* Content */}
+                <h3 className="text-xl font-black text-white uppercase tracking-tight mb-4 group-hover:text-amber-400 transition-colors duration-300">
+                  Smart Cost Optimization
+                </h3>
+                <p className="text-gray-400 leading-relaxed text-sm font-light mb-8">
+                  Our ML engine analyzes fuel consumption patterns, route efficiency, and driver behavior to cut fleet operating costs by up to 35%. Auto-generated reports show exactly where rupees are leaking — and how to plug them.
+                </p>
+
+                {/* Stats */}
+                <div className="flex items-center space-x-6 pt-6 border-t border-white/5">
+                  <div>
+                    <div className="text-2xl font-black text-white tracking-tighter">35%</div>
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cost Reduction</div>
+                  </div>
+                  <div className="w-px h-10 bg-white/10" />
+                  <div>
+                    <div className="text-2xl font-black text-white tracking-tighter">₹2.5Cr</div>
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Saved Annually</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -12,6 +12,7 @@ interface CardData {
   title: string;
   description: string;
   label: string;
+  image?: string;
 }
 
 const cardData: CardData[] = [
@@ -19,13 +20,15 @@ const cardData: CardData[] = [
     color: 'rgba(24, 24, 27, 0.4)',
     title: 'Fleet Analytics',
     description: 'Track mission performance with millisecond precision.',
-    label: 'Intelligence'
+    label: 'Intelligence',
+    image: '/fleet-analytics.png'
   },
   {
     color: 'rgba(24, 24, 27, 0.4)',
     title: 'Operator Dashboard',
     description: 'Centralized control for entire vehicle network.',
-    label: 'Command'
+    label: 'Command',
+    image: '/operator-dashboard.png'
   },
   {
     color: 'rgba(24, 24, 27, 0.4)',
@@ -37,13 +40,15 @@ const cardData: CardData[] = [
     color: 'rgba(24, 24, 27, 0.4)',
     title: 'Predictive Care',
     description: 'Service vehicles before failures occur.',
-    label: 'Efficiency'
+    label: 'Efficiency',
+    image: '/predictive-care.png'
   },
   {
     color: 'rgba(24, 24, 27, 0.4)',
     title: 'Neural Routing',
     description: 'AI-optimized paths for maximum yield.',
-    label: 'Navigation'
+    label: 'Navigation',
+    image: '/neural-routing.png'
   },
   {
     color: 'rgba(24, 24, 27, 0.4)',
@@ -568,6 +573,11 @@ const MagicBento: React.FC<MagicBentoProps> = ({
                 clickEffect={clickEffect}
                 enableMagnetism={enableMagnetism}
               >
+                {card.image && (
+                  <div className="magic-bento-card__image">
+                    <img src={card.image} alt={card.title} />
+                  </div>
+                )}
                 <div className="magic-bento-card__header">
                   <div className="magic-bento-card__label">{card.label}</div>
                 </div>
@@ -691,6 +701,11 @@ const MagicBento: React.FC<MagicBentoProps> = ({
                 el.addEventListener('click', handleClick as any);
               }}
             >
+              {card.image && (
+                <div className="magic-bento-card__image">
+                  <img src={card.image} alt={card.title} />
+                </div>
+              )}
               <div className="magic-bento-card__header">
                 <div className="magic-bento-card__label">{card.label}</div>
               </div>

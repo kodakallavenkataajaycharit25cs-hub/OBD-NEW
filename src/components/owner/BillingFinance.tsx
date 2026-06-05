@@ -13,6 +13,7 @@ import {
   Plus
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { triggerDownload } from '../../utils/download';
 
 export default function BillingFinance() {
   const [selectedTab, setSelectedTab] = useState<'invoices' | 'pricing' | 'payroll' | 'reports'>('invoices');
@@ -252,16 +253,28 @@ export default function BillingFinance() {
               </div>
 
               <div className="flex space-x-3">
-                <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors">
+                <button 
+                  onClick={() => alert(`VIEW INVOICE\n\nID: ${invoice.id}\nCustomer: ${invoice.customer}\nAmount: ₹${invoice.amount}\nStatus: ${invoice.status.toUpperCase()}`)}
+                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors"
+                >
                   <FileText className="w-4 h-4" />
                   <span>View</span>
                 </button>
-                <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition-colors">
+                <button 
+                  onClick={() => {
+                    const content = `INVOICE: ${invoice.id}\nCustomer: ${invoice.customer}\nDate: ${invoice.date}\nDue Date: ${invoice.dueDate}\nStatus: ${invoice.status.toUpperCase()}\n\n-- BILLING DETAILS --\nTrips: ${invoice.trips}\nHSN/SAC: ${invoice.hsnSac}\n\nBase Amount: ₹${invoice.amount}\nGST (15%): ₹${invoice.gstAmount}\n------------------\nTOTAL: ₹${invoice.totalAmount}`;
+                    triggerDownload(`${invoice.id}.txt`, content, 'text/plain');
+                  }}
+                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition-colors"
+                >
                   <Download className="w-4 h-4" />
-                  <span>Download PDF</span>
+                  <span>Download Details</span>
                 </button>
                 {invoice.status === 'pending' && (
-                  <button className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-colors">
+                  <button 
+                    onClick={() => alert(`Payment reminder has been sent to ${invoice.customer} for invoice ${invoice.id}.`)}
+                    className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-colors"
+                  >
                     <span>Send Reminder</span>
                   </button>
                 )}
@@ -390,7 +403,14 @@ export default function BillingFinance() {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Driver Payroll & Commissions</h3>
         <div className="flex space-x-3">
-          <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+          <button 
+            onClick={() => {
+              const headers = 'Driver Name,Vehicle,Basic Salary,Incentives,Fuel Bonus,Deductions,Gross Pay,Net Pay,Status,Pay Date\n';
+              const rows = driverPayroll.map(p => `${p.driverName},${p.vehicle},${p.basicSalary},${p.incentives},${p.fuelBonus},${p.deductions},${p.grossPay},${p.netPay},${p.status},${p.payDate}`).join('\n');
+              triggerDownload('payroll_export.csv', headers + rows, 'text/csv');
+            }}
+            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors"
+          >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
           </button>
@@ -461,16 +481,28 @@ export default function BillingFinance() {
               </div>
 
               <div className="flex space-x-3 mt-4">
-                <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <button 
+                  onClick={() => alert(`VIEW PAYSLIP\n\nDriver: ${payroll.driverName}\nVehicle: ${payroll.vehicle}\nNet Pay: ₹${payroll.netPay}\nStatus: ${payroll.status.toUpperCase()}`)}
+                  className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
                   <FileText className="w-4 h-4" />
                   <span>View Slip</span>
                 </button>
-                <button className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <button 
+                  onClick={() => {
+                    const content = `PAYSLIP FOR: ${payroll.driverName}\nVehicle: ${payroll.vehicle}\nPay Date: ${payroll.payDate}\nStatus: ${payroll.status.toUpperCase()}\n\n-- EARNINGS --\nBasic Salary: ₹${payroll.basicSalary}\nIncentives: ₹${payroll.incentives}\nFuel Bonus: ₹${payroll.fuelBonus}\n\n-- DEDUCTIONS --\nDeductions: ₹${payroll.deductions}\n\n------------------\nGross Pay: ₹${payroll.grossPay}\nNET PAY: ₹${payroll.netPay}`;
+                    triggerDownload(`${payroll.id}_payslip.txt`, content, 'text/plain');
+                  }}
+                  className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
                   <Download className="w-4 h-4" />
-                  <span>Download PDF</span>
+                  <span>Download Slip</span>
                 </button>
                 {payroll.status === 'pending' && (
-                  <button className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => alert(`Payroll for ${payroll.driverName} has been processed.\nTransfer of ₹${payroll.netPay} initiated.`)}
+                    className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
                     <span>Process</span>
                   </button>
                 )}
@@ -531,7 +563,20 @@ export default function BillingFinance() {
               </div>
               <h4 className="font-black text-white uppercase tracking-tight mb-2">{report.name}</h4>
               <p className="text-gray-300 text-sm mb-4">{report.description}</p>
-              <button className={`w-full ${btnStyle} text-white py-2 rounded-lg transition-colors`}>
+              <button 
+                onClick={() => {
+                  let content = '';
+                  if (report.name === 'Monthly P&L Statement') {
+                    content = 'Category,Value\nRevenue,2847600\nOperational Cost,1245600\nNet Profit,1151200';
+                  } else if (report.name === 'Invoice Aging Report') {
+                    content = 'Invoice ID,Customer,Amount,Due Date,Status\n' + recentInvoices.map(inv => `${inv.id},${inv.customer},${inv.totalAmount},${inv.dueDate},${inv.status}`).join('\n');
+                  } else {
+                    content = `Report Name: ${report.name}\nDescription: ${report.description}\nGenerated on: ${new Date().toISOString()}`;
+                  }
+                  triggerDownload(`${report.name.replace(/\s+/g, '_')}.csv`, content, 'text/csv');
+                }}
+                className={`w-full ${btnStyle} text-white py-2 rounded-lg transition-colors`}
+              >
                 Generate Report
               </button>
             </div>

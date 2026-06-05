@@ -32,12 +32,16 @@ import {
   Unlock,
   Lock,
   DownloadCloud,
-  ArrowLeft
+  ArrowLeft,
+  PlusCircle,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
 import ThemeToggle from '../ThemeToggle';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, OBDData } from '../../services/obdApi';
+import { CreateView, UpdateView, RemoveView } from './CrudViews';
 
 // Impersonate Modal Component
 const ImpersonateModal = ({ isOpen, onClose, targetUser, onConfirm }: { isOpen: boolean; onClose: () => void; targetUser: any; onConfirm: () => void }) => {
@@ -326,7 +330,7 @@ const TrackingView = ({ telemetry, owners, pilots, devices }: { telemetry: OBDDa
             />
 
             {/* SciFi HUD floating Overlay card */}
-            <div className="absolute bottom-4 right-4 bg-black/90 backdrop-blur-md border border-white/5 p-4 rounded-2xl text-[9px] pointer-events-none text-left min-w-[200px] shadow-[0_4px_24px_rgba(0,0,0,0.85)] z-10">
+            <div className="absolute bottom-4 right-4 scifi-hud-overlay bg-black/90 backdrop-blur-md border border-white/5 p-4 rounded-2xl text-[9px] pointer-events-none text-left min-w-[200px] shadow-[0_4px_24px_rgba(0,0,0,0.85)] z-10">
               <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-1">LOGISTICS BEACON TARGET</div>
               <div className="text-white font-black text-[12px] mb-0.5 truncate">{mapTarget.split(',')[0].toUpperCase()}</div>
               <div className="text-blue-400 font-bold text-[8px] mb-2">{displayCoords}</div>
@@ -512,24 +516,24 @@ export default function SuperAdminPortal() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const updateMockDB = async () => {
-      try {
-        const [ownersData, pilotsData, devicesData, alertsData] = await Promise.all([
-          fetchOwners(),
-          fetchPilots(),
-          fetchDevices(),
-          fetchAlerts()
-        ]);
-        setOwners(ownersData);
-        setPilots(pilotsData);
-        setDevices(devicesData);
-        setAlerts(alertsData);
-      } catch (error) {
-        console.error('Failed to update mock DB:', error);
-      }
-    };
+  const updateMockDB = async () => {
+    try {
+      const [ownersData, pilotsData, devicesData, alertsData] = await Promise.all([
+        fetchOwners(),
+        fetchPilots(),
+        fetchDevices(),
+        fetchAlerts()
+      ]);
+      setOwners(ownersData || []);
+      setPilots(pilotsData || []);
+      setDevices(devicesData || []);
+      setAlerts(alertsData || []);
+    } catch (error) {
+      console.error('Failed to update mock DB:', error);
+    }
+  };
 
+  useEffect(() => {
     if (isBooted) {
       updateMockDB();
       const interval = setInterval(updateMockDB, 5000); // Sync mock DB every 5 seconds
@@ -757,7 +761,9 @@ export default function SuperAdminPortal() {
     { name: 'Device Management', href: '/super-admin-dashboard/devices', icon: Cpu },
     { name: 'Live Tracking', href: '/super-admin-dashboard/tracking', icon: MapPin },
     { name: 'Analytics', href: '/super-admin-dashboard/analytics', icon: BarChart2 },
-
+    { name: 'New Client', href: '/super-admin-dashboard/create', icon: PlusCircle },
+    { name: 'Update Records', href: '/super-admin-dashboard/update', icon: Edit },
+    { name: 'Remove Records', href: '/super-admin-dashboard/remove', icon: Trash2 },
   ];
 
   if (!isBooted) {
@@ -1593,6 +1599,9 @@ export default function SuperAdminPortal() {
               <Route path="/tracking" element={<TrackingView telemetry={telemetry} owners={owners} pilots={pilots} devices={devices} />} />
               <Route path="/analytics" element={<AnalyticsView />} />
               <Route path="/alerts" element={<AlertsView />} />
+              <Route path="/create" element={<CreateView onRefresh={updateMockDB} owners={owners} pilots={pilots} />} />
+              <Route path="/update" element={<UpdateView onRefresh={updateMockDB} owners={owners} pilots={pilots} />} />
+              <Route path="/remove" element={<RemoveView onRefresh={updateMockDB} owners={owners} pilots={pilots} />} />
               <Route path="*" element={<Navigate to="/super-admin-dashboard" replace />} />
             </Routes>
           </div>

@@ -165,7 +165,7 @@ const TrackingView = () => {
             />
 
             {/* HUD Overlay */}
-            <div className="absolute bottom-4 right-4 bg-black/90 backdrop-blur-md border border-white/5 p-4 rounded-2xl text-[9px] pointer-events-none text-left min-w-[220px] shadow-[0_4px_24px_rgba(0,0,0,0.85)] z-10">
+            <div className="absolute bottom-4 right-4 scifi-hud-overlay bg-black/90 backdrop-blur-md border border-white/5 p-4 rounded-2xl text-[9px] pointer-events-none text-left min-w-[220px] shadow-[0_4px_24px_rgba(0,0,0,0.85)] z-10">
               <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-1">FLEET HQ LOCATION</div>
               <div className="text-white font-black text-[12px] mb-0.5 truncate">{activeOwner.name.toUpperCase()}</div>
               <div className="text-blue-400 font-bold text-[8px] mb-2">{activeOwner.hqCoords}</div>

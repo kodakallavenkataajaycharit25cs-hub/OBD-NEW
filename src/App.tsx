@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import BookingPage from './components/BookingPage';
 import FeaturesPage from './components/FeaturesPage';
@@ -11,6 +11,16 @@ import SuperAdminPortal from './components/admin/SuperAdminPortal';
 import AdminPortal from './components/admin/AdminPortal';
 import LoginModal from './components/LoginModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -26,6 +36,7 @@ function AppContent() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-black text-white font-sans">
         <Routes>
           <Route path="/" element={<LandingPage onLoginClick={() => setShowLogin(true)} />} />
