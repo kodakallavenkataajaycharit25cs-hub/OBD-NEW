@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchPilots, deletePilot } from '../../services/obdApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { Trash2, Car, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Trash2, Car, AlertTriangle, ArrowLeft } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
 
 export default function DeleteDriver() {
@@ -40,10 +41,15 @@ export default function DeleteDriver() {
         backgroundColor="#120F17"
         className="p-6 border-white/5 shadow-2xl min-h-[500px]"
       >
-        <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
-          <Trash2 className="w-6 h-6 mr-3 text-red-500" />
-          Remove Driver
-        </h2>
+        <div className="flex items-center mb-6">
+          <Link to="/owner/drivers" className="mr-4 p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/10 text-gray-400 hover:text-white">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white flex items-center">
+            <Trash2 className="w-6 h-6 mr-3 text-red-500" />
+            Remove Driver
+          </h2>
+        </div>
 
         {loading ? (
           <div className="flex justify-center items-center h-32">

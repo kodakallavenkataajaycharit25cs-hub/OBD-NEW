@@ -202,10 +202,16 @@ export default function SafetyEmergency() {
                   </div>
 
                   <div className="flex space-x-3 mt-4">
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors">
+                    <button 
+                      onClick={() => alert(`Investigating alert for ${alert.vehicle}`)}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors"
+                    >
                       Investigate
                     </button>
-                    <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors">
+                    <button 
+                      onClick={() => alert(`Resolving alert for ${alert.vehicle}`)}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors"
+                    >
                       Resolve
                     </button>
                   </div>
@@ -293,8 +299,18 @@ export default function SafetyEmergency() {
                 <p className="text-white font-bold">{new Date(selectedIncidentData.timestamp).toLocaleString('en-IN')}</p>
               </div>
               <div className="flex space-x-3 pt-2">
-                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">View Analytics</button>
-                <button className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Export Report</button>
+                <button 
+                  onClick={() => alert(`Loading analytics for incident: ${selectedIncidentData.id}`)}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
+                >
+                  View Analytics
+                </button>
+                <button 
+                  onClick={() => alert(`Exporting report for incident: ${selectedIncidentData.id}`)}
+                  className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
+                >
+                  Export Report
+                </button>
               </div>
             </div>
 

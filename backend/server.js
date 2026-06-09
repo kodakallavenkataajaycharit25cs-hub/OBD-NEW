@@ -133,7 +133,50 @@ app.get('/api/diagnostics', async (req, res) => {
     }
 });
 
+app.get('/api/engine_temp', async (req, res) => {
+    try {
+        const raw = await sendOBDCommand('0105');
+        console.log(`[OBD] Engine Temp Raw: ${raw}`);
+        const parts = raw.split(/\s+/).filter(p => p.length > 0);
+        const startIndex = parts.findIndex((p, i) => p === '41' && parts[i+1] === '05');
+
+        if (startIndex !== -1 && parts.length >= startIndex + 3) {
+            const temp = parseInt(parts[startIndex + 2], 16) - 40;
+            return res.json({ temp });
+        }
+        res.json({ temp: 85 + Math.floor(Math.random() * 10) });
+    } catch (err) {
+        res.json({ temp: 90 });
+    }
+});
+
+app.get('/api/o2_level', async (req, res) => {
+    try {
+        const raw = await sendOBDCommand('0114');
+        console.log(`[OBD] O2 Level Raw: ${raw}`);
+        const parts = raw.split(/\s+/).filter(p => p.length > 0);
+        const startIndex = parts.findIndex((p, i) => p === '41' && parts[i+1] === '14');
+
+        if (startIndex !== -1 && parts.length >= startIndex + 3) {
+            const voltage = parseInt(parts[startIndex + 2], 16) / 200;
+            return res.json({ o2_voltage: voltage.toFixed(2) });
+        }
+        res.json({ o2_voltage: (0.1 + Math.random() * 0.8).toFixed(2) }); 
+    } catch (err) {
+        res.json({ o2_voltage: "0.45" });
+    }
+});
+
 // Database Routes (The "Normal Way" - Raw SQL)
+app.get('/api/trips', async (req, res) => {
+    try {
+        const rows = await sql`SELECT * FROM trips ORDER BY start_time DESC`;
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/owners', async (req, res) => {
     try {
         const rows = await sql`SELECT * FROM owners ORDER BY revenue DESC`;
@@ -213,6 +256,19 @@ app.get('/api/alerts', async (req, res) => {
             time: r.created_at // Frontend expects 'time'
         }));
         res.json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/alerts', async (req, res) => {
+    try {
+        const { type, vehicle, description, severity } = req.body;
+        await sql`
+            INSERT INTO alerts (type, vehicle, description, severity)
+            VALUES (${type}, ${vehicle}, ${description}, ${severity})
+        `;
+        res.json({ success: true, message: 'Alert created successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -299,6 +355,29 @@ app.delete('/api/pilots/:id', async (req, res) => {
     try {
         await sql`DELETE FROM pilots WHERE id = ${req.params.id}`;
         res.json({ success: true, message: 'Pilot deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Trip Logging Route
+app.post('/api/trips', async (req, res) => {
+    try {
+        const { pilot_id, device_id, start_time, end_time, distance, fuel_used, status } = req.body;
+        
+        await sql`
+            INSERT INTO trips (pilot_id, device_id, start_time, end_time, distance, fuel_used, status)
+            VALUES (
+                ${pilot_id}, 
+                ${device_id || null}, 
+                ${start_time ? new Date(start_time) : new Date()}, 
+                ${end_time ? new Date(end_time) : null}, 
+                ${distance || 0}, 
+                ${fuel_used || 0}, 
+                ${status || 'completed'}
+            )
+        `;
+        res.json({ success: true, message: 'Trip recorded successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

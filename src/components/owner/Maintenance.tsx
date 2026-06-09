@@ -160,7 +160,10 @@ export default function Maintenance() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Maintenance Schedule</h3>
-        <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+        <button 
+          onClick={() => alert('Opening schedule service form')}
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+        >
           <Plus className="w-4 h-4" />
           <span>Schedule Service</span>
         </button>
@@ -217,7 +220,10 @@ export default function Maintenance() {
                 >
                   {scheduledJobs[maintenance.id] ? 'Scheduled ✓' : 'Schedule Now'}
                 </button>
-                <button className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium transition-colors">
+                <button 
+                  onClick={() => alert(`Viewing details for ${maintenance.vehicle}`)}
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg font-medium transition-colors"
+                >
                   View Details
                 </button>
               </div>
@@ -286,7 +292,10 @@ export default function Maintenance() {
               </div>
             )}
           </div>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors text-white">
+          <button 
+            onClick={() => alert('Opening new job form')}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors text-white"
+          >
             <Plus className="w-4 h-4" />
             <span>New Job</span>
           </button>

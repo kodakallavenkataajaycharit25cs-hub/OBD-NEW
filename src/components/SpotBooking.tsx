@@ -142,11 +142,11 @@ export default function SpotBooking() {
                       type="button"
                       onClick={() => setBooking(prev => ({ ...prev, car: v.id }))}
                       className={`p-4 rounded-2xl text-center transition-all group ${booking.car === v.id
-                          ? 'clay-card bg-blue-600 border-none shadow-blue-900/40 text-white'
+                          ? 'clay-btn clay-btn-blue border-none shadow-blue-900/40'
                           : 'bg-black/20 text-gray-600 hover:text-white hover:bg-white/5 border border-white/5 shadow-inner'
                         }`}
                     >
-                      <Car className={`w-6 h-6 mx-auto mb-2 ${booking.car === v.id ? 'text-white' : 'text-gray-700 group-hover:text-blue-500/50'}`} />
+                      <Car className={`w-6 h-6 mx-auto mb-2 ${booking.car === v.id ? '' : 'text-gray-700 group-hover:text-blue-500/50'}`} />
                       <div className="text-[10px] font-black uppercase tracking-tighter leading-none">{v.name}</div>
                       <div className="text-[8px] font-bold opacity-40 mt-1 uppercase">{v.seats} Seats</div>
                     </button>
@@ -159,7 +159,7 @@ export default function SpotBooking() {
                 disabled={submitted}
                 className={`w-full h-16 rounded-2xl font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center space-x-3 ${submitted
                     ? 'bg-green-500/20 text-green-500 border border-green-500/20 cursor-default'
-                    : 'clay-card bg-blue-600 border-none shadow-blue-900/40 text-white hover:scale-[1.02] active:scale-95'
+                    : 'clay-btn clay-btn-blue border-none shadow-blue-900/40 hover:scale-[1.02]'
                   }`}
               >
                 {submitted ? (

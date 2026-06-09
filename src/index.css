@@ -1,4 +1,68 @@
 
+:root {
+  /* Default Dark Mode CSS Variables */
+  --canvas-bg: #000000;
+  --card-bg: #120F17;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --brand-blue: #3b82f6;
+  --brand-blue-tint: rgba(59, 130, 246, 0.1);
+
+  --success-green: #22c55e;
+  --success-green-tint: rgba(34, 197, 94, 0.1);
+  --success-green-border: rgba(34, 197, 94, 0.2);
+
+  --warning-yellow: #eab308;
+  --warning-yellow-tint: rgba(234, 179, 8, 0.1);
+  --warning-yellow-border: rgba(234, 179, 8, 0.2);
+
+  --danger-red: #ef4444;
+  --danger-red-tint: rgba(239, 68, 68, 0.1);
+  --danger-red-border: rgba(239, 68, 68, 0.2);
+
+  --orange-accent: #f97316;
+  --orange-accent-tint: rgba(249, 115, 22, 0.1);
+  --orange-accent-border: rgba(249, 115, 22, 0.2);
+}
+
+.light-mode {
+  /* Re-engineered Light Mode (Strict 70/20/10 Composition) */
+  /* 70% DOMINANT COLORS (Canvas & Structure) */
+  --canvas-bg: #F8FAFC;       /* Soft neutral slate-tinted canvas to reduce eye strain */
+  --card-bg: #FFFFFF;         /* Solid crisp white dashboard cards & sidebar containers */
+  --border-subtle: #E2E8F0;   /* Soft slate border separator */
+
+  /* 20% SECONDARY COLORS (Typography & Hierarchy) */
+  --text-primary: #0F172A;     /* Primary headings & critical metrics: Deep slate navy/charcoal */
+  --text-secondary: #334155;   /* Slate body/secondary text */
+  --text-muted: #64748B;       /* Mid-tone cool gray for labels like "47 MISSIONS", "PILOT NETWORK" */
+
+  /* 10% ACCENT COLORS (Focus & Strategic Intent) */
+  --brand-blue: #1D4ED8;        /* Deeply saturated brand accent blue for text/interactive states */
+  --brand-blue-tint: #EFF6FF;   /* Highly diluted brand blue tint (10-12% opacity) for container backgrounds */
+
+  /* Status Badges */
+  --success-green: #15803D;        /* Deeply saturated success green text */
+  --success-green-tint: #DCFCE7;   /* Soft pastel success background fill */
+  --success-green-border: #DCFCE7; /* Diluted border (same as background) */
+
+  --warning-yellow: #A16207;
+  --warning-yellow-tint: #FEF9C3;
+  --warning-yellow-border: #FEF9C3;
+
+  --danger-red: #B91C1C;
+  --danger-red-tint: #FEE2E2;
+  --danger-red-border: #FEE2E2;
+
+  --orange-accent: #C2410C;
+  --orange-accent-tint: #FFEDD5;
+  --orange-accent-border: #FFEDD5;
+}
+
 @font-face {
   font-family: 'Space Grotesk';
   font-style: normal;
@@ -29,7 +93,9 @@
   }
 
   body {
-    @apply bg-black text-white antialiased font-sans selection:bg-blue-500/30 selection:text-blue-200;
+    background-color: var(--canvas-bg);
+    color: var(--text-primary);
+    @apply antialiased font-sans selection:bg-blue-500/30 selection:text-blue-200;
   }
 
   h1,
@@ -42,60 +108,67 @@
   }
 }
 
+
 /* Light Mode Overrides */
 .light-mode body {
-  @apply bg-[#E2E8F0] text-[#0F172A] selection:bg-[#3B82F6]/30 selection:text-[#0F172A];
+  background-color: var(--canvas-bg);
+  color: var(--text-primary);
+  @apply selection:bg-[#1D4ED8]/10 selection:text-[#1D4ED8];
 }
 
 .light-mode .bg-black,
 .light-mode .bg-zinc-950 {
-  @apply bg-[#E2E8F0];
+  background-color: var(--canvas-bg) !important;
 }
 
 .light-mode .bg-zinc-800,
 .light-mode .bg-zinc-800\/30,
 .light-mode .bg-\[\#120F17\] {
-  @apply bg-white;
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-subtle) !important;
 }
 
 .light-mode .bg-\[\#120F17\]\/50,
 .light-mode .bg-\[\#120F17\]\/60 {
-  @apply bg-white/90 backdrop-blur-md;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(16px) !important;
 }
 
 .light-mode .bg-\[\#120F17\]\/80,
 .light-mode .bg-\[\#120F17\]\/90 {
-  @apply bg-white border border-[#CBD5E1];
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-subtle) !important;
 }
 
-.light-mode .bg-white\/5 {
-  @apply bg-[#F1F5F9];
+.light-mode [class*="bg-white/5"] {
+  background-color: var(--canvas-bg) !important;
 }
 
-.light-mode .bg-white\/10 {
-  @apply bg-white border border-[#CBD5E1];
+.light-mode [class*="bg-white/10"] {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-subtle) !important;
 }
 
 .light-mode .bg-black\/20,
 .light-mode .bg-black\/30 {
-  @apply bg-[#F1F5F9];
+  background-color: var(--canvas-bg) !important;
 }
 
 .light-mode .bg-black\/40,
 .light-mode .bg-black\/50 {
-  @apply bg-[#CBD5E1];
+  background-color: var(--border-subtle) !important;
 }
 
 .light-mode .bg-black\/60,
 .light-mode .bg-black\/80 {
-  @apply bg-white/95;
+  background-color: rgba(255, 255, 255, 0.95) !important;
 }
 
-/* Text Colors */
+/* Text Colors Mapping to 20% Secondary/Muted Hierarchy */
 .light-mode .text-white,
 .light-mode .text-white\/80,
 .light-mode .text-white\/90 {
-  @apply text-[#0F172A];
+  color: var(--text-primary) !important;
 }
 
 .light-mode .text-white\/20,
@@ -105,118 +178,138 @@
 .light-mode .text-gray-200,
 .light-mode .text-gray-300,
 .light-mode .text-gray-400 {
-  @apply text-[#334155];
+  color: var(--text-secondary) !important;
 }
 
 .light-mode .text-gray-500,
 .light-mode .text-gray-600 {
-  @apply text-[#1E293B];
+  color: var(--text-muted) !important;
 }
 
 .light-mode .text-gray-700 {
-  @apply text-[#475569];
+  color: var(--text-muted) !important;
 }
 
-/* Accent Colors - Blue */
+/* Accent Colors - Blue (Re-engineered 10% Focus & Tint) */
 .light-mode .text-blue-100,
 .light-mode .text-blue-100\/60 {
-  @apply text-black;
+  color: var(--text-primary) !important;
 }
 
+/* Icon Container Re-engineering: replace solid blue with 10-12% soft tint and deep blue icon */
 .light-mode .bg-blue-600 {
-  @apply bg-[#1D4ED8];
+  background-color: var(--brand-blue-tint) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.light-mode .bg-blue-600 svg,
+.light-mode .bg-blue-600 .text-white {
+  color: var(--brand-blue) !important;
 }
 
-.light-mode .text-blue-500 {
-  @apply text-[#1D4ED8];
-}
-
+.light-mode .text-blue-500,
 .light-mode .text-blue-400 {
-  @apply text-[#1D4ED8];
+  color: var(--brand-blue) !important;
 }
 
-.light-mode .bg-blue-500\/10 {
-  @apply bg-[#EFF6FF];
-}
-
+.light-mode .bg-blue-500\/10,
 .light-mode .bg-blue-600\/10 {
-  @apply bg-[#EFF6FF];
+  background-color: var(--brand-blue-tint) !important;
 }
 
 .light-mode .border-blue-500\/20 {
-  @apply border-[#93C5FD];
+  border-color: var(--brand-blue-tint) !important;
 }
 
-/* Accent Colors - Green */
+/* Sidebar Active Navigation Item Override */
+.light-mode .clay-card.bg-blue-600.text-white {
+  background-color: var(--brand-blue-tint) !important;
+  color: var(--brand-blue) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.light-mode .clay-card.bg-blue-600.text-white svg {
+  color: var(--brand-blue) !important;
+}
+.light-mode .clay-card.bg-blue-600.text-white span {
+  color: var(--brand-blue) !important;
+}
+.light-mode .clay-card.bg-blue-600.text-white [class*="bg-white/10"] {
+  background-color: rgba(29, 78, 216, 0.08) !important;
+  border-color: rgba(29, 78, 216, 0.15) !important;
+}
+
+/* Primary buttons must remain solid blue for visual affordance */
+.light-mode .clay-btn-blue {
+  background-color: var(--brand-blue) !important;
+  color: #FFFFFF !important;
+}
+.light-mode .clay-btn-blue:hover {
+  opacity: 0.9 !important;
+}
+
+/* Accent Colors - Success Green */
 .light-mode .text-green-500,
 .light-mode .text-green-400 {
-  @apply text-[#15803D];
+  color: var(--success-green) !important;
 }
 
 .light-mode .bg-green-500 {
-  @apply bg-[#15803D];
+  background-color: var(--success-green) !important;
 }
 
 .light-mode .bg-green-500\/10 {
-  @apply bg-[#DCFCE7];
+  background-color: var(--success-green-tint) !important;
 }
 
 .light-mode .border-green-500\/20 {
-  @apply border-[#86EFAC];
+  border-color: var(--success-green-border) !important;
 }
 
-/* Accent Colors - Purple */
-.light-mode .bg-purple-600\/10 {
-  @apply bg-[#F3E8FF];
-}
-
-.light-mode .text-purple-500,
-.light-mode .text-purple-400 {
-  @apply text-[#7E22CE];
-}
-
-/* Accent Colors - Red & Yellow & Orange */
+/* Accent Colors - Danger Red */
 .light-mode .text-red-500 {
-  @apply text-[#B91C1C];
+  color: var(--danger-red) !important;
 }
 
 .light-mode .bg-red-500\/10,
 .light-mode .bg-red-600\/10 {
-  @apply bg-[#FEE2E2];
+  background-color: var(--danger-red-tint) !important;
 }
 
 .light-mode .border-red-500\/20 {
-  @apply border-[#FCA5A5];
+  border-color: var(--danger-red-border) !important;
 }
 
 .light-mode .border-l-red-600 {
-  @apply border-l-[#B91C1C];
+  border-l-color: var(--danger-red) !important;
 }
 
+/* Accent Colors - Warning Yellow */
 .light-mode .text-yellow-500 {
-  @apply text-[#A16207];
+  color: var(--warning-yellow) !important;
 }
 
 .light-mode .bg-yellow-500\/5,
 .light-mode .bg-yellow-500\/10 {
-  @apply bg-[#FEF9C3];
+  background-color: var(--warning-yellow-tint) !important;
 }
 
 .light-mode .border-yellow-500\/20 {
-  @apply border-[#FDE047];
+  border-color: var(--warning-yellow-border) !important;
 }
 
+/* Accent Colors - Orange */
 .light-mode .text-orange-500 {
-  @apply text-[#C2410C];
+  color: var(--orange-accent) !important;
 }
 
 .light-mode .bg-orange-500\/5,
 .light-mode .bg-orange-500\/10 {
-  @apply bg-[#FFEDD5];
+  background-color: var(--orange-accent-tint) !important;
 }
 
 .light-mode .border-orange-500\/20 {
-  @apply border-[#FDBA74];
+  border-color: var(--orange-accent-border) !important;
 }
 
 /* Borders */
@@ -225,74 +318,83 @@
 .light-mode .border-white\/20,
 .light-mode .border-white\/30,
 .light-mode .border-white\/40 {
-  @apply border-[#E2E8F0];
+  border-color: var(--border-subtle) !important;
 }
 
 /* Hover States */
 .light-mode .hover\:bg-white\/5:hover,
 .light-mode .hover\:bg-white\/10:hover,
 .light-mode .group:hover .group-hover\:bg-white\/5 {
-  @apply bg-[#F1F5F9];
+  background-color: var(--canvas-bg) !important;
 }
 
 .light-mode .hover\:bg-white\/20:hover {
-  @apply bg-[#E2E8F0];
+  background-color: var(--border-subtle) !important;
 }
 
 .light-mode .hover\:text-white:hover {
-  @apply text-[#111827];
+  color: var(--text-primary) !important;
 }
 
 /* Shadows */
 .light-mode .shadow-2xl {
-  box-shadow: 0 10px 40px rgba(15,23,42,0.04);
+  box-shadow: 0 10px 40px rgba(15,23,42,0.04) !important;
 }
 
 .light-mode .shadow-xl {
-  box-shadow: 0 10px 25px rgba(15,23,42,0.03);
+  box-shadow: 0 10px 25px rgba(15,23,42,0.03) !important;
 }
 
 .light-mode .shadow-inner {
-  box-shadow: inset 0 2px 4px 0 rgba(15,23,42,0.02);
+  box-shadow: inset 0 2px 4px 0 rgba(15,23,42,0.02) !important;
 }
 
 .light-mode .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(15,23,42,0.03), 0 4px 6px -2px rgba(15,23,42,0.015);
+  box-shadow: 0 10px 15px -3px rgba(15,23,42,0.03), 0 4px 6px -2px rgba(15,23,42,0.015) !important;
 }
 
 /* Specific Component Overrides */
 .light-mode .clay-card {
-  @apply bg-white border border-[#E2E8F0];
-  box-shadow: 0 4px 20px rgba(15,23,42,0.05);
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: 0 4px 20px rgba(15,23,42,0.03) !important;
 }
 
 .light-mode .clay-card:hover {
-  @apply border-[#CBD5E1];
-  box-shadow: 0 8px 30px rgba(15,23,42,0.08);
+  border-color: rgba(29, 78, 216, 0.2) !important;
+  box-shadow: 0 8px 30px rgba(15,23,42,0.05) !important;
 }
 
 .light-mode .clay-card-hover:hover {
-  @apply border-[#5B82F6]/30;
-  box-shadow: 0 8px 30px rgba(15,23,42,0.08);
+  border-color: rgba(29, 78, 216, 0.3) !important;
+  box-shadow: 0 8px 30px rgba(15,23,42,0.06) !important;
 }
 
 .light-mode .glass-navbar {
-  @apply bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0];
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
 }
 
 /* Scrollbar Overrides */
 .light-mode ::-webkit-scrollbar-track {
-  @apply bg-[#F8FAFC];
+  background-color: var(--canvas-bg) !important;
 }
 
 .light-mode ::-webkit-scrollbar-thumb {
-  @apply bg-[#CBD5E1] hover:bg-[#94A3B8];
+  background-color: var(--border-subtle) !important;
+  border-radius: 9999px !important;
+}
+
+.light-mode ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted) !important;
 }
 
 /* Clay text 3D */
 .light-mode .clay-text-3d {
-  text-shadow: 1px 1px 0px rgba(255,255,255,1), 2px 2px 0px rgba(0, 0, 0, 0.05);
+  text-shadow: 1px 1px 0px rgba(255,255,255,1), 2px 2px 0px rgba(0, 0, 0, 0.02) !important;
 }
+
 
 @layer components {
   .clay-card {
@@ -407,5 +509,21 @@
 
 /* SciFi HUD Overlay for Light Mode */
 .light-mode .scifi-hud-overlay {
-  @apply bg-white/95 border border-[#CBD5E1] shadow-[0_10px_30px_rgba(15,23,42,0.15)] !important;
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Glass Overlay Card for Landing Page */
+.glass-overlay-card {
+  background-color: rgba(59, 130, 246, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.light-mode .glass-overlay-card .text-white,
+.light-mode .glass-overlay-card .text-blue-100,
+.light-mode .glass-overlay-card [class*="text-blue-100/60"],
+.light-mode .glass-overlay-card svg {
+  color: #ffffff !important;
 }

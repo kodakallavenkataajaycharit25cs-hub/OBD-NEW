@@ -57,9 +57,7 @@ export default function OwnerDashboard() {
     { name: 'Fleet Health', href: '/owner/health', icon: Car, current: location.pathname === '/owner/health' },
     { name: 'Trip Costing', href: '/owner/costing', icon: TrendingUp, current: location.pathname === '/owner/costing' },
     { name: 'Driver Management', href: '/owner/drivers', icon: Users, current: location.pathname === '/owner/drivers' },
-    { name: 'Add Driver', href: '/owner/drivers/create', icon: UserPlus, current: location.pathname === '/owner/drivers/create' },
-    { name: 'Update Driver', href: '/owner/drivers/update', icon: Edit, current: location.pathname === '/owner/drivers/update' },
-    { name: 'Remove Driver', href: '/owner/drivers/remove', icon: Trash2, current: location.pathname === '/owner/drivers/remove' },
+
     { name: 'Safety & Emergency', href: '/owner/safety', icon: Shield, current: location.pathname === '/owner/safety' },
     { name: 'Maintenance', href: '/owner/maintenance', icon: Wrench, current: location.pathname === '/owner/maintenance' },
     { name: 'Trip Assignment', href: '/owner/trip-assign', icon: RouteIcon, current: location.pathname === '/owner/trip-assign' },

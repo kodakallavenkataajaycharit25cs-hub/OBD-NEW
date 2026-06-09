@@ -294,7 +294,8 @@ export default function TripAssignment() {
                       className={selectClass}
                     >
                       <option value="" className="bg-[#120F17]">Select a driver...</option>
-                      {availableDrivers.map(d => <option key={d} value={d} className="bg-[#120F17]">{d}</option>)}
+                      {pilots.map(p => <option key={p.id} value={p.name} className="bg-[#120F17]">{p.name}</option>)}
+                      {pilots.length === 0 && availableDrivers.map(d => <option key={d} value={d} className="bg-[#120F17]">{d}</option>)}
                     </select>
                     <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-500 pointer-events-none" />
                   </div>
@@ -547,7 +548,8 @@ export default function TripAssignment() {
                     className={selectClass}
                   >
                     <option value="" className="bg-[#120F17]">Select a driver...</option>
-                    {availableDrivers.map(d => <option key={d} value={d} className="bg-[#120F17]">{d}</option>)}
+                    {pilots.map(p => <option key={p.id} value={p.name} className="bg-[#120F17]">{p.name}</option>)}
+                    {pilots.length === 0 && availableDrivers.map(d => <option key={d} value={d} className="bg-[#120F17]">{d}</option>)}
                   </select>
                   <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-500 pointer-events-none" />
                 </div>

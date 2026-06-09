@@ -22,9 +22,9 @@ export default {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
       fontFamily: {
-        sans: ['"Inter"', 'sans-serif'],
-        display: ['Syne', 'sans-serif'],
-        'Space_Grotesk': ['"Inter"', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        'Space_Grotesk': ['"Plus Jakarta Sans"', 'sans-serif'],
       },
     },
   },

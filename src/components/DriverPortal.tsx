@@ -26,7 +26,18 @@ import ThemeToggle from './ThemeToggle';
 
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
-import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../services/obdApi';
+import { 
+  fetchRPM, 
+  fetchSpeed, 
+  fetchFuelLevel, 
+  fetchDiagnostics, 
+  fetchPilots, 
+  fetchTrips, 
+  createAlert, 
+  fetchEngineTemp, 
+  fetchO2Level,
+  OBDData 
+} from '../services/obdApi';
 
 export default function DriverPortal() {
   const { user, logout, loginAs } = useAuth();
@@ -35,24 +46,30 @@ export default function DriverPortal() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '1m' | '3m' | '1y'>('1m');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
-  const [telemetry, setTelemetry] = useState<OBDData>({});
+  const [telemetry, setTelemetry] = useState<any>({});
   const [pilotRecord, setPilotRecord] = useState<any>(null);
+  const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sosLoading, setSosLoading] = useState(false);
 
   useEffect(() => {
     const updateTelemetry = async () => {
       try {
-        const [rpmData, speedData, fuelData, diagData] = await Promise.all([
+        const [rpmData, speedData, fuelData, diagData, tempData, o2Data] = await Promise.all([
           fetchRPM(),
           fetchSpeed(),
           fetchFuelLevel(),
-          fetchDiagnostics()
+          fetchDiagnostics(),
+          fetchEngineTemp(),
+          fetchO2Level()
         ]);
         setTelemetry({
           rpm: rpmData.rpm,
           speed: speedData.speed,
           fuel_level: fuelData.fuel_level,
-          diagnostics: diagData.diagnostics
+          diagnostics: diagData.diagnostics,
+          engine_temp: tempData.temp,
+          o2_voltage: o2Data.o2_voltage
         });
       } catch (error) {
         console.error('Failed to update telemetry:', error);
@@ -61,13 +78,24 @@ export default function DriverPortal() {
 
     const loadPilotProfile = async () => {
       try {
-        const pilots = await fetchPilots();
+        const [pilots, tripsData] = await Promise.all([
+          fetchPilots(),
+          fetchTrips()
+        ]);
+        
         // Match by Email (primary key link from Auth)
         const record = pilots.find((p: any) => p.email === user?.email);
         setPilotRecord(record);
+        
+        // Filter trips for this pilot
+        if (record) {
+          const myTrips = tripsData.filter((t: any) => t.pilot_id === record.id);
+          setTrips(myTrips);
+        }
+        
         setLoading(false);
       } catch (error) {
-        console.error('Failed to load pilot profile:', error);
+        console.error('Failed to load profile data:', error);
         setLoading(false);
       }
     };
@@ -355,7 +383,10 @@ export default function DriverPortal() {
                 <span>Expiry Registry</span>
                 <span className="text-white">{new Date(doc.expiry).toLocaleDateString('en-IN')}</span>
               </div>
-              <button className="w-full clay-btn clay-btn-blue h-12 flex items-center justify-center space-x-3 text-[10px]">
+              <button 
+                onClick={() => alert(`Opening file dialog to upload revision for ${doc.name}`)}
+                className="w-full clay-btn clay-btn-blue h-12 flex items-center justify-center space-x-3 text-[10px]"
+              >
                 <Upload className="w-4 h-4" />
                 <span>UPLOAD REVISION</span>
               </button>
@@ -378,12 +409,7 @@ export default function DriverPortal() {
         <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Historical Missions</h2>
 
         <div className="space-y-4">
-          {[
-            { date: '2025-01-15', route: 'Mumbai → Pune', distance: '148 km', duration: '3h 15m', fare: 2840 },
-            { date: '2025-01-14', route: 'Pune → Mumbai', distance: '148 km', duration: '3h 30m', fare: 2940 },
-            { date: '2025-01-13', route: 'Mumbai → Nashik', distance: '166 km', duration: '4h 10m', fare: 3200 },
-            { date: '2025-01-12', route: 'Mumbai Airport → Lonavala', distance: '98 km', duration: '2h 45m', fare: 2100 }
-          ].map((trip, index) => (
+          {trips.length > 0 ? trips.map((trip, index) => (
             <BorderGlow
               key={index}
               borderRadius={28}
@@ -394,22 +420,26 @@ export default function DriverPortal() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-black text-white tracking tight uppercase group-hover:text-blue-400 transition-colors">{trip.route}</h3>
+                  <h3 className="text-lg font-black text-white tracking tight uppercase group-hover:text-blue-400 transition-colors">Mission Vector: {trip.id}</h3>
                   <div className="flex items-center space-x-4 text-[10px] font-black uppercase tracking-widest text-gray-600 mt-2">
-                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.date}</span>
-                    <span className="flex items-center"><TrendingUp className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.distance}</span>
-                    <span className="flex items-center"><Activity className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.duration}</span>
+                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1 text-blue-500/50" /> {new Date(trip.start_time).toLocaleDateString()}</span>
+                    <span className="flex items-center"><TrendingUp className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.distance} km</span>
+                    <span className="flex items-center"><Activity className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.status}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl md:text-3xl font-black text-green-400 tracking-tighter">
-                    {formatIndianCurrency(trip.fare)}
+                    {formatIndianCurrency(trip.distance * 15)}
                   </div>
                   <div className="text-[10px] text-gray-700 font-bold uppercase tracking-widest mt-1">Mission Credit</div>
                 </div>
               </div>
             </BorderGlow>
-          ))}
+          )) : (
+            <div className="text-center py-20 bg-black/20 rounded-3xl border border-dashed border-white/5">
+              <p className="text-gray-500 font-black uppercase tracking-widest text-xs">No mission logs detected in current sector.</p>
+            </div>
+          )}
         </div>
       </BorderGlow>
     </div>
@@ -506,7 +536,7 @@ export default function DriverPortal() {
             { label: 'Engine RPM', value: telemetry.rpm || 0, unit: 'RPM', icon: Gauge, color: 'blue' },
             { label: 'Ground Speed', value: telemetry.speed || 0, unit: 'km/h', icon: Zap, color: 'orange' },
             { label: 'Fuel Reservoir', value: telemetry.fuel_level || 0, unit: '%', icon: Thermometer, color: 'green' },
-            { label: 'Engine Load', value: telemetry.diagnostics?.engine_load || '0%', unit: '', icon: Activity, color: 'purple' }
+            { label: 'Engine Temp', value: telemetry.engine_temp || 0, unit: '°C', icon: Thermometer, color: 'red' }
           ].map((stat, i) => (
             <BorderGlow
               key={i}
@@ -544,9 +574,15 @@ export default function DriverPortal() {
                 </span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-white/5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Coolant Temp</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">O2 Voltage</span>
                 <span className="text-xs font-black text-blue-400">
-                  {telemetry.diagnostics?.coolant_temp || '0C'}
+                  {telemetry.o2_voltage || '0.00'}V
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Engine Load</span>
+                <span className="text-xs font-black text-purple-400">
+                  {telemetry.diagnostics?.engine_load || '0%'}
                 </span>
               </div>
               <div className="flex justify-between items-center py-3">
@@ -703,6 +739,14 @@ export default function DriverPortal() {
           </div>
 
           <div className="flex items-center space-x-6">
+            <button
+              onClick={handleTriggerSOS}
+              disabled={sosLoading}
+              className={`flex items-center px-6 py-3 bg-red-600 border-none text-white transition-all active:scale-95 group shadow-[0_0_20px_rgba(220,38,38,0.4)] rounded-2xl ${sosLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'}`}
+            >
+              <ShieldAlert className={`w-5 h-5 mr-3 ${sosLoading ? 'animate-spin' : 'animate-pulse'}`} />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">{sosLoading ? 'Broadcasting...' : 'TRIGGER SOS'}</span>
+            </button>
             <div className="flex flex-col text-right">
               <span className="text-[8px] font-black uppercase tracking-widest text-gray-600 italic">Auth Level 4</span>
               <span className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</span>

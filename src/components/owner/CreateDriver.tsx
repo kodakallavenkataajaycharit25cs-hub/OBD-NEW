@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { createPilot } from '../../services/obdApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { UserPlus, ArrowLeft } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
 
 export default function CreateDriver() {
@@ -43,10 +44,15 @@ export default function CreateDriver() {
         backgroundColor="#120F17"
         className="p-6 border-white/5 shadow-2xl"
       >
-        <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6 flex items-center">
-          <UserPlus className="w-6 h-6 mr-3 text-blue-500" />
-          Create New Driver
-        </h2>
+        <div className="flex items-center mb-6">
+          <Link to="/owner/drivers" className="mr-4 p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/10 text-gray-400 hover:text-white">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white flex items-center">
+            <UserPlus className="w-6 h-6 mr-3 text-blue-500" />
+            Create New Driver
+          </h2>
+        </div>
 
         {message && (
           <div className="p-4 mb-6 bg-green-500/20 text-green-400 border border-green-500/50 rounded-xl font-bold">

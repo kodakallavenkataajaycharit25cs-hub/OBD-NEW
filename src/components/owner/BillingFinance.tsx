@@ -178,7 +178,10 @@ export default function BillingFinance() {
             <Filter className="w-4 h-4" />
             <span>Filter</span>
           </button>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors">
+          <button 
+            onClick={() => alert('Opening invoice generation form')}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors"
+          >
             <Plus className="w-4 h-4" />
             <span>Generate Invoice</span>
           </button>
@@ -290,7 +293,10 @@ export default function BillingFinance() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">Pricing Models</h3>
-        <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+        <button 
+          onClick={() => alert('Opening form to add new pricing model')}
+          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+        >
           <Plus className="w-4 h-4" />
           <span>Add Pricing Model</span>
         </button>
@@ -385,10 +391,16 @@ export default function BillingFinance() {
             </div>
 
             <div className="flex space-x-3">
-              <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors">
+              <button 
+                onClick={() => alert(`Editing pricing model: ${model.name}`)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
+              >
                 Edit
               </button>
-              <button className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors">
+              <button 
+                onClick={() => alert(`Cloning pricing model: ${model.name}`)}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors"
+              >
                 Clone
               </button>
             </div>
@@ -414,7 +426,10 @@ export default function BillingFinance() {
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
           </button>
-          <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+          <button 
+            onClick={() => alert('Initiating bulk payroll processing')}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+          >
             <Plus className="w-4 h-4" />
             <span>Process Payroll</span>
           </button>
@@ -606,10 +621,13 @@ export default function BillingFinance() {
                   </span>
                 </div>
                 <p className="text-gray-400 text-sm mb-4">Last sync: {integration.lastSync}</p>
-                <button className={`w-full py-2 rounded-lg font-medium transition-colors ${integration.status === 'connected'
+                <button 
+                  onClick={() => alert(integration.status === 'connected' ? `Syncing data with ${integration.name}` : `Connecting to ${integration.name}`)}
+                  className={`w-full py-2 rounded-lg font-medium transition-colors ${integration.status === 'connected'
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-green-600 hover:bg-green-700 text-white'
-                  }`}>
+                  }`}
+                >
                   {integration.status === 'connected' ? 'Sync Now' : 'Connect'}
                 </button>
               </div>

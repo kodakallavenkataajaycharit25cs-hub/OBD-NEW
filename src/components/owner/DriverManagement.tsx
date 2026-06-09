@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Users,
   Star,
@@ -11,7 +12,10 @@ import {
   Phone,
   Mail,
   Calendar,
-  Car
+  Car,
+  Plus,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
 
@@ -154,7 +158,20 @@ export default function DriverManagement() {
         backgroundColor="#120F17"
         className="p-6 border-white/5 shadow-2xl"
       >
-        <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Driver Management</h2>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
+          <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Driver Management</h2>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/owner/drivers/create" className="flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
+              <Plus className="w-4 h-4 mr-2" /> Add Driver
+            </Link>
+            <Link to="/owner/drivers/update" className="flex items-center px-4 py-2 bg-purple-500/20 border border-purple-500/50 text-purple-400 hover:bg-purple-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
+              <Edit className="w-4 h-4 mr-2" /> Update Driver
+            </Link>
+            <Link to="/owner/drivers/remove" className="flex items-center px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
+              <Trash2 className="w-4 h-4 mr-2" /> Remove Driver
+            </Link>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4 text-center">

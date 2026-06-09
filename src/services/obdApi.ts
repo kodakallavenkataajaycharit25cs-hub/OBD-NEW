@@ -107,6 +107,69 @@ export const fetchAlerts = async () => {
   }
 };
 
+// SOS / Alerts
+export const createAlert = async (alertData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/alerts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(alertData)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating alert:', error);
+    return { success: false };
+  }
+};
+
+// Trips
+export const fetchTrips = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/trips`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching trips:', error);
+    return [];
+  }
+};
+
+export const createTrip = async (tripData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/trips`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tripData)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating trip:', error);
+    return { success: false };
+  }
+};
+
+export const fetchEngineTemp = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/engine_temp`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching engine temp:', error);
+    return { temp: 0 };
+  }
+};
+
+export const fetchO2Level = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/o2_level`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching O2 level:', error);
+    return { o2_voltage: "0.00" };
+  }
+};
+
 // CRUD for Owners
 export const createOwner = async (ownerData: any) => {
   try {

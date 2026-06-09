@@ -75,7 +75,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                   showTooltip={false}
                   displayOverlayContent={true}
                   overlayContent={
-                    <div className="absolute bottom-6 right-6 p-5 border-none bg-blue-600/80 backdrop-blur-md max-w-[200px] rounded-2xl">
+                    <div className="absolute bottom-6 right-6 p-5 border-none bg-blue-600/80 backdrop-blur-md max-w-[200px] rounded-2xl glass-overlay-card">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-[8px] font-black uppercase tracking-widest text-blue-100 leading-none">Fleet Command</span>
                         <Shield className="w-4 h-4 text-blue-100" />
