@@ -93,7 +93,7 @@ const TrackingView = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search location..."
-                className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors w-44"
+                className="bg-[#120F17] border border-white/5 rounded-xl px-3 py-1.5 text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors w-44"
               />
               {searchQuery && (
                 <button
@@ -247,7 +247,7 @@ const TrackingView = () => {
         {/* Fleet Owners Sidebar */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl flex flex-col justify-between overflow-y-auto custom-scrollbar">
           <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Fleet Owners</h3>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Fleet Owners</h3>
 
             <div className="space-y-4">
               {fleetOwners.map(owner => {

@@ -336,7 +336,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
           </div>
 
           {isProcessing && (
-            <div className="mt-6 bg-blue-500/20 border border-blue-500/50 rounded-2xl p-4">
+            <div className="mt-6 bg-[#120F17] border border-white/5 rounded-2xl p-4">
               <div className="flex items-center space-x-3">
                 <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" />
                 <span className="text-blue-400 font-medium">Processing with AI OCR...</span>

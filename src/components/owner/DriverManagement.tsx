@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users,
@@ -18,9 +18,31 @@ import {
   Trash2
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { fetchPilots } from '../../services/obdApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function DriverManagement() {
-  const [selectedDriver, setSelectedDriver] = useState('driver-1');
+  const { user } = useAuth();
+  const [drivers, setDrivers] = useState<any[]>([]);
+  const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDrivers = async () => {
+      try {
+        const allPilots = await fetchPilots();
+        const ownerId = user?.id || 'owner-default';
+        const myDrivers = allPilots.filter((p: any) => p.owner_id === ownerId);
+        setDrivers(myDrivers);
+        if (myDrivers.length > 0) setSelectedDriver(myDrivers[0].id);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadDrivers();
+  }, [user]);
 
   const formatIndianCurrency = (amount: number) => {
     if (amount >= 10000000) {
@@ -39,101 +61,9 @@ export default function DriverManagement() {
     }).format(amount);
   };
 
-  const drivers = [
-    {
-      id: 'driver-1',
-      name: 'Suresh Singh',
-      phone: '+91 98765 43210',
-      email: 'suresh@luxfleet.com',
-      license: 'MH123456789',
-      experience: '8 years',
-      assignedVehicle: 'MH 02 AB 1234 - Toyota Innova Crysta',
-      status: 'active',
-      location: 'En route to Pune',
-      rating: 4.8,
-      totalTrips: 156,
-      totalDistance: 24680,
-      monthlyEarnings: 48600,
-      scores: {
-        safety: 9.2,
-        acceleration: 8.7,
-        braking: 9.1,
-        speed: 8.9,
-        idling: 8.5,
-        efficiency: 9.0
-      },
-      badges: ['Safe Driver', 'Eco Warrior', 'Customer Favorite'],
-      violations: 2,
-      documents: {
-        license: { status: 'valid', expiry: '2026-03-15' },
-        permit: { status: 'valid', expiry: '2025-08-20' },
-        medical: { status: 'expiring', expiry: '2025-02-10' }
-      }
-    },
-    {
-      id: 'driver-2',
-      name: 'Ramesh Sharma',
-      phone: '+91 87654 32109',
-      email: 'ramesh@luxfleet.com',
-      license: 'DL987654321',
-      experience: '6 years',
-      assignedVehicle: 'DL 01 CD 5678 - Tempo Traveller',
-      status: 'active',
-      location: 'Mumbai Depot',
-      rating: 4.6,
-      totalTrips: 134,
-      totalDistance: 21450,
-      monthlyEarnings: 42800,
-      scores: {
-        safety: 8.9,
-        acceleration: 8.2,
-        braking: 8.8,
-        speed: 8.4,
-        idling: 7.9,
-        efficiency: 8.3
-      },
-      badges: ['Safe Driver', 'Distance Master'],
-      violations: 4,
-      documents: {
-        license: { status: 'valid', expiry: '2025-11-30' },
-        permit: { status: 'valid', expiry: '2026-01-15' },
-        medical: { status: 'valid', expiry: '2025-09-05' }
-      }
-    },
-    {
-      id: 'driver-3',
-      name: 'Vikram Patel',
-      phone: '+91 76543 21098',
-      email: 'vikram@luxfleet.com',
-      license: 'GJ456789123',
-      experience: '10 years',
-      assignedVehicle: 'KA 05 EF 9012 - Force Traveller',
-      status: 'inactive',
-      location: 'Off Duty',
-      rating: 4.9,
-      totalTrips: 203,
-      totalDistance: 32870,
-      monthlyEarnings: 52400,
-      scores: {
-        safety: 9.5,
-        acceleration: 9.2,
-        braking: 9.4,
-        speed: 9.3,
-        idling: 9.1,
-        efficiency: 9.6
-      },
-      badges: ['Safe Driver', 'Eco Warrior', 'Customer Favorite', 'Route Expert'],
-      violations: 0,
-      documents: {
-        license: { status: 'valid', expiry: '2027-05-20' },
-        permit: { status: 'valid', expiry: '2025-12-10' },
-        medical: { status: 'valid', expiry: '2025-07-15' }
-      }
-    }
-  ];
-
+  // Mock data functions for UI elements not yet in backend
   const selectedDriverData = drivers.find(d => d.id === selectedDriver) || drivers[0];
-
+  
   const getScoreColor = (score: number) => {
     if (score >= 9) return 'green';
     if (score >= 8) return 'yellow';
@@ -161,32 +91,32 @@ export default function DriverManagement() {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
           <h2 className="text-2xl font-black tracking-tighter uppercase clay-text-3d text-white">Driver Management</h2>
           <div className="flex flex-wrap gap-3">
-            <Link to="/owner/drivers/create" className="flex items-center px-4 py-2 bg-blue-500/20 border border-blue-500/50 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
+            <Link to="/owner/drivers/create" className="flex items-center px-4 py-2 bg-[#120F17] border border-white/5 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
               <Plus className="w-4 h-4 mr-2" /> Add Driver
             </Link>
-            <Link to="/owner/drivers/update" className="flex items-center px-4 py-2 bg-purple-500/20 border border-purple-500/50 text-purple-400 hover:bg-purple-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
+            <Link to="/owner/drivers/update" className="flex items-center px-4 py-2 bg-[#120F17] border border-white/5 text-purple-400 hover:bg-purple-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
               <Edit className="w-4 h-4 mr-2" /> Update Driver
             </Link>
-            <Link to="/owner/drivers/remove" className="flex items-center px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
+            <Link to="/owner/drivers/remove" className="flex items-center px-4 py-2 bg-[#120F17] border border-white/5 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-sm font-bold transition-all active:scale-95">
               <Trash2 className="w-4 h-4 mr-2" /> Remove Driver
             </Link>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">42</div>
             <div className="text-sm text-blue-300">Total Drivers</div>
           </div>
-          <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-green-400">38</div>
             <div className="text-sm text-green-300">Active Today</div>
           </div>
-          <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-yellow-400">8.7</div>
             <div className="text-sm text-yellow-300">Avg Score</div>
           </div>
-          <div className="bg-purple-500/20 border border-purple-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-purple-400">4.7</div>
             <div className="text-sm text-purple-300">Avg Rating</div>
           </div>
@@ -227,7 +157,7 @@ export default function DriverManagement() {
                           }`} />
                         <span>{driver.status}</span>
                         <span>•</span>
-                        <span>{driver.location}</span>
+                        <span>{driver.availability || 'Unknown'}</span>
                       </div>
                     </div>
                   </div>
@@ -236,22 +166,22 @@ export default function DriverManagement() {
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
                       <span className="text-white font-semibold">{driver.rating}</span>
                     </div>
-                    <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">{driver.totalTrips} trips</div>
+                    <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">{driver.trips || 0} trips</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Score:</span>
-                    <span className="text-white ml-1">{driver.scores.safety}/10</span>
+                    <span className="text-white ml-1">{driver.safety_score}/10</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Vehicle:</span>
-                    <span className="text-white ml-1">{driver.assignedVehicle.split(' - ')[0]}</span>
+                    <span className="text-white ml-1">{driver.vehicle_model || 'Unknown'}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Earnings:</span>
-                    <span className="text-white ml-1">{formatIndianCurrency(driver.monthlyEarnings)}</span>
+                    <span className="text-gray-400">Number:</span>
+                    <span className="text-white ml-1">{driver.vehicle_number || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -274,12 +204,12 @@ export default function DriverManagement() {
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData.name}</h4>
-                <p className="text-gray-400">{selectedDriverData.experience} experience</p>
+                <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData?.name}</h4>
+                <p className="text-gray-400">{selectedDriverData?.hours || 0} hours experience</p>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className={`w-2 h-2 rounded-full ${selectedDriverData.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
+                  <span className={`w-2 h-2 rounded-full ${selectedDriverData?.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
                     }`} />
-                  <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">{selectedDriverData.status}</span>
+                  <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">{selectedDriverData?.status}</span>
                 </div>
               </div>
             </div>
@@ -287,19 +217,22 @@ export default function DriverManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-300">{selectedDriverData.phone}</span>
+                <span className="text-gray-300">{selectedDriverData?.contact || 'N/A'}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-300">{selectedDriverData.email}</span>
+                <span className="text-gray-300">{selectedDriverData?.email || 'N/A'}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Car className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-300">{selectedDriverData.assignedVehicle}</span>
+                <span className="text-gray-300">
+                  {selectedDriverData?.vehicle_number} {selectedDriverData?.vehicle_model ? `- ${selectedDriverData.vehicle_model}` : ''}
+                  {(!selectedDriverData?.vehicle_number && !selectedDriverData?.vehicle_model) && 'No Vehicle Assigned'}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-300">{selectedDriverData.location}</span>
+                <span className="text-gray-300">{selectedDriverData?.availability || 'Unknown'}</span>
               </div>
             </div>
           </BorderGlow>
@@ -323,7 +256,8 @@ export default function DriverManagement() {
             { name: 'Commercial Permit', key: 'permit' },
             { name: 'Medical Certificate', key: 'medical' }
           ].map((doc, index) => {
-            const docData = selectedDriverData.documents[doc.key as keyof typeof selectedDriverData.documents];
+            // Mocking documents for real drivers
+            const docData = { status: 'valid', expiry: '2026-01-01' };
             const status = getDocumentStatus(docData.status);
 
             return (

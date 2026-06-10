@@ -5,18 +5,54 @@ import { UserPlus, Building2, Car, Trash2, Edit, Save, X, ArrowLeft, PlusCircle 
 export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => void, owners: any[], pilots: any[] }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [selectedFleetId, setSelectedFleetId] = useState<string | null>(null);
 
   // Form states
-  const [ownerForm, setOwnerForm] = useState({ id: '', name: '', contact: '', email: '', fleetSize: 0, activeVehicles: 0 });
-  const [pilotForm, setPilotForm] = useState({ id: '', name: '', email: '', contact: '', owner_id: '' });
+  const [ownerForm, setOwnerForm] = useState({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0 });
+  const [pilotForm, setPilotForm] = useState({ id: '', name: '', email: '', contact: '', password: '', owner_id: '', vehicleNumber: '', vehicleModel: '' });
 
   const handleCreateOwner = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+    setMessage('');
+
+    const duplicateId = owners.find(o => o.id.toLowerCase() === ownerForm.id.toLowerCase());
+    const duplicateEmail = ownerForm.email && owners.find(o => o.email?.toLowerCase() === ownerForm.email.toLowerCase());
+    const duplicatePhone = ownerForm.contact && owners.find(o => o.contact === ownerForm.contact);
+
+    if (ownerForm.contact && ownerForm.contact.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (ownerForm.email && !emailRegex.test(ownerForm.email)) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    if (duplicateId) {
+      setError('A client with this ID already exists.');
+      setLoading(false);
+      return;
+    }
+    if (duplicateEmail) {
+      setError('A client with this Email already exists.');
+      setLoading(false);
+      return;
+    }
+    if (duplicatePhone) {
+      setError('A client with this Phone Number already exists.');
+      setLoading(false);
+      return;
+    }
+
     await createOwner({ ...ownerForm, revenue: 0, score: 10, status: 'active' });
     setMessage('Client created successfully!');
-    setOwnerForm({ id: '', name: '', contact: '', email: '', fleetSize: 0, activeVehicles: 0 });
+    setOwnerForm({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0 });
     onRefresh();
     setLoading(false);
   };
@@ -24,10 +60,45 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
   const handleCreatePilot = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+    setMessage('');
+
+    const duplicateId = pilots.find(p => p.id.toLowerCase() === pilotForm.id.toLowerCase());
+    const duplicateEmail = pilotForm.email && pilots.find(p => p.email?.toLowerCase() === pilotForm.email.toLowerCase());
+    const duplicatePhone = pilotForm.contact && pilots.find(p => p.contact === pilotForm.contact);
+
+    if (pilotForm.contact && pilotForm.contact.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (pilotForm.email && !emailRegex.test(pilotForm.email)) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    if (duplicateId) {
+      setError('A driver with this ID already exists.');
+      setLoading(false);
+      return;
+    }
+    if (duplicateEmail) {
+      setError('A driver with this Email already exists.');
+      setLoading(false);
+      return;
+    }
+    if (duplicatePhone) {
+      setError('A driver with this Phone Number already exists.');
+      setLoading(false);
+      return;
+    }
+
     const selectedOwner = owners.find(o => o.id === selectedFleetId);
     await createPilot({ ...pilotForm, owner_id: selectedFleetId, trips: 0, hours: 0, safetyScore: 10, status: 'active', availability: 'off-duty', rating: 5 });
     setMessage(`Driver added to ${selectedOwner?.name || 'fleet'} successfully!`);
-    setPilotForm({ id: '', name: '', email: '', contact: '', owner_id: '' });
+    setPilotForm({ id: '', name: '', email: '', contact: '', password: '', owner_id: '', vehicleNumber: '', vehicleModel: '' });
     onRefresh();
     setLoading(false);
   };
@@ -39,12 +110,13 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
   if (selectedFleet) {
     return (
       <div className="space-y-8 animate-in fade-in duration-500">
-        <button onClick={() => { setSelectedFleetId(null); setMessage(''); }} className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-xl">
+        <button onClick={() => { setSelectedFleetId(null); setMessage(''); setError(''); }} className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-xl">
           <ArrowLeft className="w-4 h-4" />
           <span className="text-[10px] font-black uppercase tracking-widest">Back to Overview</span>
         </button>
 
         {message && <div className="p-4 bg-green-500/20 text-green-400 border border-green-500/50 rounded-xl font-bold">{message}</div>}
+        {error && <div className="p-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-xl font-bold">{error}</div>}
 
         <div className="flex items-center space-x-4 mb-2">
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-black text-xl">
@@ -62,7 +134,7 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
             <h5 className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-3">Current Drivers ({fleetDrivers.length})</h5>
             <div className="flex flex-wrap gap-2">
               {fleetDrivers.map((d: any) => (
-                <span key={d.id} className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-gray-300">
+                <span key={d.id} className="px-3 py-1.5 bg-[#120F17] border border-white/5 rounded-lg text-xs font-bold text-gray-300">
                   <Car className="w-3 h-3 inline-block mr-1.5 text-purple-400" />{d.name}
                 </span>
               ))}
@@ -74,20 +146,34 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
           <form onSubmit={handleCreatePilot} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Driver ID</label>
-              <input required value={pilotForm.id} onChange={e => setPilotForm({...pilotForm, id: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="e.g. P10" />
+              <input required value={pilotForm.id} onChange={e => setPilotForm({...pilotForm, id: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="e.g. P10" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Full Name</label>
-              <input required value={pilotForm.name} onChange={e => setPilotForm({...pilotForm, name: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="e.g. John Doe" />
+              <input required value={pilotForm.name} onChange={e => setPilotForm({...pilotForm, name: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="e.g. John Doe" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Contact (Phone)</label>
-                <input type="text" value={pilotForm.contact} onChange={e => setPilotForm({...pilotForm, contact: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="+91 XXXXXXXXXX" />
+                <input type="text" value={pilotForm.contact} onChange={e => setPilotForm({...pilotForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10)})} maxLength={10} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="1234567890" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                <input type="email" value={pilotForm.email} onChange={e => setPilotForm({...pilotForm, email: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="driver@example.com" />
+                <input type="email" value={pilotForm.email} onChange={e => setPilotForm({...pilotForm, email: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="driver@example.com" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
+                <input type="text" value={pilotForm.password} onChange={e => setPilotForm({...pilotForm, password: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="Create password" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Vehicle Number</label>
+                <input type="text" value={pilotForm.vehicleNumber} onChange={e => setPilotForm({...pilotForm, vehicleNumber: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="e.g. MH-01-AB-1234" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Vehicle Model</label>
+                <input type="text" value={pilotForm.vehicleModel} onChange={e => setPilotForm({...pilotForm, vehicleModel: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="e.g. Tata Ace" />
               </div>
             </div>
             <button disabled={loading} type="submit" className="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-black uppercase tracking-widest py-3 rounded-xl transition-all">
@@ -104,6 +190,7 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
     <div className="space-y-8 animate-in fade-in duration-500">
 
       {message && <div className="p-4 bg-green-500/20 text-green-400 border border-green-500/50 rounded-xl font-bold">{message}</div>}
+      {error && <div className="p-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-xl font-bold">{error}</div>}
 
       {/* New Client Form */}
       <div>
@@ -114,30 +201,34 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
           <form onSubmit={handleCreateOwner} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Client ID</label>
-              <input required value={ownerForm.id} onChange={e => setOwnerForm({...ownerForm, id: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="e.g. O6" />
+              <input required value={ownerForm.id} onChange={e => setOwnerForm({...ownerForm, id: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="e.g. O6" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Company Name</label>
-              <input required value={ownerForm.name} onChange={e => setOwnerForm({...ownerForm, name: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="e.g. Delta Logistics" />
+              <input required value={ownerForm.name} onChange={e => setOwnerForm({...ownerForm, name: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="e.g. Delta Logistics" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Contact (Phone)</label>
-                <input type="text" value={ownerForm.contact} onChange={e => setOwnerForm({...ownerForm, contact: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                <input type="text" value={ownerForm.contact} onChange={e => setOwnerForm({...ownerForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10)})} maxLength={10} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="1234567890" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                <input type="email" value={ownerForm.email} onChange={e => setOwnerForm({...ownerForm, email: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                <input type="email" value={ownerForm.email} onChange={e => setOwnerForm({...ownerForm, email: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
+                <input type="text" value={ownerForm.password} onChange={e => setOwnerForm({...ownerForm, password: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="Create password" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Fleet Size</label>
-                <input type="number" required value={ownerForm.fleetSize} onChange={e => setOwnerForm({...ownerForm, fleetSize: parseInt(e.target.value)})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                <input type="number" required value={ownerForm.fleetSize} onChange={e => setOwnerForm({...ownerForm, fleetSize: parseInt(e.target.value)})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Active Vehicles</label>
-                <input type="number" required value={ownerForm.activeVehicles} onChange={e => setOwnerForm({...ownerForm, activeVehicles: parseInt(e.target.value)})} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                <input type="number" required value={ownerForm.activeVehicles} onChange={e => setOwnerForm({...ownerForm, activeVehicles: parseInt(e.target.value)})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
               </div>
             </div>
             <button disabled={loading} type="submit" className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest py-3 rounded-xl transition-all">
@@ -186,19 +277,43 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [selectedFleetId, setSelectedFleetId] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   const handleEdit = (item: any) => {
     setEditingId(item.id);
     setEditForm({ ...item });
+    setError('');
   };
 
   const handleSaveClient = async () => {
+    setError('');
+    if (editForm.contact && editForm.contact.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (editForm.email && !emailRegex.test(editForm.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
     await updateOwner(editingId!, editForm);
     setEditingId(null);
     onRefresh();
   };
 
   const handleSaveDriver = async () => {
+    setError('');
+    if (editForm.contact && editForm.contact.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (editForm.email && !emailRegex.test(editForm.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
     await updatePilot(editingId!, editForm);
     setEditingId(null);
     onRefresh();
@@ -235,6 +350,8 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
           </div>
         </div>
 
+        {error && <div className="p-4 mb-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-xl font-bold">{error}</div>}
+
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
           {fleetDrivers.length === 0 ? (
             <p className="text-xs text-gray-600 font-bold">No drivers assigned to this fleet.</p>
@@ -251,11 +368,25 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Contact (Phone)</label>
-                          <input value={editForm.contact || ''} onChange={e => setEditForm({...editForm, contact: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="+91 XXXXXXXXXX" />
+                          <input value={editForm.contact || ''} onChange={e => setEditForm({...editForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10)})} maxLength={10} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="1234567890" />
                         </div>
                         <div>
                           <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email</label>
                           <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
+                          <input type="text" value={editForm.password || ''} onChange={e => setEditForm({...editForm, password: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="Update password" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div>
+                          <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Vehicle Number</label>
+                          <input type="text" value={editForm.vehicle_number || ''} onChange={e => setEditForm({...editForm, vehicleNumber: e.target.value, vehicle_number: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="Vehicle No" />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Vehicle Model</label>
+                          <input type="text" value={editForm.vehicle_model || ''} onChange={e => setEditForm({...editForm, vehicleModel: e.target.value, vehicle_model: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="Vehicle Model" />
                         </div>
                       </div>
                       <div>
@@ -278,6 +409,7 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                         <div className="mt-2 space-y-0.5">
                           {driver.contact && <p className="text-xs text-gray-400">📞 {driver.contact}</p>}
                           {driver.email && <p className="text-xs text-gray-400">✉ {driver.email}</p>}
+                          {driver.vehicle_number && <p className="text-xs text-gray-400">🚗 {driver.vehicle_number} {driver.vehicle_model ? `(${driver.vehicle_model})` : ''}</p>}
                           <p className={`text-xs mt-1 ${driver.status === 'active' ? 'text-green-400' : 'text-red-400'}`}>● {driver.status}</p>
                         </div>
                       </div>
@@ -349,6 +481,8 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
         </button>
       </div>
 
+      {error && <div className="p-4 mb-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-xl font-bold">{error}</div>}
+
       <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {owners.map((item: any) => (
@@ -362,11 +496,15 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Contact</label>
-                      <input value={editForm.contact || ''} onChange={e => setEditForm({...editForm, contact: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
+                      <input value={editForm.contact || ''} onChange={e => setEditForm({...editForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10)})} maxLength={10} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="1234567890" />
                     </div>
                     <div>
                       <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email</label>
                       <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
+                      <input type="text" value={editForm.password || ''} onChange={e => setEditForm({...editForm, password: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="Update password" />
                     </div>
                   </div>
                   <div>

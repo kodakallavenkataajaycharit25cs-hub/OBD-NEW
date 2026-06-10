@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
-import ThemeToggle from '../ThemeToggle';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { fetchOwners, fetchPilots, fetchDevices, createOwner, createPilot, updateOwner, updatePilot, deleteOwner, deletePilot } from '../../services/obdApi';
 import { CreateView, UpdateView, RemoveView } from './CrudViews';
 
@@ -83,7 +83,7 @@ export default function AdminPortal() {
             <ShieldCheck className="w-12 h-12 text-blue-400" />
           </div>
 
-          <h2 className="text-2xl font-extrabold text-white tracking-widest uppercase mb-2 font-['Syne']">SUKRUTHA ADMIN CORE</h2>
+          <h2 className="text-2xl font-extrabold text-white tracking-widest uppercase mb-2 font-sans">SUKRUTHA ADMIN CORE</h2>
           <p className="text-blue-500 text-[10px] font-bold uppercase tracking-[0.4em] mb-12">INITIALIZING...</p>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function AdminPortal() {
 
               <div className="flex justify-between items-start mb-4">
                 <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{stat.label}</span>
-                <div className={`p-2 rounded-xl bg-white/5 border border-white/10 group-hover:border-blue-500/30 transition-colors`}>
+                <div className={`p-2 rounded-xl bg-[#120F17] border border-white/5 group-hover:border-blue-500/30 transition-colors`}>
                   <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
                 </div>
               </div>
@@ -203,7 +203,7 @@ export default function AdminPortal() {
         {/* Client Breakdown Grid */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl relative shadow-xl">
           <div className="absolute top-0 left-0 w-32 h-[2px] bg-blue-500" />
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center font-['Syne']">
+          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center font-sans">
             <Building2 className="w-4 h-4 text-blue-500 mr-2" /> Operations Breakdown by Client
           </h3>
 
@@ -271,7 +271,7 @@ export default function AdminPortal() {
                   <ShieldCheck className="w-5 h-5 text-blue-500" />
                   <span className="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em]">Admin Core</span>
                 </div>
-                <h1 className="text-xl font-black tracking-tighter leading-none text-white uppercase font-['Syne']">SUKRUTHA</h1>
+                <h1 className="text-xl font-black tracking-tighter leading-none text-white uppercase font-sans">SUKRUTHA</h1>
                 <span className="text-[9px] uppercase font-bold text-gray-400 tracking-widest mt-1">Operations Control</span>
               </div>
             ) : (
@@ -317,7 +317,7 @@ export default function AdminPortal() {
           <div className="flex items-center space-x-6">
             <div>
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 leading-none mb-1.5 font-sans">Client Operations</h2>
-              <span className="text-xl font-black text-white tracking-tighter uppercase font-['Syne']">Admin Interface</span>
+              <span className="text-xl font-black text-white tracking-tighter uppercase font-sans">Admin Interface</span>
             </div>
           </div>
 
@@ -342,7 +342,7 @@ export default function AdminPortal() {
         <main className="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
           <div className="flex justify-between items-end mb-8 border-b border-white/5 pb-4">
             <div>
-              <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-1 font-['Syne']" style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
+              <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-1 font-sans" style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
                 Client Operations Overview
               </h2>
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest font-sans">SUKRUTHA MOBILITY CONTROL CORE</p>

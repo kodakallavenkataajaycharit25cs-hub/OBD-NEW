@@ -17,16 +17,47 @@ export default function ContactPage({ onLoginClick }: ContactPageProps) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formState.name || !formState.email || !formState.message) {
       setError('Please fill in all required fields.');
       return;
     }
+    if (formState.phone && formState.phone.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (formState.email && !emailRegex.test(formState.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
     setError('');
-    setSubmitted(true);
-    setFormState({ name: '', email: '', phone: '', message: '' });
-    setTimeout(() => setSubmitted(false), 5000);
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          phone: formState.phone,
+          message: formState.message
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to transmit message.');
+      }
+
+      setSubmitted(true);
+      setFormState({ name: '', email: '', phone: '', message: '' });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again later.');
+    }
   };
 
   return (
@@ -155,9 +186,10 @@ export default function ContactPage({ onLoginClick }: ContactPageProps) {
                     <input
                       type="tel"
                       value={formState.phone}
-                      onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+                      onChange={(e) => setFormState({ ...formState, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      maxLength={10}
                       className="bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all font-sans placeholder-gray-600"
-                      placeholder="+91 99999 99999"
+                      placeholder="1234567890"
                     />
                   </div>
 

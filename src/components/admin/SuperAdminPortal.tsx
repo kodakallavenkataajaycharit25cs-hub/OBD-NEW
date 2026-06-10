@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
-import ThemeToggle from '../ThemeToggle';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, OBDData } from '../../services/obdApi';
 import { CreateView, UpdateView, RemoveView } from './CrudViews';
 
@@ -66,7 +66,7 @@ const ImpersonateModal = ({ isOpen, onClose, targetUser, onConfirm }: { isOpen: 
         <div className="bg-white/5 border border-white/5 rounded-2xl p-6 mb-8">
           <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Target Identity Node</div>
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#120F17] border border-white/5 flex items-center justify-center">
               <User className="w-6 h-6 text-white/40" />
             </div>
             <div>
@@ -256,7 +256,7 @@ const TrackingView = ({ telemetry, owners, pilots, devices }: { telemetry: OBDDa
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Enter location, grid, city..."
-                className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors w-44"
+                className="bg-[#120F17] border border-white/5 rounded-xl px-3 py-1.5 text-[10px] text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors w-44"
               />
               {searchQuery && (
                 <button
@@ -359,7 +359,7 @@ const TrackingView = ({ telemetry, owners, pilots, devices }: { telemetry: OBDDa
           <div>
             {!selectedFleetId ? (
               <>
-                <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">FLEET ORBITS</h3>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">FLEET ORBITS</h3>
                 <div className="space-y-6">
                   {fleets.map(fleet => (
                     <div
@@ -405,7 +405,7 @@ const TrackingView = ({ telemetry, owners, pilots, devices }: { telemetry: OBDDa
                     <ArrowLeft className="w-4 h-4 text-gray-400 group-hover:text-blue-400 transition-colors" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">{activeFleet?.name}</h3>
+                    <h3 className="text-sm font-black text-white uppercase tracking-widest font-sans">{activeFleet?.name}</h3>
                     <span className="text-[8px] font-bold text-blue-400 uppercase tracking-widest">Select Pilot</span>
                   </div>
                 </div>
@@ -780,10 +780,10 @@ export default function SuperAdminPortal() {
             <ShieldAlert className="w-12 h-12 text-blue-400" />
           </div>
 
-          <h2 className="text-2xl font-extrabold text-white tracking-widest uppercase mb-2 font-['Syne']">SUKRUTHA MOBILITY</h2>
+          <h2 className="text-2xl font-extrabold text-white tracking-widest uppercase mb-2 font-sans">SUKRUTHA MOBILITY</h2>
           <p className="text-blue-500 text-[10px] font-bold uppercase tracking-[0.4em] mb-12">CONTROL CORE UPLINK</p>
 
-          <div className="relative w-full h-2 bg-white/5 border border-white/10 rounded-full overflow-hidden mb-6">
+          <div className="relative w-full h-2 bg-[#120F17] border border-white/5 rounded-full overflow-hidden mb-6">
             <div
               className="absolute left-0 top-0 bottom-0 bg-blue-500 shadow-[0_0_15px_#2563EB] transition-all duration-100 ease-out"
               style={{ width: `${bootProgress}%` }}
@@ -812,79 +812,82 @@ export default function SuperAdminPortal() {
         className="p-6 border border-white/5 backdrop-blur-xl rounded-3xl relative shadow-xl overflow-hidden group"
       >
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center font-['Syne']">
+          <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center font-sans">
             <TrendingUp className="w-4 h-4 text-blue-500 mr-2" /> Client Yield Radar: Top 5 Performing Organizations
           </h3>
-          <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+          <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest bg-[#120F17] border border-white/5 px-3 py-1 rounded-full">
             Units of Yield: INR (₹)
           </span>
         </div>
 
         {/* Bar Chart Grid */}
-        <div className="relative pt-6 px-4 h-72 flex flex-col justify-end">
-          {/* Background Grid Lines */}
-          <div className="absolute inset-x-0 bottom-[12%] top-6 flex flex-col justify-between pointer-events-none opacity-40">
-            <div className="w-full border-t border-dashed border-white/10 relative">
-              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹20L</span>
+        <div className="relative pt-6 px-4">
+          {/* Chart area with grid lines and bars */}
+          <div className="relative h-56">
+            {/* Background Grid Lines */}
+            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-40">
+              <div className="w-full border-t border-dashed border-white/10 relative h-0">
+                <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹20L</span>
+              </div>
+              <div className="w-full border-t border-dashed border-white/10 relative h-0">
+                <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹15L</span>
+              </div>
+              <div className="w-full border-t border-dashed border-white/10 relative h-0">
+                <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹10L</span>
+              </div>
+              <div className="w-full border-t border-dashed border-white/10 relative h-0">
+                <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹5L</span>
+              </div>
+              <div className="w-full border-b border-white/20 relative h-0" />
             </div>
-            <div className="w-full border-t border-dashed border-white/10 relative">
-              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹15L</span>
+
+            {/* Columns of Bars - aligned to bottom */}
+            <div className="absolute inset-0 flex items-end justify-around z-10 px-4 h-full pb-[1px]">
+              {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
+                const percentHeight = Math.max((client.revenue / 2000000) * 100, 5); // Ensure minimum visibility
+                const colors = index === 0
+                  ? 'bg-orange-200 border-x border-t border-orange-300'
+                  : index === 1
+                    ? 'bg-blue-200 border-x border-t border-blue-300'
+                    : index === 2
+                      ? 'bg-emerald-200 border-x border-t border-emerald-300'
+                      : index === 3
+                        ? 'bg-purple-200 border-x border-t border-purple-300'
+                        : 'bg-slate-200 border-x border-t border-slate-300';
+
+                return (
+                  <div key={client.id} className="flex flex-col justify-end items-center w-full max-w-[12%] group relative h-full">
+                    {/* Floating numeric label above the bar */}
+                    <div 
+                      className="absolute left-1/2 -translate-x-1/2 text-[10px] font-black text-gray-700 font-sans bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300 whitespace-nowrap z-20 pointer-events-none shadow-sm"
+                      style={{ bottom: animateBars ? `calc(${percentHeight}% + 8px)` : '8px' }}
+                    >
+                      ₹{(client.revenue / 100000).toFixed(1)}L
+                    </div>
+
+                    {/* Matte Pastel Bar */}
+                    <div
+                      className={`w-full ${colors} rounded-t-xl transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative cursor-pointer hover:opacity-80`}
+                      style={{ height: animateBars ? `${percentHeight}%` : '0%' }}
+                    />
+                  </div>
+                );
+              })}
             </div>
-            <div className="w-full border-t border-dashed border-white/10 relative">
-              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹10L</span>
-            </div>
-            <div className="w-full border-t border-dashed border-white/10 relative">
-              <span className="absolute right-0 -top-3 text-[8px] text-gray-600 font-bold">₹5L</span>
-            </div>
-            <div className="w-full border-b border-white/20 relative" />
           </div>
 
-          {/* Columns of Bars */}
-          <div className="flex items-end justify-around relative z-10 h-[88%] w-full">
+          {/* Labels row - outside the chart area */}
+          <div className="flex items-start justify-around px-4 mt-3">
             {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
-              const percentHeight = (client.revenue / 2000000) * 100;
-              const colors = index === 0
-                ? 'from-yellow-500 via-amber-500 to-orange-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
-                : index === 1
-                  ? 'from-blue-600 via-indigo-500 to-indigo-400 shadow-[0_0_15px_rgba(37,99,235,0.4)]'
-                  : index === 2
-                    ? 'from-cyan-500 via-teal-500 to-emerald-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                    : index === 3
-                      ? 'from-purple-600 via-purple-500 to-pink-500 shadow-[0_0_15px_rgba(147,51,234,0.4)]'
-                      : 'from-gray-500 via-slate-600 to-slate-500 shadow-[0_0_15px_rgba(100,116,139,0.3)]';
-
               const initials = client.name.split(' ').map(n => n[0]).join('').slice(0, 3);
-
               return (
-                <div key={client.id} className="flex flex-col items-center w-full max-w-[15%] group relative">
-
-
-                  {/* Bar Cylinder */}
-                  <div className="relative w-full h-44 flex items-end">
-                    {/* Bar Glow Base */}
-                    <div
-                      className={`w-full bg-gradient-to-t ${colors} rounded-t-2xl transition-all duration-700 ease-out`}
-                      style={{ height: animateBars ? `${percentHeight}%` : '0%' }}
-                    >
-                      {/* Shimmer reflection effect */}
-                      <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 opacity-50" />
-
-                      {/* Floating numeric label inside/above the bar */}
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] font-black text-white font-sans bg-black/80 px-2 py-0.5 rounded border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                        ₹{(client.revenue / 100000).toFixed(1)}L
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Label Area */}
-                  <div className="mt-3 text-center">
-                    <span className="text-[10px] font-black text-white font-sans tracking-wider uppercase block group-hover:text-blue-400 transition-colors">
-                      {initials}
-                    </span>
-                    <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mt-0.5 block">
-                      Rank {index + 1}
-                    </span>
-                  </div>
+                <div key={client.id} className="text-center w-full max-w-[12%]">
+                  <span className="text-[10px] font-black text-gray-800 dark:text-white font-sans tracking-wider uppercase block">
+                    {initials}
+                  </span>
+                  <span className="text-[7px] text-gray-500 font-black uppercase tracking-widest mt-0.5 block">
+                    Rank {index + 1}
+                  </span>
                 </div>
               );
             })}
@@ -897,7 +900,7 @@ export default function SuperAdminPortal() {
         {/* Top 5 Performing Clients Board */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl relative shadow-xl">
           <div className="absolute top-0 left-0 w-32 h-[2px] bg-blue-500" />
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center font-['Syne']">
+          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center font-sans">
             <TrendingUp className="w-4 h-4 text-blue-500 mr-2" /> Top Performing Clients
           </h3>
 
@@ -974,7 +977,7 @@ export default function SuperAdminPortal() {
 
             <div className="flex justify-between items-start mb-4">
               <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{stat.label}</span>
-              <div className={`p-2 rounded-xl bg-white/5 border border-white/10 group-hover:border-blue-500/30 transition-colors`}>
+              <div className={`p-2 rounded-xl bg-[#120F17] border border-white/5 group-hover:border-blue-500/30 transition-colors`}>
                 <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
               </div>
             </div>
@@ -991,7 +994,7 @@ export default function SuperAdminPortal() {
   const OwnersView = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
-        <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Fleet Owners Database</h3>
+        <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Fleet Owners Database</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {owners.map(owner => (
@@ -1065,7 +1068,7 @@ export default function SuperAdminPortal() {
   const PilotsView = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
-        <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Unit Pilots Directory</h3>
+        <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Unit Pilots Directory</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pilots.map(pilot => (
@@ -1162,8 +1165,8 @@ export default function SuperAdminPortal() {
       <div className="space-y-8 animate-in fade-in duration-500">
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-            <h3 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">Telemetry Node Network</h3>
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4 py-2 w-full md:w-80">
+            <h3 className="text-sm font-black text-white uppercase tracking-widest font-sans">Telemetry Node Network</h3>
+            <div className="flex items-center bg-[#120F17] border border-white/5 rounded-2xl px-4 py-2 w-full md:w-80">
               <Search className="w-4 h-4 text-gray-500" />
               <input
                 type="text"
@@ -1225,7 +1228,7 @@ export default function SuperAdminPortal() {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => { playClick(); setSelectedDevice(dev); }}
-                          className="px-3 py-1 bg-white/5 border border-white/10 hover:bg-blue-500/20 hover:border-blue-500/30 text-blue-400 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all"
+                          className="px-3 py-1 bg-[#120F17] border border-white/5 hover:bg-blue-500/20 hover:border-blue-500/30 text-blue-400 text-[8px] font-black uppercase tracking-widest rounded-lg transition-all"
                         >
                           Ping Logs
                         </button>
@@ -1259,7 +1262,7 @@ export default function SuperAdminPortal() {
                 </div>
                 <button
                   onClick={() => { playClick(); setSelectedDevice(null); }}
-                  className="p-1 rounded-lg bg-white/5 border border-white/10 text-gray-500 hover:text-white transition-colors"
+                  className="p-1 rounded-lg bg-[#120F17] border border-white/5 text-gray-500 hover:text-white transition-colors"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
@@ -1276,7 +1279,7 @@ export default function SuperAdminPortal() {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => { playClick(); setSelectedDevice(null); }}
-                  className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-[9px] font-black uppercase tracking-widest rounded-2xl"
+                  className="px-5 py-2.5 bg-[#120F17] border border-white/5 hover:bg-white/10 transition-colors text-[9px] font-black uppercase tracking-widest rounded-2xl"
                 >
                   Close Terminal
                 </button>
@@ -1297,7 +1300,7 @@ export default function SuperAdminPortal() {
 
         {/* Core Fleet Activity Area Graph */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Missions Stream (Daily)</h3>
+          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Missions Stream (Daily)</h3>
 
           <div
             onMouseMove={handleMissionsMouseMove}
@@ -1366,7 +1369,7 @@ export default function SuperAdminPortal() {
 
         {/* System Load Analytics Bar Chart */}
         <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-['Syne']">Active Node Revenue Cycles</h3>
+          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Active Node Revenue Cycles</h3>
 
           <div className="h-64 flex items-end justify-around relative pt-6 px-4">
             {[
@@ -1418,7 +1421,7 @@ export default function SuperAdminPortal() {
       <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h3 className="text-sm font-black text-white uppercase tracking-widest font-['Syne']">CRITICAL SOS MANAGEMENT</h3>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest font-sans">CRITICAL SOS MANAGEMENT</h3>
             <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mt-1">Real-time Emergency Events & Intercept Status</p>
           </div>
 
@@ -1493,7 +1496,7 @@ export default function SuperAdminPortal() {
                   <ShieldCheck className="w-5 h-5 text-blue-500" />
                   <span className="text-[10px] text-blue-500 font-black uppercase tracking-[0.3em]">Core Active</span>
                 </div>
-                <h1 className="text-xl font-black tracking-tighter leading-none text-white uppercase font-['Syne']">SUKRUTHA</h1>
+                <h1 className="text-xl font-black tracking-tighter leading-none text-white uppercase font-sans">SUKRUTHA</h1>
                 <span className="text-[9px] uppercase font-bold text-gray-400 tracking-widest mt-1">Mobility Control Core</span>
               </div>
             ) : (
@@ -1540,7 +1543,7 @@ export default function SuperAdminPortal() {
           <div className="flex items-center space-x-6">
             <div>
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 leading-none mb-1.5 font-sans">Operations Control Center</h2>
-              <span className="text-xl font-black text-white tracking-tighter uppercase font-['Syne']">Admin Core Interface</span>
+              <span className="text-xl font-black text-white tracking-tighter uppercase font-sans">Admin Core Interface</span>
             </div>
           </div>
 
@@ -1566,7 +1569,7 @@ export default function SuperAdminPortal() {
 
           <div className="flex justify-between items-end mb-8 border-b border-white/5 pb-4">
             <div>
-              <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-1 font-['Syne']" style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
+              <h2 className="text-2xl font-black text-white uppercase tracking-widest mb-1 font-sans" style={{ textShadow: '0 0 15px rgba(255,255,255,0.2)' }}>
                 {location.pathname === '/super-admin-dashboard' ? 'Command Center Dashboard' :
                   location.pathname.includes('stats') ? 'System Telemetry Stats' :
                     location.pathname.includes('owners') ? 'Fleet Owner Accounts' :

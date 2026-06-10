@@ -37,9 +37,9 @@
   --border-subtle: #E2E8F0;   /* Soft slate border separator */
 
   /* 20% SECONDARY COLORS (Typography & Hierarchy) */
-  --text-primary: #0F172A;     /* Primary headings & critical metrics: Deep slate navy/charcoal */
-  --text-secondary: #334155;   /* Slate body/secondary text */
-  --text-muted: #64748B;       /* Mid-tone cool gray for labels like "47 MISSIONS", "PILOT NETWORK" */
+  --text-primary: #000000;     /* Pure Black */
+  --text-secondary: #000000;   /* Pure Black */
+  --text-muted: #000000;       /* Pure Black */
 
   /* 10% ACCENT COLORS (Focus & Strategic Intent) */
   --brand-blue: #1D4ED8;        /* Deeply saturated brand accent blue for text/interactive states */
@@ -123,9 +123,16 @@
 
 .light-mode .bg-zinc-800,
 .light-mode .bg-zinc-800\/30,
-.light-mode .bg-\[\#120F17\] {
+.light-mode .bg-\[\#120F17\],
+.light-mode .bg-\[\#0f0c15\] {
   background-color: var(--card-bg) !important;
   border-color: var(--border-subtle) !important;
+}
+
+.light-mode .from-\[\#0f0c15\] {
+  --tw-gradient-from: var(--card-bg) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }
 
 .light-mode .bg-\[\#120F17\]\/50,
@@ -196,15 +203,44 @@
   color: var(--text-primary) !important;
 }
 
-/* Icon Container Re-engineering: replace solid blue with 10-12% soft tint and deep blue icon */
+/* Icon Container & Button Re-engineering: replace solid with soft tints */
 .light-mode .bg-blue-600 {
   background-color: var(--brand-blue-tint) !important;
   border: none !important;
   box-shadow: none !important;
 }
 .light-mode .bg-blue-600 svg,
-.light-mode .bg-blue-600 .text-white {
+.light-mode .bg-blue-600 .text-white,
+.light-mode .bg-blue-600.text-white {
   color: var(--brand-blue) !important;
+}
+.light-mode .hover\:bg-blue-700:hover {
+  background-color: rgba(29, 78, 216, 0.15) !important;
+}
+
+.light-mode .bg-gray-600 {
+  background-color: #F1F5F9 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.light-mode .bg-gray-600 svg,
+.light-mode .bg-gray-600 .text-white,
+.light-mode .bg-gray-600.text-white {
+  color: var(--text-secondary) !important;
+}
+.light-mode .hover\:bg-gray-700:hover {
+  background-color: #E2E8F0 !important;
+}
+
+.light-mode .bg-green-600 {
+  background-color: var(--success-green-tint) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.light-mode .bg-green-600 svg,
+.light-mode .bg-green-600 .text-white,
+.light-mode .bg-green-600.text-white {
+  color: var(--success-green) !important;
 }
 
 .light-mode .text-blue-500,
@@ -526,4 +562,50 @@
 .light-mode .glass-overlay-card [class*="text-blue-100/60"],
 .light-mode .glass-overlay-card svg {
   color: #ffffff !important;
+}
+
+/* Solid Pills with White Text for Light Mode */
+.light-mode span.rounded-full[class*="bg-red-500"],
+.light-mode span.rounded-full[class*="bg-orange-500"],
+.light-mode span.rounded-full[class*="bg-yellow-500"],
+.light-mode span.rounded-full[class*="bg-green-500"],
+.light-mode span.rounded-full[class*="bg-blue-500"],
+.light-mode span.rounded-full[class*="bg-gray-500"],
+.light-mode span.rounded-full[class*="bg-purple-500"],
+.light-mode span.rounded-full.bg-gray-600 {
+  color: #ffffff !important;
+}
+
+.light-mode span.rounded-full[class*="bg-red-500"] {
+  background-color: var(--danger-red) !important;
+}
+.light-mode span.rounded-full[class*="bg-orange-500"] {
+  background-color: var(--orange-accent) !important;
+}
+.light-mode span.rounded-full[class*="bg-yellow-500"] {
+  background-color: var(--warning-yellow) !important;
+}
+.light-mode span.rounded-full[class*="bg-green-500"] {
+  background-color: var(--success-green) !important;
+}
+.light-mode span.rounded-full[class*="bg-blue-500"] {
+  background-color: var(--brand-blue) !important;
+}
+.light-mode span.rounded-full[class*="bg-gray-500"],
+.light-mode span.rounded-full.bg-gray-600 {
+  background-color: var(--text-muted) !important;
+}
+.light-mode span.rounded-full[class*="bg-purple-500"] {
+  background-color: #9333ea !important;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-150%) skewX(20deg); }
+  100% { transform: translateX(150%) skewX(20deg); }
+}
+
+/* Force all text to black in light mode across all portals */
+.light-mode,
+.light-mode * {
+  color: #000000 !important;
 }

@@ -135,19 +135,19 @@ export default function SafetyEmergency() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-red-500/30 border border-red-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-red-400">3</div>
             <div className="text-sm text-red-300">Active Alerts</div>
           </div>
-          <div className="bg-green-500/30 border border-green-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-green-400">98.7%</div>
             <div className="text-sm text-green-300">Safety Score</div>
           </div>
-          <div className="bg-blue-500/30 border border-blue-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">4.2 min</div>
             <div className="text-sm text-blue-300">Avg Response Time</div>
           </div>
-          <div className="bg-yellow-500/30 border border-yellow-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-yellow-400">15</div>
             <div className="text-sm text-yellow-300">Incidents This Month</div>
           </div>
@@ -175,7 +175,7 @@ export default function SafetyEmergency() {
               return (
                 <div
                   key={alert.id}
-                  className={`bg-${severityColor}-500/20 border border-${severityColor}-500/50 rounded-lg p-4`}
+                  className={`bg-[#120F17] border border-white/5 rounded-lg p-4`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">

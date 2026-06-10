@@ -11,6 +11,7 @@ export default function UpdateDriver() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
+  const [error, setError] = useState('');
 
   const loadDrivers = async () => {
     setLoading(true);
@@ -32,10 +33,23 @@ export default function UpdateDriver() {
   const handleEdit = (driver: any) => {
     setEditingId(driver.id);
     setEditForm({ ...driver });
+    setError('');
   };
 
   const handleSaveDriver = async () => {
     if (!editingId) return;
+    setError('');
+
+    if (editForm.contact && editForm.contact.length !== 10) {
+      setError('Phone number must be exactly 10 digits.');
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (editForm.email && !emailRegex.test(editForm.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
     await updatePilot(editingId, editForm);
     setEditingId(null);
     loadDrivers();
@@ -58,18 +72,24 @@ export default function UpdateDriver() {
           </h2>
         </div>
 
+        {error && (
+          <div className="p-4 mb-6 bg-red-500/20 text-red-400 border border-red-500/50 rounded-xl font-bold">
+            {error}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center items-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
           </div>
         ) : drivers.length === 0 ? (
-          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center">
+          <div className="p-6 bg-[#120F17] border border-white/5 rounded-2xl text-center">
             <p className="text-gray-400 font-bold">No drivers found in your fleet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {drivers.map((driver: any) => (
-              <div key={driver.id} className="p-5 bg-white/5 border border-white/10 rounded-2xl transition-all hover:bg-white/10 group">
+              <div key={driver.id} className="p-5 bg-[#120F17] border border-white/5 rounded-2xl transition-all hover:bg-white/10 group">
                 {editingId === driver.id ? (
                   <div className="space-y-4">
                     <div>
@@ -85,9 +105,10 @@ export default function UpdateDriver() {
                         <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Contact</label>
                         <input 
                           value={editForm.contact || ''} 
-                          onChange={e => setEditForm({...editForm, contact: e.target.value})} 
+                          onChange={e => setEditForm({...editForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10)})} 
+                          maxLength={10}
                           className="w-full bg-white/10 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:border-yellow-500 outline-none" 
-                          placeholder="+91..." 
+                          placeholder="1234567890" 
                         />
                       </div>
                       <div>
@@ -97,6 +118,38 @@ export default function UpdateDriver() {
                           value={editForm.email || ''} 
                           onChange={e => setEditForm({...editForm, email: e.target.value})} 
                           className="w-full bg-white/10 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:border-yellow-500 outline-none" 
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Password</label>
+                      <input 
+                        type="text" 
+                        value={editForm.password || ''} 
+                        onChange={e => setEditForm({...editForm, password: e.target.value})} 
+                        className="w-full bg-white/10 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:border-yellow-500 outline-none" 
+                        placeholder="Update password"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Vehicle Number</label>
+                        <input 
+                          type="text" 
+                          value={editForm.vehicle_number || ''} 
+                          onChange={e => setEditForm({...editForm, vehicleNumber: e.target.value, vehicle_number: e.target.value})} 
+                          className="w-full bg-white/10 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:border-yellow-500 outline-none" 
+                          placeholder="Vehicle No"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Vehicle Model</label>
+                        <input 
+                          type="text" 
+                          value={editForm.vehicle_model || ''} 
+                          onChange={e => setEditForm({...editForm, vehicleModel: e.target.value, vehicle_model: e.target.value})} 
+                          className="w-full bg-white/10 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:border-yellow-500 outline-none" 
+                          placeholder="Vehicle Model"
                         />
                       </div>
                     </div>
@@ -150,6 +203,7 @@ export default function UpdateDriver() {
                     <div className="space-y-1.5 w-full bg-black/20 rounded-xl p-3 border border-white/5">
                       {driver.contact && <p className="text-xs text-gray-400 flex items-center"><span className="w-4 mr-2 opacity-50">📞</span> {driver.contact}</p>}
                       {driver.email && <p className="text-xs text-gray-400 flex items-center"><span className="w-4 mr-2 opacity-50">✉</span> {driver.email}</p>}
+                      {driver.vehicle_number && <p className="text-xs text-gray-400 flex items-center"><span className="w-4 mr-2 opacity-50">🚗</span> {driver.vehicle_number} {driver.vehicle_model ? `(${driver.vehicle_model})` : ''}</p>}
                       <p className={`text-xs flex items-center mt-2 ${driver.status === 'active' ? 'text-green-400' : 'text-red-400'}`}>
                         <span className="w-4 mr-2 opacity-80">●</span> <span className="uppercase font-bold text-[10px] tracking-widest">{driver.status}</span>
                       </p>

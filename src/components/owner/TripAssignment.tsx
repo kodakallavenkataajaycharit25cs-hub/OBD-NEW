@@ -17,6 +17,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { fetchPilots } from '../../services/obdApi';
 
 interface TripAssignment {
   id: string;
@@ -113,6 +114,7 @@ export default function TripAssignment() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [pilots, setPilots] = useState<any[]>([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [viewTripId, setViewTripId] = useState<string | null>(null);
@@ -123,6 +125,18 @@ export default function TripAssignment() {
       detailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [viewTripId, editingId]);
+
+  useEffect(() => {
+    const loadPilots = async () => {
+      try {
+        const data = await fetchPilots();
+        setPilots(data || []);
+      } catch (err) {
+        console.error('Failed to load pilots:', err);
+      }
+    };
+    loadPilots();
+  }, []);
 
   // Always derive the viewed trip from the live trips array so edits are reflected instantly
   const viewTrip = viewTripId ? trips.find(t => t.id === viewTripId) || null : null;
@@ -146,6 +160,16 @@ export default function TripAssignment() {
 
     if (!form.driverName || !form.vehicle || !form.origin || !form.destination || !form.tripCost || !form.customerName || !form.customerPhone || !form.numberOfPeople) {
       showMessage('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    if (form.customerPhone && form.customerPhone.length !== 10) {
+      showMessage('Phone number must be exactly 10 digits.', 'error');
+      return;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (form.customerEmail && !emailRegex.test(form.customerEmail)) {
+      showMessage('Please enter a valid email address.', 'error');
       return;
     }
 
@@ -183,6 +207,30 @@ export default function TripAssignment() {
       };
       setTrips(prev => [newTrip, ...prev]);
       showMessage(`Trip ${newTrip.id} created and assigned to ${form.driverName}!`);
+      
+      // WhatsApp Integration
+      const pilot = pilots.find(p => p.name === form.driverName);
+      let driverPhone = pilot?.contact ? pilot.contact.replace(/\D/g, '') : '9876543210';
+      if (driverPhone.length === 10) driverPhone = '91' + driverPhone; // Default to India prefix for demo
+
+      const googleMapsRoute = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(form.origin)}&destination=${encodeURIComponent(form.destination)}`;
+      
+      const waMessage = ` New trip assigned
+---- Customer Details ----
+Customer : ${form.customerName}
+No.of people : ${form.numberOfPeople}
+Phone : ${form.customerPhone}
+Price : ${form.tripCost}
+
+---- Trip Details ----
+From : ${form.origin}
+To : ${form.destination}
+Route : ${googleMapsRoute}
+
+Drive safe and please confirm receipt of this message!`;
+
+      const whatsappUrl = `https://wa.me/${driverPhone}?text=${encodeURIComponent(waMessage)}`;
+      window.open(whatsappUrl, '_blank');
     }
 
     setForm(emptyForm);
@@ -227,9 +275,9 @@ export default function TripAssignment() {
     }
   };
 
-  const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:border-blue-500 outline-none transition-colors placeholder:text-gray-600";
+  const inputClass = "w-full bg-[#120F17] border border-white/5 rounded-xl p-3 text-white focus:border-blue-500 outline-none transition-colors placeholder:text-gray-600";
   const labelClass = "block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5";
-  const selectClass = "w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:border-blue-500 outline-none transition-colors appearance-none cursor-pointer";
+  const selectClass = "w-full bg-[#120F17] border border-white/5 rounded-xl p-3 text-white focus:border-blue-500 outline-none transition-colors appearance-none cursor-pointer";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -246,7 +294,7 @@ export default function TripAssignment() {
           </h2>
           <button
             onClick={() => { setShowForm(!showForm); setEditingId(null); setForm(emptyForm); }}
-            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all active:scale-95 ${showForm ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-emerald-500/25'}`}
+            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wider transition-all active:scale-95 ${showForm ? 'bg-white/5 text-red-400 border border-white/10 hover:bg-red-500/30' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-emerald-500/25'}`}
           >
             {showForm ? <><X className="w-4 h-4" /><span>Cancel</span></> : <><Plus className="w-4 h-4" /><span>Assign New Trip</span></>}
           </button>
@@ -255,7 +303,7 @@ export default function TripAssignment() {
 
       {/* Messages */}
       {message && (
-        <div className={`p-4 rounded-xl font-bold border transition-all animate-in fade-in duration-300 ${messageType === 'success' ? 'bg-green-500/20 text-green-400 border-green-500/50' : 'bg-red-500/20 text-red-400 border-red-500/50'}`}>
+        <div className={`p-4 rounded-xl font-bold border transition-all animate-in fade-in duration-300 ${messageType === 'success' ? 'bg-white/5 text-green-400 border border-white/10' : 'bg-white/5 text-red-400 border border-white/10'}`}>
           {message}
         </div>
       )}
@@ -372,9 +420,10 @@ export default function TripAssignment() {
                       required
                       type="tel"
                       value={form.customerPhone}
-                      onChange={e => setForm({ ...form, customerPhone: e.target.value })}
+                      onChange={e => setForm({ ...form, customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      maxLength={10}
                       className={inputClass}
-                      placeholder="+91 XXXXXXXXXX"
+                      placeholder="1234567890"
                     />
                   </div>
 
@@ -628,9 +677,10 @@ export default function TripAssignment() {
                     required
                     type="tel"
                     value={form.customerPhone}
-                    onChange={e => setForm({ ...form, customerPhone: e.target.value })}
+                    onChange={e => setForm({ ...form, customerPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                    maxLength={10}
                     className={inputClass}
-                    placeholder="+91 XXXXXXXXXX"
+                    placeholder="1234567890"
                   />
                 </div>
                 <div>

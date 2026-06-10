@@ -226,7 +226,7 @@ export default function VehicleHealth() {
 
           {/* Engine Diagnostic Codes */}
           {selectedVehicleData.engineCodes.length > 0 && (
-            <div className="bg-red-500/20 border border-red-500/50 backdrop-blur-sm rounded-2xl p-6">
+            <div className="bg-[#120F17] border border-white/5 backdrop-blur-sm rounded-2xl p-6">
               <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
                 <AlertTriangle className="w-6 h-6 mr-2" />
                 Engine Diagnostic Codes
@@ -354,12 +354,12 @@ export default function VehicleHealth() {
 
               <div className="mt-4">
                 {new Date(selectedVehicleData.nextService) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) ? (
-                  <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 text-center">
+                  <div className="bg-[#120F17] border border-white/5 rounded-lg p-3 text-center">
                     <AlertTriangle className="w-5 h-5 text-yellow-400 mx-auto mb-2" />
                     <span className="text-yellow-400 text-sm font-medium">Service Due Soon</span>
                   </div>
                 ) : (
-                  <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-3 text-center">
+                  <div className="bg-[#120F17] border border-white/5 rounded-lg p-3 text-center">
                     <CheckCircle className="w-5 h-5 text-green-400 mx-auto mb-2" />
                     <span className="text-green-400 text-sm font-medium">Service Up to Date</span>
                   </div>

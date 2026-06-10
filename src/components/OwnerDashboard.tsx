@@ -38,7 +38,7 @@ import TripAssignment from './owner/TripAssignment';
 
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export default function OwnerDashboard() {
   const { user, logout, loginAs } = useAuth();

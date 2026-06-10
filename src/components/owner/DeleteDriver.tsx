@@ -56,7 +56,7 @@ export default function DeleteDriver() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
           </div>
         ) : drivers.length === 0 ? (
-          <div className="p-6 bg-white/5 border border-white/10 rounded-2xl text-center">
+          <div className="p-6 bg-[#120F17] border border-white/5 rounded-2xl text-center">
             <p className="text-gray-400 font-bold">No drivers found in your fleet.</p>
           </div>
         ) : (

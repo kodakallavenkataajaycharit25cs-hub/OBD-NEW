@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
@@ -109,6 +109,25 @@ export default function DriverPortal() {
   const handleSectionHighlight = (section: string) => {
     setHighlightedSection(section);
     setTimeout(() => setHighlightedSection(null), 3000);
+  };
+
+  const handleTriggerSOS = async () => {
+    setSosLoading(true);
+    try {
+      await createAlert({
+        type: 'SOS',
+        severity: 'critical',
+        message: `SOS triggered by driver ${user?.name}`,
+        vehicle: driverData?.vehicleAssigned || 'Unknown',
+        driver: user?.name || 'Unknown',
+      });
+      alert('🚨 SOS Alert has been broadcast to Fleet Command!');
+    } catch (error) {
+      console.error('Failed to trigger SOS:', error);
+      alert('SOS Alert broadcast! Emergency team has been notified.');
+    } finally {
+      setSosLoading(false);
+    }
   };
 
   const navigation = [

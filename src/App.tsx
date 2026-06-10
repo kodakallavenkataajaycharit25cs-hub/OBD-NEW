@@ -10,6 +10,7 @@ import DriverPortal from './components/DriverPortal';
 import SuperAdminPortal from './components/admin/SuperAdminPortal';
 import AdminPortal from './components/admin/AdminPortal';
 import LoginModal from './components/LoginModal';
+import ResetPasswordPage from './components/ResetPasswordPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 function ScrollToTop() {
@@ -44,6 +45,7 @@ function AppContent() {
           <Route path="/about" element={<AboutPage onLoginClick={() => setShowLogin(true)} />} />
           <Route path="/features" element={<FeaturesPage onLoginClick={() => setShowLogin(true)} />} />
           <Route path="/contact" element={<ContactPage onLoginClick={() => setShowLogin(true)} />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route 
             path="/owner/*" 
             element={

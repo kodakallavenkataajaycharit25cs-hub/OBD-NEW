@@ -236,15 +236,15 @@ export default function Maintenance() {
         <h4 className="text-lg font-black tracking-tight uppercase text-white mb-4">Predictive Maintenance Insights</h4>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">7</div>
             <div className="text-sm text-blue-300">Vehicles Due Soon</div>
           </div>
-          <div className="bg-orange-500/20 border border-orange-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-orange-400">3</div>
             <div className="text-sm text-orange-300">Anomalies Detected</div>
           </div>
-          <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4 text-center">
+          <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-green-400">₹2.4L</div>
             <div className="text-sm text-green-300">Cost Savings (Predicted)</div>
           </div>

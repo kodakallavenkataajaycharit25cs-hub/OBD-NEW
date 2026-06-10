@@ -171,7 +171,7 @@ export default function TripCosting() {
                 <select
                   value={dateRange}
                   onChange={(e) => setDateRange(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-white outline-none focus:border-blue-500/50 transition-all custom-select"
+                  className="w-full bg-[#120F17] border border-white/5 rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-white outline-none focus:border-blue-500/50 transition-all custom-select"
                 >
                   <option value="7d" className="bg-[#120F17]">Last 7 Days</option>
                   <option value="30d" className="bg-[#120F17]">Last 30 Days</option>

@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; user?: User }>;
   logout: () => void;
   loginAs: (user: User) => void;
 }
@@ -48,16 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const mapSupabaseUser = (sbUser: SupabaseUser) => {
+  const mapSupabaseUser = (sbUser: SupabaseUser): User => {
     const role = sbUser.user_metadata?.role || deriveRole(sbUser.email || '');
     const name = sbUser.user_metadata?.name || sbUser.email?.split('@')[0] || 'Unknown User';
 
-    setUser({
+    const mappedUser: User = {
       id: sbUser.id,
       email: sbUser.email || '',
       role: role as any,
       name: name
-    });
+    };
+    
+    setUser(mappedUser);
+    return mappedUser;
   };
 
   const deriveRole = (email: string): string => {
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return 'driver'; // Default
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; user?: User }> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -77,19 +80,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
       if (data.user) {
-        mapSupabaseUser(data.user);
-        return true;
+        const mappedUser = mapSupabaseUser(data.user);
+        return { success: true, user: mappedUser };
       }
-      return false;
+      return { success: false };
     } catch (error) {
       console.error('Login error:', error);
-      return false;
+      return { success: false };
     }
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    sessionStorage.removeItem('admin_impersonating');
   };
 
   const loginAs = (targetUser: User) => {
