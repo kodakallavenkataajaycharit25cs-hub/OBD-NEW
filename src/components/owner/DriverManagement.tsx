@@ -18,7 +18,7 @@ import {
   Trash2
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
-import { fetchPilots } from '../../services/obdApi';
+import { fetchPilots, updatePilot } from '../../services/obdApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function DriverManagement() {
@@ -43,6 +43,15 @@ export default function DriverManagement() {
     };
     loadDrivers();
   }, [user]);
+
+  const handleAvailabilityChange = async (id: string, newAvailability: string) => {
+    try {
+      await updatePilot(id, { availability: newAvailability });
+      setDrivers(prev => prev.map(d => d.id === id ? { ...d, availability: newAvailability } : d));
+    } catch (err) {
+      console.error('Failed to update availability', err);
+    }
+  };
 
   const formatIndianCurrency = (amount: number) => {
     if (amount >= 10000000) {
@@ -78,6 +87,20 @@ export default function DriverManagement() {
       case 'expired': return { color: 'red', icon: AlertTriangle };
       default: return { color: 'gray', icon: Clock };
     }
+  };
+
+  const getAvailabilityPill = (availability: string) => {
+    const avail = availability?.toLowerCase() || 'unknown';
+    if (avail === 'busy' || avail === 'on-trip') {
+      return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest bg-red-500/20 text-red-500 border border-red-500/20">Busy</span>;
+    }
+    if (avail === 'available' || avail === 'free') {
+      return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest bg-green-500/20 text-green-500 border border-green-500/20">Free</span>;
+    }
+    if (avail === 'off-duty' || avail === 'offday') {
+      return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest bg-gray-500/20 text-gray-400 border border-gray-500/20">Unavailable</span>;
+    }
+    return <span className="px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest bg-blue-500/20 text-blue-400 border border-blue-500/20">{availability || 'Unknown'}</span>;
   };
 
   return (
@@ -156,17 +179,15 @@ export default function DriverManagement() {
                         <span className={`w-2 h-2 rounded-full ${driver.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
                           }`} />
                         <span>{driver.status}</span>
-                        <span>•</span>
-                        <span>{driver.availability || 'Unknown'}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex flex-col items-end space-y-2">
+                    {getAvailabilityPill(driver.availability)}
                     <div className="flex items-center space-x-1 mb-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
                       <span className="text-white font-semibold">{driver.rating}</span>
                     </div>
-                    <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">{driver.trips || 0} trips</div>
                   </div>
                 </div>
 
@@ -206,10 +227,18 @@ export default function DriverManagement() {
               <div>
                 <h4 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white">{selectedDriverData?.name}</h4>
                 <p className="text-gray-400">{selectedDriverData?.hours || 0} hours experience</p>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className={`w-2 h-2 rounded-full ${selectedDriverData?.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
-                    }`} />
-                  <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">{selectedDriverData?.status}</span>
+                <div className="flex items-center space-x-3 mt-2">
+                  <div className="flex items-center space-x-1">
+                    <span className={`w-2 h-2 rounded-full ${selectedDriverData?.status === 'active' ? 'bg-green-400' : 'bg-gray-400'}`} />
+                    <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">{selectedDriverData?.status}</span>
+                  </div>
+                  
+                  {/* Interactive Status Toggle */}
+                  <div className="flex bg-black/40 rounded-full border border-white/10 p-0.5 ml-4">
+                    <button onClick={() => handleAvailabilityChange(selectedDriverData.id, 'available')} className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest transition-colors ${selectedDriverData?.availability === 'available' || selectedDriverData?.availability === 'free' ? 'bg-green-500/20 text-green-500' : 'text-gray-500 hover:text-white'}`}>Free</button>
+                    <button onClick={() => handleAvailabilityChange(selectedDriverData.id, 'busy')} className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest transition-colors ${selectedDriverData?.availability === 'busy' || selectedDriverData?.availability === 'on-trip' ? 'bg-red-500/20 text-red-500' : 'text-gray-500 hover:text-white'}`}>Busy</button>
+                    <button onClick={() => handleAvailabilityChange(selectedDriverData.id, 'off-duty')} className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest transition-colors ${selectedDriverData?.availability === 'off-duty' || selectedDriverData?.availability === 'offday' ? 'bg-gray-500/20 text-gray-400' : 'text-gray-500 hover:text-white'}`}>Unavailable</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -230,9 +259,11 @@ export default function DriverManagement() {
                   {(!selectedDriverData?.vehicle_number && !selectedDriverData?.vehicle_model) && 'No Vehicle Assigned'}
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-300">{selectedDriverData?.availability || 'Unknown'}</span>
+              <div className="flex items-center justify-between col-span-1 md:col-span-2 mt-2 pt-4 border-t border-white/5">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300">Total Trips: {selectedDriverData?.trips || 0}</span>
+                </div>
               </div>
             </div>
           </BorderGlow>

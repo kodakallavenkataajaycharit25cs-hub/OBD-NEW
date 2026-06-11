@@ -16,6 +16,8 @@ import {
   ZoomIn
 } from 'lucide-react';
 import { triggerDownload } from '../utils/download';
+import { useAuth } from '../contexts/AuthContext';
+import { recordTransaction } from '../services/obdApi';
 
 declare const cv: any; // OpenCV global
 
@@ -85,46 +87,13 @@ const getCategoryColor = (category: string) => {
 };
 
 export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) {
+  const { user } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [viewExpense, setViewExpense] = useState<ClassifiedExpense | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [apiKey, setApiKey] = useState(localStorage.getItem('GEMINI_API_KEY') || '');
   const [showKeyInput, setShowKeyInput] = useState(!apiKey);
-  const [classifiedExpenses, setClassifiedExpenses] = useState<ClassifiedExpense[]>([
-    {
-      id: 'EXP-001',
-      fileName: 'fuel_receipt_mumbai.jpg',
-      category: 'fuel',
-      amount: 2450,
-      date: '2025-01-15',
-      vendor: 'Indian Oil Petrol Pump',
-      confidence: 94,
-      status: 'classified',
-      ocrText: 'INDIAN OIL CORPORATION LTD\nPetrol - 35.5L @ ₹69.00/L\nTotal: ₹2,449.50'
-    },
-    {
-      id: 'EXP-002',
-      fileName: 'toll_receipt_expressway.jpg',
-      category: 'tolls',
-      amount: 180,
-      date: '2025-01-14',
-      vendor: 'Mumbai-Pune Expressway',
-      confidence: 98,
-      status: 'verified',
-      ocrText: 'MSRDC TOLL PLAZA\nCar/Jeep/Van - Single Journey\nAmount: ₹180.00'
-    },
-    {
-      id: 'EXP-003',
-      fileName: 'service_bill_garage.pdf',
-      category: 'maintenance',
-      amount: 8500,
-      date: '2025-01-12',
-      vendor: 'Mumbai Auto Service Center',
-      confidence: 91,
-      status: 'classified',
-      ocrText: 'Oil Change + Filter Replacement\nLabor: ₹2,500\nParts: ₹6,000\nTotal: ₹8,500'
-    }
-  ]);
+  const [classifiedExpenses, setClassifiedExpenses] = useState<ClassifiedExpense[]>([]);
 
   const processImageWithOpenCV = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -163,26 +132,74 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
   const extractWithGemini = async (base64Image: string) => {
     if (!apiKey) throw new Error('API Key missing');
 
-    const prompt = `Extract receipt data in JSON format: { "amount": number, "date": "YYYY-MM-DD", "vendor": "string", "invoice": "string", "category": "fuel|maintenance|tolls|parking|other" }. Return ONLY JSON. If multiple amounts, pick the TOTAL.`;
-    
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-          ]
-        }]
-      })
-    });
+    // Validate key format - Gemini API keys always start with AIzaSy
+    if (!apiKey.startsWith('AIza')) {
+      throw new Error('INVALID_KEY: Your API key appears to be invalid. Gemini API keys always start with "AIzaSy". Please get a fresh key from aistudio.google.com');
+    }
 
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const result = await response.json();
-    const text = result.candidates[0].content.parts[0].text;
-    const cleanJson = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(cleanJson);
+    const prompt = `Extract receipt data in JSON format: { "amount": number, "date": "YYYY-MM-DD", "vendor": "string", "invoice": "string", "category": "fuel|maintenance|tolls|parking|other" }. Return ONLY JSON. If multiple amounts, pick the TOTAL.`;
+
+    // Try models in order — stop on rate limit (429), skip on 404
+    const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+    let lastError: Error | null = null;
+
+    for (const model of models) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+              ]
+            }]
+          })
+        });
+
+        if (response.status === 429) {
+          // Rate limited — wait 3 seconds then retry same model once
+          await new Promise(res => setTimeout(res, 3000));
+          const retry = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+                ]
+              }]
+            })
+          });
+          if (!retry.ok) {
+            const errBody = await retry.json().catch(() => ({}));
+            lastError = new Error(`Rate limit hit (${retry.status}). Please wait a moment and try again. Details: ${errBody?.error?.message || retry.statusText}`);
+            continue;
+          }
+          const result = await retry.json();
+          const text = result.candidates[0].content.parts[0].text;
+          return JSON.parse(text.replace(/```json|```/g, '').trim());
+        }
+
+        if (!response.ok) {
+          const errBody = await response.json().catch(() => ({}));
+          const errMsg = errBody?.error?.message || response.statusText;
+          lastError = new Error(`API Error ${response.status}: ${errMsg}`);
+          continue; // try next model
+        }
+
+        const result = await response.json();
+        const text = result.candidates[0].content.parts[0].text;
+        const cleanJson = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleanJson);
+      } catch (err: any) {
+        lastError = err;
+      }
+    }
+
+    throw lastError || new Error('All models failed');
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,9 +234,16 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
         };
 
         setClassifiedExpenses(prev => [newExpense, ...prev]);
-      } catch (error) {
+      } catch (error: any) {
         console.error('AI Extraction failed:', error);
-        alert("Extraction failed for " + file.name + ". Check your API key or image quality.");
+        if (error?.message?.startsWith('INVALID_KEY:')) {
+          alert(error.message.replace('INVALID_KEY: ', ''));
+          setShowKeyInput(true);
+          setApiKey('');
+          localStorage.removeItem('GEMINI_API_KEY');
+        } else {
+          alert(`Extraction failed for ${file.name}:\n${error?.message || 'Unknown error'}\n\nTip: Make sure your API key starts with "AIzaSy" and is from aistudio.google.com`);
+        }
       }
     }
 
@@ -260,10 +284,17 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
     return acc;
   }, {} as Record<string, number>);
 
-  const handleVerify = (id: string) => {
+  const handleVerify = async (id: string) => {
+    const expenseToVerify = classifiedExpenses.find(exp => exp.id === id);
+    if (!expenseToVerify || expenseToVerify.status === 'verified') return;
+
     setClassifiedExpenses(prev => 
       prev.map(exp => exp.id === id ? { ...exp, status: 'verified' } : exp)
     );
+
+    if (user && user.email) {
+      await recordTransaction(expenseToVerify.amount, 'debit', user.email, user.role);
+    }
   };
 
   return (

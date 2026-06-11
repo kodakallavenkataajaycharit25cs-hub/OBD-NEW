@@ -12,10 +12,13 @@ import {
   Search,
   Plus
 } from 'lucide-react';
-import BorderGlow from '../BorderGlow';
 import { triggerDownload } from '../../utils/download';
+import { useAuth } from '../../contexts/AuthContext';
+import { recordTransaction } from '../../services/obdApi';
+import BorderGlow from '../BorderGlow';
 
 export default function BillingFinance() {
+  const { user } = useAuth();
   const [selectedTab, setSelectedTab] = useState<'invoices' | 'pricing' | 'payroll' | 'reports'>('invoices');
 
   const formatIndianCurrency = (amount: number) => {
@@ -36,128 +39,19 @@ export default function BillingFinance() {
   };
 
   const financialMetrics = [
-    { title: 'Monthly Revenue', value: formatIndianCurrency(2847600), change: '+15.2%' },
-    { title: 'Outstanding Amount', value: formatIndianCurrency(456800), change: '-8.7%' },
-    { title: 'Driver Payroll', value: formatIndianCurrency(1245600), change: '+12.1%' },
-    { title: 'Net Profit', value: formatIndianCurrency(1151200), change: '+18.5%' }
+    { title: 'Monthly Revenue', value: '₹0', change: '0%' },
+    { title: 'Outstanding Amount', value: '₹0', change: '0%' },
+    { title: 'Driver Payroll', value: '₹0', change: '0%' },
+    { title: 'Net Profit', value: '₹0', change: '0%' }
   ];
 
-  const recentInvoices = [
-    {
-      id: 'INV-2025-0234',
-      customer: 'Reliance Industries Ltd.',
-      amount: 145600,
-      gstAmount: 21840,
-      totalAmount: 167440,
-      date: '2025-01-15',
-      dueDate: '2025-02-14',
-      status: 'paid',
-      trips: 23,
-      hsnSac: '996511'
-    },
-    {
-      id: 'INV-2025-0235',
-      customer: 'Tata Consultancy Services',
-      amount: 98400,
-      gstAmount: 14760,
-      totalAmount: 113160,
-      date: '2025-01-14',
-      dueDate: '2025-02-13',
-      status: 'pending',
-      trips: 16,
-      hsnSac: '996511'
-    },
-    {
-      id: 'INV-2025-0236',
-      customer: 'Infosys Limited',
-      amount: 234800,
-      gstAmount: 35220,
-      totalAmount: 270020,
-      date: '2025-01-13',
-      dueDate: '2025-02-12',
-      status: 'overdue',
-      trips: 38,
-      hsnSac: '996511'
-    }
-  ];
+  const initialInvoices: any[] = [];
+  const [invoices, setInvoices] = useState(initialInvoices);
 
-  const pricingModels = [
-    {
-      id: 'PM-001',
-      name: 'Corporate - Premium',
-      type: 'Fixed + Per KM',
-      baseRate: 500,
-      perKmRate: 15,
-      minimumKm: 80,
-      applicableVehicles: ['Innova Crysta', 'Corolla Altis'],
-      surgeMultiplier: 1.2,
-      gstRate: 5
-    },
-    {
-      id: 'PM-002',
-      name: 'Tourism - Standard',
-      type: 'Package',
-      dailyRate: 2500,
-      perKmRate: 12,
-      driverAllowance: 500,
-      applicableVehicles: ['Tempo Traveller', 'Force Traveller'],
-      surgeMultiplier: 1.5,
-      gstRate: 5
-    },
-    {
-      id: 'PM-003',
-      name: 'Airport Transfer',
-      type: 'Fixed',
-      fixedRate: 800,
-      waitingCharges: 50,
-      cancellationFee: 200,
-      applicableVehicles: ['All'],
-      surgeMultiplier: 2.0,
-      gstRate: 5
-    }
-  ];
+  const pricingModels: any[] = [];
 
-  const driverPayroll = [
-    {
-      id: 'PAY-001',
-      driverName: 'Suresh Singh',
-      vehicle: 'MH 02 AB 1234',
-      basicSalary: 25000,
-      incentives: 8400,
-      fuelBonus: 1200,
-      deductions: 2100,
-      grossPay: 32500,
-      netPay: 30400,
-      status: 'processed',
-      payDate: '2025-01-15'
-    },
-    {
-      id: 'PAY-002',
-      driverName: 'Ramesh Sharma',
-      vehicle: 'DL 01 CD 5678',
-      basicSalary: 23000,
-      incentives: 6800,
-      fuelBonus: 900,
-      deductions: 1850,
-      grossPay: 28850,
-      netPay: 27000,
-      status: 'processed',
-      payDate: '2025-01-15'
-    },
-    {
-      id: 'PAY-003',
-      driverName: 'Vikram Patel',
-      vehicle: 'KA 05 EF 9012',
-      basicSalary: 28000,
-      incentives: 9600,
-      fuelBonus: 1400,
-      deductions: 2300,
-      grossPay: 36700,
-      netPay: 34400,
-      status: 'pending',
-      payDate: '2025-01-16'
-    }
-  ];
+  const initialDriverPayroll: any[] = [];
+  const [payroll, setPayroll] = useState(initialDriverPayroll);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -189,7 +83,7 @@ export default function BillingFinance() {
       </div>
 
       <div className="space-y-4">
-        {recentInvoices.map((invoice) => {
+        {invoices.map((invoice) => {
           const statusColor = getStatusColor(invoice.status);
           const isOverdue = new Date(invoice.dueDate) < new Date() && invoice.status !== 'paid';
 
@@ -273,12 +167,17 @@ export default function BillingFinance() {
                   <Download className="w-4 h-4" />
                   <span>Download Details</span>
                 </button>
-                {invoice.status === 'pending' && (
+                {invoice.status !== 'paid' && (
                   <button 
-                    onClick={() => alert(`Payment reminder has been sent to ${invoice.customer} for invoice ${invoice.id}.`)}
+                    onClick={async () => {
+                      if (user && user.email) {
+                        await recordTransaction(invoice.totalAmount, 'credit', user.email, user.role);
+                      }
+                      setInvoices(prev => prev.map(inv => inv.id === invoice.id ? { ...inv, status: 'paid' } : inv));
+                    }}
                     className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl transition-colors"
                   >
-                    <span>Send Reminder</span>
+                    <span>Mark Paid & Credit</span>
                   </button>
                 )}
               </div>
@@ -437,12 +336,12 @@ export default function BillingFinance() {
       </div>
 
       <div className="space-y-4">
-        {driverPayroll.map((payroll) => {
-          const statusColor = getStatusColor(payroll.status);
+        {payroll.map((payrollItem) => {
+          const statusColor = getStatusColor(payrollItem.status);
 
           return (
             <BorderGlow
-              key={payroll.id}
+              key={payrollItem.id}
               borderRadius={24}
               backgroundColor="#120F17"
               className="p-6 border border-white/10 shadow-2xl"
@@ -453,16 +352,16 @@ export default function BillingFinance() {
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-black tracking-tight uppercase text-white">{payroll.driverName}</h4>
-                    <p className="text-gray-400">{payroll.vehicle}</p>
+                    <h4 className="text-lg font-black tracking-tight uppercase text-white">{payrollItem.driverName}</h4>
+                    <p className="text-gray-400">{payrollItem.vehicle}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${statusColor}-500/30 text-${statusColor}-300`}>
-                    {payroll.status}
+                    {payrollItem.status}
                   </span>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-green-400">{formatIndianCurrency(payroll.netPay)}</div>
+                    <div className="text-2xl font-bold text-green-400">{formatIndianCurrency(payrollItem.netPay)}</div>
                     <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Net Pay</div>
                   </div>
                 </div>
@@ -472,24 +371,24 @@ export default function BillingFinance() {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                   <div className="text-center">
                     <span className="text-gray-400">Basic Salary</span>
-                    <p className="text-white font-semibold">{formatIndianCurrency(payroll.basicSalary)}</p>
+                    <p className="text-white font-semibold">{formatIndianCurrency(payrollItem.basicSalary)}</p>
                   </div>
                   <div className="text-center">
                     <span className="text-gray-400">Incentives</span>
-                    <p className="text-green-400 font-semibold">+{formatIndianCurrency(payroll.incentives)}</p>
+                    <p className="text-green-400 font-semibold">+{formatIndianCurrency(payrollItem.incentives)}</p>
                   </div>
                   <div className="text-center">
                     <span className="text-gray-400">Fuel Bonus</span>
-                    <p className="text-green-400 font-semibold">+{formatIndianCurrency(payroll.fuelBonus)}</p>
+                    <p className="text-green-400 font-semibold">+{formatIndianCurrency(payrollItem.fuelBonus)}</p>
                   </div>
                   <div className="text-center">
                     <span className="text-gray-400">Deductions</span>
-                    <p className="text-red-400 font-semibold">-{formatIndianCurrency(payroll.deductions)}</p>
+                    <p className="text-red-400 font-semibold">-{formatIndianCurrency(payrollItem.deductions)}</p>
                   </div>
                   <div className="text-center border-l border-white/20 pl-4">
                     <span className="text-gray-400">Pay Date</span>
                     <p className="text-white font-semibold">
-                      {new Date(payroll.payDate).toLocaleDateString('en-IN')}
+                      {new Date(payrollItem.payDate).toLocaleDateString('en-IN')}
                     </p>
                   </div>
                 </div>
@@ -497,7 +396,7 @@ export default function BillingFinance() {
 
               <div className="flex space-x-3 mt-4">
                 <button 
-                  onClick={() => alert(`VIEW PAYSLIP\n\nDriver: ${payroll.driverName}\nVehicle: ${payroll.vehicle}\nNet Pay: ₹${payroll.netPay}\nStatus: ${payroll.status.toUpperCase()}`)}
+                  onClick={() => alert(`VIEW PAYSLIP\n\nDriver: ${payrollItem.driverName}\nVehicle: ${payrollItem.vehicle}\nNet Pay: ₹${payrollItem.netPay}\nStatus: ${payrollItem.status.toUpperCase()}`)}
                   className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   <FileText className="w-4 h-4" />
@@ -505,20 +404,25 @@ export default function BillingFinance() {
                 </button>
                 <button 
                   onClick={() => {
-                    const content = `PAYSLIP FOR: ${payroll.driverName}\nVehicle: ${payroll.vehicle}\nPay Date: ${payroll.payDate}\nStatus: ${payroll.status.toUpperCase()}\n\n-- EARNINGS --\nBasic Salary: ₹${payroll.basicSalary}\nIncentives: ₹${payroll.incentives}\nFuel Bonus: ₹${payroll.fuelBonus}\n\n-- DEDUCTIONS --\nDeductions: ₹${payroll.deductions}\n\n------------------\nGross Pay: ₹${payroll.grossPay}\nNET PAY: ₹${payroll.netPay}`;
-                    triggerDownload(`${payroll.id}_payslip.txt`, content, 'text/plain');
+                    const content = `PAYSLIP FOR: ${payrollItem.driverName}\nVehicle: ${payrollItem.vehicle}\nPay Date: ${payrollItem.payDate}\nStatus: ${payrollItem.status.toUpperCase()}\n\n-- EARNINGS --\nBasic Salary: ₹${payrollItem.basicSalary}\nIncentives: ₹${payrollItem.incentives}\nFuel Bonus: ₹${payrollItem.fuelBonus}\n\n-- DEDUCTIONS --\nDeductions: ₹${payrollItem.deductions}\n\n------------------\nGross Pay: ₹${payrollItem.grossPay}\nNET PAY: ₹${payrollItem.netPay}`;
+                    triggerDownload(`${payrollItem.id}_payslip.txt`, content, 'text/plain');
                   }}
                   className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Slip</span>
                 </button>
-                {payroll.status === 'pending' && (
+                {payrollItem.status === 'pending' && (
                   <button 
-                    onClick={() => alert(`Payroll for ${payroll.driverName} has been processed.\nTransfer of ₹${payroll.netPay} initiated.`)}
+                    onClick={async () => {
+                      if (user && user.email) {
+                        await recordTransaction(payrollItem.netPay, 'debit', user.email, user.role);
+                      }
+                      setPayroll(prev => prev.map(p => p.id === payrollItem.id ? { ...p, status: 'processed' } : p));
+                    }}
                     className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
                   >
-                    <span>Process</span>
+                    <span>Process & Pay</span>
                   </button>
                 )}
               </div>

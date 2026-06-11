@@ -10,17 +10,25 @@ import {
 } from 'lucide-react';
 import BorderGlow from './BorderGlow';
 
+import { useAuth } from '../contexts/AuthContext';
+import { createBooking } from '../services/obdApi';
+
 export default function SpotBooking() {
+  const { user } = useAuth();
   const [booking, setBooking] = useState({
     departure: '',
     destination: '',
     passengers: '1',
     car: '',
     date: '',
-    time: ''
+    time: '',
+    customerName: '',
+    customerPhone: '',
+    price: ''
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const vehicles = [
     { id: 'innova', name: 'Innova Crysta', seats: 7 },
@@ -29,9 +37,25 @@ export default function SpotBooking() {
     { id: 'harrier', name: 'Tata Harrier', seats: 5 },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Spot Booking Submitted:', booking);
+    const vehicle = vehicles.find(v => v.id === booking.car);
+    const bookingPayload = {
+      ...booking,
+      driverEmail: user?.email,
+      driverName: user?.name,
+      driverPhone: 'N/A',
+      vehicleNumber: 'N/A',
+      car: vehicle ? vehicle.name : booking.car
+    };
+    setError(null);
+    const response = await createBooking(bookingPayload);
+    
+    if (!response.success && response.error) {
+      setError(response.error);
+      return;
+    }
+
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
   };
@@ -47,6 +71,12 @@ export default function SpotBooking() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
+          {error && (
+            <div className="mb-4 bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center space-x-3">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <span className="text-red-500 text-xs font-black uppercase tracking-widest">{error}</span>
+            </div>
+          )}
           <BorderGlow
             borderRadius={28}
             backgroundColor="#120F17"
@@ -84,6 +114,48 @@ export default function SpotBooking() {
                       onChange={(e) => setBooking(prev => ({ ...prev, destination: e.target.value }))}
                       placeholder="Enter Dropoff Location"
                       className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Customer Name</label>
+                  <div className="relative group">
+                    <input
+                      required
+                      type="text"
+                      value={booking.customerName}
+                      onChange={(e) => setBooking(prev => ({ ...prev, customerName: e.target.value }))}
+                      placeholder="Enter Customer Name"
+                      className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Customer Phone</label>
+                  <div className="relative group">
+                    <input
+                      required
+                      type="text"
+                      value={booking.customerPhone}
+                      onChange={(e) => setBooking(prev => ({ ...prev, customerPhone: e.target.value }))}
+                      placeholder="Enter Phone Number"
+                      className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Price (₹)</label>
+                  <div className="relative group">
+                    <input
+                      required
+                      type="number"
+                      value={booking.price}
+                      onChange={(e) => setBooking(prev => ({ ...prev, price: e.target.value }))}
+                      placeholder="Estimated Price"
+                      className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none"
                     />
                   </div>
                 </div>

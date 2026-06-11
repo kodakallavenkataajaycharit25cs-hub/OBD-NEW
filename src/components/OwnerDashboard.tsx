@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
@@ -19,9 +19,11 @@ import {
   UserPlus,
   Edit,
   Trash2,
-  Route as RouteIcon
+  Route as RouteIcon,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { fetchBookings, dismissBooking } from '../services/obdApi';
 import ExpenseClassifier from './ExpenseClassifier';
 
 import FleetOverview from './owner/FleetOverview';
@@ -36,7 +38,6 @@ import Maintenance from './owner/Maintenance';
 import BillingFinance from './owner/BillingFinance';
 import TripAssignment from './owner/TripAssignment';
 
-import SpotBooking from './SpotBooking';
 import BorderGlow from './BorderGlow';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -47,9 +48,29 @@ export default function OwnerDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [highlightedSection, setHighlightedSection] = useState<string | null>(null);
 
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    if (user?.email) {
+      const pollBookings = async () => {
+        const data = await fetchBookings(user.email);
+        setBookings(data);
+      };
+      pollBookings();
+      const interval = setInterval(pollBookings, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
   const handleSectionHighlight = (section: string) => {
     setHighlightedSection(section);
     setTimeout(() => setHighlightedSection(null), 3000);
+  };
+
+  const handleDismissBooking = async (id: string) => {
+    await dismissBooking(id);
+    setBookings(prev => prev.filter(b => b.id !== id));
   };
 
   const navigation = [
@@ -63,7 +84,6 @@ export default function OwnerDashboard() {
     { name: 'Trip Assignment', href: '/owner/trip-assign', icon: RouteIcon, current: location.pathname === '/owner/trip-assign' },
     { name: 'Billing & Finance', href: '/owner/billing', icon: CreditCard, current: location.pathname === '/owner/billing' },
     { name: 'Expense Classifier', href: '/owner/expenses', icon: Camera, current: location.pathname === '/owner/expenses' },
-    { name: 'Booking', href: '/owner/booking', icon: MapPin, current: location.pathname === '/owner/booking' },
   ];
 
   return (
@@ -167,6 +187,72 @@ export default function OwnerDashboard() {
                 <Users className="w-6 h-6 text-white" />
               </div>
             </div>
+
+            {/* Notifications Bell */}
+            <div className="relative z-50">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors relative"
+              >
+                <Bell className="w-5 h-5 text-white" />
+                {bookings.length > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-4 w-96 max-h-[80vh] overflow-y-auto custom-scrollbar bg-[#120F17] border border-white/10 rounded-2xl shadow-2xl">
+                  <div className="p-4 border-b border-white/10 sticky top-0 bg-[#120F17] z-10 flex justify-between items-center">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-white">Notifications</h3>
+                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">{bookings.length} New</span>
+                  </div>
+                  <div className="p-2 space-y-2">
+                    {bookings.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500 text-sm">No new bookings.</div>
+                    ) : (
+                      [...bookings].reverse().map((b: any) => (
+                        <div key={b.id} className="p-4 bg-white/5 rounded-xl border border-white/5 hover:border-blue-500/50 transition-colors">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black uppercase text-blue-400 bg-blue-500/10 px-2 py-1 rounded">Spot Booking</span>
+                            <div className="flex items-center space-x-3">
+                              <span className="text-[10px] text-gray-500">{new Date(b.createdAt).toLocaleTimeString()}</span>
+                              <input 
+                                type="checkbox" 
+                                onChange={() => handleDismissBooking(b.id)}
+                                title="Mark as read & dismiss"
+                                className="w-4 h-4 rounded border-white/20 bg-black text-blue-500 focus:ring-blue-500/50 cursor-pointer accent-blue-500"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <div className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">Customer</div>
+                              <div className="text-sm text-white">{b.customerName}</div>
+                              <div className="text-xs text-gray-400">{b.customerPhone} • {b.passengers} Passengers</div>
+                            </div>
+                            
+                            <div>
+                              <div className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">Trip Details</div>
+                              <div className="text-xs text-white">{b.departure} <span className="text-blue-500">→</span> {b.destination}</div>
+                              <div className="text-xs text-gray-400">{b.date} at {b.time}</div>
+                              <div className="text-sm font-bold text-green-400 mt-1">₹{b.price}</div>
+                            </div>
+
+                            <div className="pt-2 border-t border-white/10">
+                              <div className="text-[10px] uppercase text-gray-500 font-bold tracking-widest mb-1">Assigned Driver</div>
+                              <div className="text-xs text-white">{b.driverName || 'Unknown Driver'}</div>
+                              <div className="text-xs text-gray-400">{b.vehicleNumber} • {b.car}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <ThemeToggle />
             <button
               onClick={logout}
@@ -196,8 +282,6 @@ export default function OwnerDashboard() {
               <Route path="/trip-assign" element={<TripAssignment />} />
               <Route path="/billing" element={<BillingFinance />} />
               <Route path="/expenses" element={<ExpenseClassifier userRole="owner" />} />
-
-              <Route path="/booking" element={<SpotBooking />} />
               <Route path="*" element={<Navigate to="/owner" replace />} />
             </Routes>
           </div>

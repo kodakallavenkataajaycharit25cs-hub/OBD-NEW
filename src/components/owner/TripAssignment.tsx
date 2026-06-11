@@ -25,6 +25,9 @@ interface TripAssignment {
   vehicle: string;
   origin: string;
   destination: string;
+  tripDate?: string;
+  startTime?: string;
+  endTime?: string;
   tripCost: number;
   customerName: string;
   customerPhone: string;
@@ -34,74 +37,19 @@ interface TripAssignment {
   createdAt: string;
 }
 
-const initialTrips: TripAssignment[] = [
-  {
-    id: 'TRIP-001',
-    driverName: 'Suresh Singh',
-    vehicle: 'MH 02 AB 1234 - Innova Crysta',
-    origin: 'Mumbai Airport',
-    destination: 'Pune',
-    tripCost: 5600,
-    customerName: 'Rajesh Mehta',
-    customerPhone: '+91 98765 43210',
-    customerEmail: 'rajesh.mehta@gmail.com',
-    numberOfPeople: 4,
-    status: 'in-progress',
-    createdAt: '2025-01-15T10:30:00'
-  },
-  {
-    id: 'TRIP-002',
-    driverName: 'Ramesh Sharma',
-    vehicle: 'DL 01 CD 5678 - Tempo Traveller',
-    origin: 'Delhi',
-    destination: 'Agra',
-    tripCost: 8200,
-    customerName: 'Priya Kapoor',
-    customerPhone: '+91 87654 32109',
-    customerEmail: 'priya.k@outlook.com',
-    numberOfPeople: 8,
-    status: 'assigned',
-    createdAt: '2025-01-15T14:00:00'
-  },
-  {
-    id: 'TRIP-003',
-    driverName: 'Vikram Patel',
-    vehicle: 'KA 05 EF 9012 - Force Traveller',
-    origin: 'Bengaluru',
-    destination: 'Mysuru',
-    tripCost: 3800,
-    customerName: 'Amit Joshi',
-    customerPhone: '+91 76543 21098',
-    customerEmail: 'amit.joshi@yahoo.com',
-    numberOfPeople: 2,
-    status: 'completed',
-    createdAt: '2025-01-14T08:15:00'
-  }
-];
+const initialTrips: TripAssignment[] = [];
 
-const availableDrivers = [
-  'Suresh Singh',
-  'Ramesh Sharma',
-  'Vikram Patel',
-  'Ajay Kumar',
-  'Manoj Tiwari',
-  'Deepak Yadav'
-];
+const availableDrivers: string[] = [];
 
-const availableVehicles = [
-  'MH 02 AB 1234 - Innova Crysta',
-  'DL 01 CD 5678 - Tempo Traveller',
-  'KA 05 EF 9012 - Force Traveller',
-  'RJ 14 KL 3456 - Ertiga',
-  'TN 07 IJ 7890 - Corolla Altis',
-  'GJ 06 MN 2345 - Swift Dzire'
-];
+const availableVehicles: string[] = [];
 
 const emptyForm = {
   driverName: '',
   vehicle: '',
   origin: '',
   destination: '',
+  tripDate: '',
+  startTime: '',
   tripCost: '',
   customerName: '',
   customerPhone: '',
@@ -137,6 +85,56 @@ export default function TripAssignment() {
     };
     loadPilots();
   }, []);
+
+  const calculateMockDuration = (origin: string, destination: string) => {
+    if (!origin || !destination) return 0;
+    const hash = origin.length + destination.length;
+    return (hash % 5) + 2; // Returns 2 to 6 hours
+  };
+
+  const getCalculatedEndTime = () => {
+    if (form.origin && form.destination && form.tripDate && form.startTime) {
+      const simulatedDuration = calculateMockDuration(form.origin, form.destination);
+      const totalDurationWithBuffer = simulatedDuration + 1; // 1 hr buffer
+      
+      const startDate = new Date(`${form.tripDate}T${form.startTime}`);
+      if (isNaN(startDate.getTime())) return '';
+      
+      startDate.setHours(startDate.getHours() + totalDurationWithBuffer);
+      return startDate.toTimeString().slice(0, 5);
+    }
+    return '';
+  };
+
+  const calculatedEndTime = getCalculatedEndTime();
+
+  const isDriverAvailable = (driverName: string) => {
+    const pilot = pilots.find(p => p.name === driverName);
+    if (pilot && (pilot.availability === 'off-duty' || pilot.availability === 'offday' || pilot.availability === 'unavailable')) return false;
+
+    if (!form.tripDate || !form.startTime || !calculatedEndTime) return true;
+
+    const newStart = new Date(`${form.tripDate}T${form.startTime}`).getTime();
+    const newEnd = new Date(`${form.tripDate}T${calculatedEndTime}`).getTime();
+    if (isNaN(newStart) || isNaN(newEnd)) return true;
+
+    const driverTrips = trips.filter(t => t.driverName === driverName && t.status !== 'cancelled' && t.status !== 'completed' && t.id !== editingId);
+    for (const trip of driverTrips) {
+      if (trip.tripDate && trip.startTime && trip.endTime) {
+        const tripStart = new Date(`${trip.tripDate}T${trip.startTime}`).getTime();
+        const tripEnd = new Date(`${trip.tripDate}T${trip.endTime}`).getTime();
+        if (!isNaN(tripStart) && !isNaN(tripEnd)) {
+          if (newStart < tripEnd && newEnd > tripStart) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  const filteredPilots = pilots.filter(p => isDriverAvailable(p.name));
+  const filteredAvailableDrivers = availableDrivers.filter(d => isDriverAvailable(d));
 
   // Always derive the viewed trip from the live trips array so edits are reflected instantly
   const viewTrip = viewTripId ? trips.find(t => t.id === viewTripId) || null : null;
@@ -180,6 +178,9 @@ export default function TripAssignment() {
         vehicle: form.vehicle,
         origin: form.origin,
         destination: form.destination,
+        tripDate: form.tripDate,
+        startTime: form.startTime,
+        endTime: calculatedEndTime,
         tripCost: Number(form.tripCost),
         customerName: form.customerName,
         customerPhone: form.customerPhone,
@@ -197,6 +198,9 @@ export default function TripAssignment() {
         vehicle: form.vehicle,
         origin: form.origin,
         destination: form.destination,
+        tripDate: form.tripDate,
+        startTime: form.startTime,
+        endTime: calculatedEndTime,
         tripCost: Number(form.tripCost),
         customerName: form.customerName,
         customerPhone: form.customerPhone,
@@ -243,6 +247,8 @@ Drive safe and please confirm receipt of this message!`;
       vehicle: trip.vehicle,
       origin: trip.origin,
       destination: trip.destination,
+      tripDate: trip.tripDate || '',
+      startTime: trip.startTime || '',
       tripCost: String(trip.tripCost),
       customerName: trip.customerName,
       customerPhone: trip.customerPhone,
@@ -342,8 +348,7 @@ Drive safe and please confirm receipt of this message!`;
                       className={selectClass}
                     >
                       <option value="" className="bg-[#120F17]">Select a driver...</option>
-                      {pilots.map(p => <option key={p.id} value={p.name} className="bg-[#120F17]">{p.name}</option>)}
-                      {pilots.length === 0 && availableDrivers.map(d => <option key={d} value={d} className="bg-[#120F17]">{d}</option>)}
+                      {filteredPilots.map(p => <option key={p.id} value={p.name} className="bg-[#120F17]">{p.name}</option>)}
                     </select>
                     <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-500 pointer-events-none" />
                   </div>
@@ -357,7 +362,7 @@ Drive safe and please confirm receipt of this message!`;
                       className={selectClass}
                     >
                       <option value="" className="bg-[#120F17]">Select a vehicle...</option>
-                      {availableVehicles.map(v => <option key={v} value={v} className="bg-[#120F17]">{v}</option>)}
+                      {pilots.filter(p => p.vehicle_number).map(p => <option key={p.id} value={`${p.vehicle_number} - ${p.vehicle_model}`} className="bg-[#120F17]">{p.vehicle_number} - {p.vehicle_model}</option>)}
                     </select>
                     <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-500 pointer-events-none" />
                   </div>
@@ -385,7 +390,30 @@ Drive safe and please confirm receipt of this message!`;
                     </div>
                   </div>
 
-                  <div>
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <label className={labelClass}>Trip Date *</label>
+                      <input
+                        type="date"
+                        required
+                        value={form.tripDate}
+                        onChange={e => setForm({ ...form, tripDate: e.target.value })}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Start Time *</label>
+                      <input
+                        type="time"
+                        required
+                        value={form.startTime}
+                        onChange={e => setForm({ ...form, startTime: e.target.value })}
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
                     <label className={labelClass}>Trip Cost (₹) *</label>
                     <input
                       required
@@ -597,8 +625,7 @@ Drive safe and please confirm receipt of this message!`;
                     className={selectClass}
                   >
                     <option value="" className="bg-[#120F17]">Select a driver...</option>
-                    {pilots.map(p => <option key={p.id} value={p.name} className="bg-[#120F17]">{p.name}</option>)}
-                    {pilots.length === 0 && availableDrivers.map(d => <option key={d} value={d} className="bg-[#120F17]">{d}</option>)}
+                    {filteredPilots.map(p => <option key={p.id} value={p.name} className="bg-[#120F17]">{p.name}</option>)}
                   </select>
                   <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-500 pointer-events-none" />
                 </div>
@@ -611,48 +638,42 @@ Drive safe and please confirm receipt of this message!`;
                     className={selectClass}
                   >
                     <option value="" className="bg-[#120F17]">Select a vehicle...</option>
-                    {availableVehicles.map(v => <option key={v} value={v} className="bg-[#120F17]">{v}</option>)}
+                    {pilots.filter(p => p.vehicle_number).map(p => <option key={p.id} value={`${p.vehicle_number} - ${p.vehicle_model}`} className="bg-[#120F17]">{p.vehicle_number} - {p.vehicle_model}</option>)}
                   </select>
                   <ChevronDown className="absolute right-3 top-9 w-4 h-4 text-gray-500 pointer-events-none" />
                 </div>
               </div>
             </div>
 
-            {/* Route Details */}
+            {/* Route & Schedule Details */}
             <div className="p-5 bg-black/20 rounded-2xl border border-white/5">
-              <h4 className="text-xs font-black uppercase tracking-widest text-blue-400 mb-4">Route & Pricing</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <h4 className="text-xs font-black uppercase tracking-widest text-blue-400 mb-4">Route, Schedule & Pricing</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className={labelClass}>From (Origin) *</label>
-                  <input
-                    required
-                    value={form.origin}
-                    onChange={e => setForm({ ...form, origin: e.target.value })}
-                    className={inputClass}
-                    placeholder="e.g. Mumbai Airport"
-                  />
+                  <input required value={form.origin} onChange={e => setForm({ ...form, origin: e.target.value })} className={inputClass} placeholder="e.g. Mumbai Airport" />
                 </div>
                 <div>
                   <label className={labelClass}>To (Destination) *</label>
-                  <input
-                    required
-                    value={form.destination}
-                    onChange={e => setForm({ ...form, destination: e.target.value })}
-                    className={inputClass}
-                    placeholder="e.g. Pune"
-                  />
+                  <input required value={form.destination} onChange={e => setForm({ ...form, destination: e.target.value })} className={inputClass} placeholder="e.g. Pune" />
                 </div>
                 <div>
+                  <label className={labelClass}>Trip Date *</label>
+                  <input type="date" required value={form.tripDate} onChange={e => setForm({ ...form, tripDate: e.target.value })} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Start Time *</label>
+                  <input type="time" required value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} className={inputClass} />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
                   <label className={labelClass}>Trip Cost (₹) *</label>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    value={form.tripCost}
-                    onChange={e => setForm({ ...form, tripCost: e.target.value })}
-                    className={inputClass}
-                    placeholder="e.g. 5600"
-                  />
+                  <input required type="number" min="0" value={form.tripCost} onChange={e => setForm({ ...form, tripCost: e.target.value })} className={inputClass} placeholder="e.g. 5600" />
+                </div>
+                <div>
+                  <label className={labelClass}>Calculated End Time (incl. buffer)</label>
+                  <input disabled value={calculatedEndTime || 'Enter route & schedule to calculate'} className={`${inputClass} bg-black/40 text-gray-400 border-white/5`} />
                 </div>
               </div>
             </div>

@@ -37,96 +37,15 @@ export default function Maintenance() {
     }).format(amount);
   };
 
-  const upcomingMaintenance = [
-    {
-      id: 'MAINT-001',
-      vehicle: 'MH 02 AB 1234',
-      model: 'Toyota Innova Crysta',
-      type: 'Scheduled Service',
-      dueDate: '2025-01-20',
-      mileage: 45680,
-      nextServiceMileage: 50000,
-      priority: 'high',
-      estimatedCost: 8500,
-      description: 'Oil change, filter replacement, brake inspection'
-    },
-    {
-      id: 'MAINT-002',
-      vehicle: 'DL 01 CD 5678',
-      model: 'Tempo Traveller',
-      type: 'Predictive',
-      dueDate: '2025-01-18',
-      mileage: 67432,
-      nextServiceMileage: 70000,
-      priority: 'critical',
-      estimatedCost: 15200,
-      description: 'Coolant system repair - high temperature detected'
-    },
-    {
-      id: 'MAINT-003',
-      vehicle: 'KA 05 EF 9012',
-      model: 'Force Traveller',
-      type: 'Breakdown',
-      dueDate: '2025-01-16',
-      mileage: 89123,
-      nextServiceMileage: 90000,
-      priority: 'critical',
-      estimatedCost: 22800,
-      description: 'Engine diagnostic codes P0300, P0171 - immediate attention required'
-    }
-  ];
-
-  const activeJobs = [
-    {
-      id: 'JOB-2025-0045',
-      vehicle: 'RJ 14 KL 3456',
-      vendor: 'Mumbai Auto Service Center',
-      technician: 'Ramesh Mechanic',
-      startDate: '2025-01-15',
-      estimatedCompletion: '2025-01-17',
-      status: 'in-progress',
-      type: 'Scheduled Service',
-      cost: 12400,
-      progress: 65,
-      tasks: [
-        { name: 'Oil & Filter Change', status: 'completed' },
-        { name: 'Brake Inspection', status: 'completed' },
-        { name: 'Transmission Check', status: 'in-progress' },
-        { name: 'AC Service', status: 'pending' }
-      ]
-    },
-    {
-      id: 'JOB-2025-0044',
-      vehicle: 'TN 07 IJ 7890',
-      vendor: 'Chennai Motors',
-      technician: 'Kumar Technician',
-      startDate: '2025-01-14',
-      estimatedCompletion: '2025-01-16',
-      status: 'delayed',
-      type: 'Repair',
-      cost: 18600,
-      progress: 40,
-      tasks: [
-        { name: 'Engine Diagnosis', status: 'completed' },
-        { name: 'Parts Procurement', status: 'in-progress' },
-        { name: 'Repair Work', status: 'pending' },
-        { name: 'Testing', status: 'pending' }
-      ]
-    }
-  ];
-
-  const vendors = [
-    { name: 'Mumbai Auto Service Center', rating: 4.8, jobs: 23, avgCost: 11200 },
-    { name: 'Delhi Motor Works', rating: 4.6, jobs: 18, avgCost: 13500 },
-    { name: 'Bengaluru Car Care', rating: 4.9, jobs: 31, avgCost: 9800 },
-    { name: 'Chennai Motors', rating: 4.5, jobs: 15, avgCost: 12800 }
-  ];
+  const upcomingMaintenance: any[] = [];
+  const activeJobs: any[] = [];
+  const vendors: any[] = [];
 
   const maintenanceMetrics = [
-    { title: 'Monthly Cost', value: formatIndianCurrency(148600), change: '-8.5%' },
-    { title: 'Avg Downtime', value: '2.3 days', change: '-12%' },
-    { title: 'Cost per KM', value: '₹4.20', change: '-5.2%' },
-    { title: 'ROI', value: '3.2x', change: '+15%' }
+    { title: 'Monthly Cost', value: '₹0', change: '0%' },
+    { title: 'Avg Downtime', value: '0 days', change: '0%' },
+    { title: 'Cost per KM', value: '₹0.00', change: '0%' },
+    { title: 'ROI', value: '0x', change: '0%' }
   ];
 
   const getPriorityColor = (priority: string) => {
@@ -237,15 +156,15 @@ export default function Maintenance() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">7</div>
+            <div className="text-2xl font-bold text-blue-400">0</div>
             <div className="text-sm text-blue-300">Vehicles Due Soon</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-orange-400">3</div>
+            <div className="text-2xl font-bold text-orange-400">0</div>
             <div className="text-sm text-orange-300">Anomalies Detected</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-green-400">₹2.4L</div>
+            <div className="text-2xl font-bold text-green-400">₹0</div>
             <div className="text-sm text-green-300">Cost Savings (Predicted)</div>
           </div>
         </div>
@@ -444,12 +363,7 @@ export default function Maintenance() {
           <h4 className="text-lg font-black tracking-tight uppercase text-white mb-4">Cost Breakdown</h4>
 
           <div className="space-y-4">
-            {[
-              { category: 'Labor Cost', amount: 84600, percentage: 57 },
-              { category: 'Parts & Components', amount: 42800, percentage: 29 },
-              { category: 'Consumables', amount: 15400, percentage: 10 },
-              { category: 'External Services', amount: 5800, percentage: 4 }
-            ].map((cost, index) => (
+            {[].map((cost, index) => (
               <div key={index} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-300">{cost.category}</span>
@@ -475,15 +389,15 @@ export default function Maintenance() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-400 mb-2">₹5.2L</div>
+            <div className="text-2xl font-bold text-green-400 mb-2">₹0</div>
             <div className="text-sm text-green-300">Preventive Maintenance Savings</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-400 mb-2">42%</div>
+            <div className="text-2xl font-bold text-blue-400 mb-2">0%</div>
             <div className="text-sm text-blue-300">Reduction in Breakdowns</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-400 mb-2">3.2x</div>
+            <div className="text-2xl font-bold text-purple-400 mb-2">0x</div>
             <div className="text-sm text-purple-300">Return on Investment</div>
           </div>
         </div>

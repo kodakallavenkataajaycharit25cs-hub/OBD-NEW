@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; user?: User }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; user?: User; error?: string }>;
   logout: () => void;
   loginAs: (user: User) => void;
 }
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return 'driver'; // Default
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; user?: User }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; user?: User; error?: string }> => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -83,10 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const mappedUser = mapSupabaseUser(data.user);
         return { success: true, user: mappedUser };
       }
-      return { success: false };
-    } catch (error) {
+      return { success: false, error: 'User mapping failed' };
+    } catch (error: any) {
       console.error('Login error:', error);
-      return { success: false };
+      return { success: false, error: error.message || 'Invalid login credentials' };
     }
   };
 

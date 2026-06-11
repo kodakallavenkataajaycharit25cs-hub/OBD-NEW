@@ -247,3 +247,112 @@ export const deletePilot = async (id: string) => {
     return { success: false };
   }
 };
+
+export const recordTransaction = async (amount: number, type: 'credit' | 'debit', userEmail: string, role: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/transactions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount, type, userEmail, role })
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error recording transaction:', error);
+    return { success: false };
+  }
+};
+
+export const createBooking = async (bookingData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, error: data.error || 'Network error' };
+    }
+    return data;
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    return { success: false, error: 'Network error occurred' };
+  }
+};
+
+export const fetchBookings = async (email: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/bookings/${email}`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    return [];
+  }
+};
+
+export const dismissBooking = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error dismissing booking:', error);
+    return { success: false };
+  }
+};
+
+// ─── Admin CRUD ───────────────────────────────────────────────────────────────
+
+export const fetchAdmins = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admins`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching admins:', error);
+    return [];
+  }
+};
+
+export const createAdmin = async (data: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admins`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating admin:', error);
+    return { success: false };
+  }
+};
+
+export const updateAdmin = async (id: string, data: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admins/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error updating admin:', error);
+    return { success: false };
+  }
+};
+
+export const deleteAdmin = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/admins/${id}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error deleting admin:', error);
+    return { success: false };
+  }
+};
+

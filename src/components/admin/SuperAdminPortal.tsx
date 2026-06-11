@@ -35,12 +35,14 @@ import {
   ArrowLeft,
   PlusCircle,
   Edit,
-  Trash2
+  Trash2,
+  Save,
+  UserPlus
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, OBDData } from '../../services/obdApi';
+import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, updateOwner, updatePilot, fetchAdmins, createAdmin, updateAdmin, deleteAdmin, OBDData } from '../../services/obdApi';
 import { CreateView, UpdateView, RemoveView } from './CrudViews';
 
 // Impersonate Modal Component
@@ -518,16 +520,18 @@ export default function SuperAdminPortal() {
 
   const updateMockDB = async () => {
     try {
-      const [ownersData, pilotsData, devicesData, alertsData] = await Promise.all([
+      const [ownersData, pilotsData, devicesData, alertsData, adminsData] = await Promise.all([
         fetchOwners(),
         fetchPilots(),
         fetchDevices(),
-        fetchAlerts()
+        fetchAlerts(),
+        fetchAdmins()
       ]);
       setOwners(ownersData || []);
       setPilots(pilotsData || []);
       setDevices(devicesData || []);
       setAlerts(alertsData || []);
+      setAdmins(adminsData || []);
     } catch (error) {
       console.error('Failed to update mock DB:', error);
     }
@@ -624,11 +628,18 @@ export default function SuperAdminPortal() {
     { id: 'DEV-7763', owner: 'Cyber Delivery', battery: 0, network: 'Offline', gps: 'Disconnected', syncTime: '1d ago', status: 'offline', health: 0, firmware: 'v3.8.2-legacy' }
   ]);
 
-  const [alerts, setAlerts] = useState([
-    { id: 'ALT-1', type: 'SOS Alert', vehicle: 'MH-12-PQ-8890', description: 'Driver triggered SOS switch manually.', severity: 'CRITICAL', time: '1m ago' },
-    { id: 'ALT-2', type: 'Battery Failure', vehicle: 'KA-03-MN-4421', description: 'GPS unit battery critically low (< 15%).', severity: 'WARNING', time: '5m ago' },
-    { id: 'ALT-3', type: 'Unauthorized Access', vehicle: 'DL-01-AB-1092', description: 'OBD port disconnect event caught.', severity: 'CRITICAL', time: '15m ago' }
-  ]);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
+
+  // Admin View State lifted to prevent reset on re-render
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+  const [editingAdminId, setEditingAdminId] = useState<string | null>(null);
+  const [adminEditForm, setAdminEditForm] = useState<any>({});
+  const [adminCreateForm, setAdminCreateForm] = useState({ id: '', name: '', email: '', password: '', contact: '', role: 'admin' });
+  const [adminMsg, setAdminMsg] = useState('');
+  const [adminErr, setAdminErr] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminDeleteConfirmId, setAdminDeleteConfirmId] = useState<string | null>(null);
 
   const [logs, setLogs] = useState([
     'SYSTEM INITIALIZING...',
@@ -699,22 +710,30 @@ export default function SuperAdminPortal() {
     if (soundEnabled) synth.playClickSound();
   };
 
-  const handleOwnerStatus = (id: string) => {
+  const handleOwnerStatus = async (id: string) => {
     playClick();
-    setOwners(prev => prev.map(owner =>
-      owner.id === id
-        ? { ...owner, status: owner.status === 'active' ? 'suspended' : 'active' }
-        : owner
-    ));
+    const owner = owners.find(o => o.id === id);
+    if (!owner) return;
+    const newStatus = owner.status === 'active' ? 'suspended' : 'active';
+    
+    // Optimistic update
+    setOwners(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+    
+    // API update
+    await updateOwner(id, { status: newStatus });
   };
 
-  const handlePilotStatus = (id: string) => {
+  const handlePilotStatus = async (id: string) => {
     playClick();
-    setPilots(prev => prev.map(pilot =>
-      pilot.id === id
-        ? { ...pilot, status: pilot.status === 'active' ? 'suspended' : 'active' }
-        : pilot
-    ));
+    const pilot = pilots.find(p => p.id === id);
+    if (!pilot) return;
+    const newStatus = pilot.status === 'active' ? 'suspended' : 'active';
+    
+    // Optimistic update
+    setPilots(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+    
+    // API update
+    await updatePilot(id, { status: newStatus });
   };
 
   const handleDeviceFirmware = (id: string) => {
@@ -758,6 +777,7 @@ export default function SuperAdminPortal() {
     { name: 'System Stats', href: '/super-admin-dashboard/stats', icon: ShieldCheck },
     { name: 'Fleet Owners', href: '/super-admin-dashboard/owners', icon: Users },
     { name: 'Pilot Accounts', href: '/super-admin-dashboard/pilots', icon: Car },
+    { name: 'Admin Accounts', href: '/super-admin-dashboard/admins', icon: ShieldAlert },
     { name: 'Device Management', href: '/super-admin-dashboard/devices', icon: Cpu },
     { name: 'Live Tracking', href: '/super-admin-dashboard/tracking', icon: MapPin },
     { name: 'Analytics', href: '/super-admin-dashboard/analytics', icon: BarChart2 },
@@ -843,17 +863,21 @@ export default function SuperAdminPortal() {
 
             {/* Columns of Bars - aligned to bottom */}
             <div className="absolute inset-0 flex items-end justify-around z-10 px-4 h-full pb-[1px]">
-              {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
-                const percentHeight = Math.max((client.revenue / 2000000) * 100, 5); // Ensure minimum visibility
+              {[...owners].sort((a, b) => {
+                if (b.revenue !== a.revenue) return b.revenue - a.revenue;
+                return b.fleetSize - a.fleetSize;
+              }).slice(0, 5).map((client, index) => {
+                const maxRevenue = Math.max(...owners.map(o => o.revenue), 2000000);
+                const percentHeight = Math.max((client.revenue / maxRevenue) * 100, 5); // Ensure minimum visibility
                 const colors = index === 0
-                  ? 'bg-orange-200 border-x border-t border-orange-300'
+                  ? 'bg-orange-500 border-x border-t border-orange-600'
                   : index === 1
-                    ? 'bg-blue-200 border-x border-t border-blue-300'
+                    ? 'bg-blue-500 border-x border-t border-blue-600'
                     : index === 2
-                      ? 'bg-emerald-200 border-x border-t border-emerald-300'
+                      ? 'bg-emerald-500 border-x border-t border-emerald-600'
                       : index === 3
-                        ? 'bg-purple-200 border-x border-t border-purple-300'
-                        : 'bg-slate-200 border-x border-t border-slate-300';
+                        ? 'bg-purple-500 border-x border-t border-purple-600'
+                        : 'bg-slate-500 border-x border-t border-slate-600';
 
                 return (
                   <div key={client.id} className="flex flex-col justify-end items-center w-full max-w-[12%] group relative h-full">
@@ -862,12 +886,23 @@ export default function SuperAdminPortal() {
                       className="absolute left-1/2 -translate-x-1/2 text-[10px] font-black text-gray-700 font-sans bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg border border-gray-200 opacity-0 group-hover:opacity-100 group-hover:-translate-y-2 transition-all duration-300 whitespace-nowrap z-20 pointer-events-none shadow-sm"
                       style={{ bottom: animateBars ? `calc(${percentHeight}% + 8px)` : '8px' }}
                     >
-                      ₹{(client.revenue / 100000).toFixed(1)}L
+                      ₹{(
+                        (() => {
+                          const realClientDrivers = pilots.filter(p => p.owner_id === client.id || String(p.owner_id).includes('owner'));
+                          const clientDrivers = realClientDrivers.length > 0 ? realClientDrivers : Array.from({ length: client.fleetSize }).map((_, i) => ({
+                            id: `DRV-${client.id || 'C'}-${1000 + i}`,
+                            name: `Driver ${i + 1}`,
+                            status: i % 5 === 0 ? 'off-duty' : 'on-duty',
+                            rating: (4 + Math.random()).toFixed(1)
+                          }));
+                          return (client.revenue / 100000);
+                        })()
+                      ).toFixed(1)}L
                     </div>
 
                     {/* Matte Pastel Bar */}
                     <div
-                      className={`w-full ${colors} rounded-t-xl transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative cursor-pointer hover:opacity-80`}
+                      className={`w-full ${colors} rounded-t-xl transition-all duration-1000 ease-[cubic-bezier(0.34,1.56,0.64,1)] absolute bottom-0 cursor-pointer hover:opacity-80`}
                       style={{ height: animateBars ? `${percentHeight}%` : '0%' }}
                     />
                   </div>
@@ -878,7 +913,10 @@ export default function SuperAdminPortal() {
 
           {/* Labels row - outside the chart area */}
           <div className="flex items-start justify-around px-4 mt-3">
-            {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
+            {[...owners].sort((a, b) => {
+              if (b.revenue !== a.revenue) return b.revenue - a.revenue;
+              return b.fleetSize - a.fleetSize;
+            }).slice(0, 5).map((client, index) => {
               const initials = client.name.split(' ').map(n => n[0]).join('').slice(0, 3);
               return (
                 <div key={client.id} className="text-center w-full max-w-[12%]">
@@ -905,7 +943,10 @@ export default function SuperAdminPortal() {
           </h3>
 
           <div className="space-y-4">
-            {owners.slice(0, 5).sort((a, b) => b.revenue - a.revenue).map((client, index) => {
+            {[...owners].sort((a, b) => {
+              if (b.revenue !== a.revenue) return b.revenue - a.revenue;
+              return b.fleetSize - a.fleetSize;
+            }).slice(0, 5).map((client, index) => {
               const rankColor = index === 0 ? 'text-yellow-400 font-black' : index === 1 ? 'text-gray-300 font-bold' : index === 2 ? 'text-amber-600 font-bold' : 'text-gray-500';
               return (
                 <div key={client.id} className="p-4 bg-white/5 border border-white/5 hover:border-blue-500/20 transition-all rounded-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
@@ -1153,6 +1194,391 @@ export default function SuperAdminPortal() {
     </div>
   );
 
+  // Admin Account Management — full CRUD
+  const AdminsView = () => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    const flashMsg = (msg: string) => { setAdminMsg(msg); setTimeout(() => setAdminMsg(''), 3500); };
+    const flashErr = (err: string) => { setAdminErr(err); setTimeout(() => setAdminErr(''), 4000); };
+
+    // ── CREATE ────────────────────────────────────────────────────────────
+    const handleCreateAdmin = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setAdminLoading(true);
+      setAdminErr('');
+      if (admins.find((a: any) => a.id.toLowerCase() === adminCreateForm.id.toLowerCase())) {
+        flashErr('An admin with this ID already exists.'); setAdminLoading(false); return;
+      }
+      if (admins.find((a: any) => a.email?.toLowerCase() === adminCreateForm.email.toLowerCase())) {
+        flashErr('An admin with this email already exists.'); setAdminLoading(false); return;
+      }
+      if (adminCreateForm.email && !emailRegex.test(adminCreateForm.email)) {
+        flashErr('Please enter a valid email address.'); setAdminLoading(false); return;
+      }
+      if (adminCreateForm.contact && adminCreateForm.contact.length !== 10) {
+        flashErr('Phone number must be exactly 10 digits.'); setAdminLoading(false); return;
+      }
+      await createAdmin({ ...adminCreateForm, status: 'active' });
+      setAdminCreateForm({ id: '', name: '', email: '', password: '', contact: '', role: 'admin' });
+      setShowCreateAdminModal(false);
+      updateMockDB();
+      flashMsg('Admin account created successfully!');
+      setAdminLoading(false);
+    };
+
+    // ── UPDATE ────────────────────────────────────────────────────────────
+    const handleSaveEdit = async () => {
+      if (adminEditForm.email && !emailRegex.test(adminEditForm.email)) { flashErr('Invalid email address.'); return; }
+      if (adminEditForm.contact && adminEditForm.contact.length !== 10) { flashErr('Phone must be exactly 10 digits.'); return; }
+      setAdminLoading(true);
+      await updateAdmin(editingAdminId!, adminEditForm);
+      setEditingAdminId(null);
+      updateMockDB();
+      flashMsg('Admin account updated successfully!');
+      setAdminLoading(false);
+    };
+
+    // ── DELETE ────────────────────────────────────────────────────────────
+    const handleDeleteAdmin = async (id: string) => {
+      setAdminLoading(true);
+      await deleteAdmin(id);
+      setAdminDeleteConfirmId(null);
+      updateMockDB();
+      flashMsg('Admin account removed.');
+      setAdminLoading(false);
+    };
+
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+
+        {/* Flash messages */}
+        {adminMsg && (
+          <div className="p-4 bg-green-500/20 text-green-400 border border-green-500/50 rounded-2xl font-bold text-xs uppercase tracking-widest animate-in fade-in">
+            ✓ {adminMsg}
+          </div>
+        )}
+        {adminErr && (
+          <div className="p-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-2xl font-bold text-xs uppercase tracking-widest animate-in fade-in">
+            ✕ {adminErr}
+          </div>
+        )}
+
+        {/* Header row */}
+        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-sm font-black text-white uppercase tracking-widest font-sans">Admin Accounts Directory</h3>
+              <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mt-1">{admins.filter((a: any) => a.role !== 'super_admin').length} registered admins</p>
+            </div>
+            <button
+              onClick={() => { setShowCreateAdminModal(true); setAdminErr(''); }}
+              className="flex items-center space-x-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-purple-900/30"
+            >
+              <UserPlus className="w-4 h-4 mr-1" />
+              New Admin
+            </button>
+          </div>
+
+          {admins.filter((a: any) => a.role !== 'super_admin').length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <ShieldAlert className="w-12 h-12 text-purple-500/20 mb-4" />
+              <p className="text-sm font-black text-gray-500 uppercase tracking-widest">No Admin Accounts Found</p>
+              <p className="text-[10px] text-gray-600 uppercase tracking-wider mt-1">Click "New Admin" to create the first one</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {admins.filter((a: any) => a.role !== 'super_admin').map((admin: any) => (
+                <BorderGlow
+                  key={admin.id}
+                  borderRadius={28}
+                  glowColor={admin.status === 'suspended' ? '239 68 68' : '139 92 246'}
+                  glowRadius={30}
+                  glowIntensity={0.6}
+                  backgroundColor="#120F17"
+                  className="p-6 border-white/5 shadow-xl"
+                >
+                  {/* ── EDIT MODE ── */}
+                  {editingAdminId === admin.id ? (
+                    <div className="space-y-3 animate-in fade-in duration-300">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] text-purple-400 font-black uppercase tracking-widest">Editing {admin.id}</span>
+                        <button onClick={() => setEditingAdminId(null)} className="text-gray-500 hover:text-white transition-colors">
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                        <input value={adminEditForm.name || ''} onChange={e => setAdminEditForm({ ...adminEditForm, name: e.target.value })} className="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email</label>
+                        <input type="email" value={adminEditForm.email || ''} onChange={e => setAdminEditForm({ ...adminEditForm, email: e.target.value })} className="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Phone</label>
+                          <input value={adminEditForm.contact || ''} onChange={e => setAdminEditForm({ ...adminEditForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10) })} maxLength={10} className="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none" placeholder="10 digits" />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Role</label>
+                          <select value={adminEditForm.role || 'admin'} onChange={e => setAdminEditForm({ ...adminEditForm, role: e.target.value })} className="w-full bg-[#120F17] border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none [&>option]:bg-[#120F17]">
+                            <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
+                            <option value="moderator">Moderator</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
+                        <input type="text" value={adminEditForm.password || ''} onChange={e => setAdminEditForm({ ...adminEditForm, password: e.target.value })} className="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none" placeholder="Update password" />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Status</label>
+                        <select value={adminEditForm.status} onChange={e => setAdminEditForm({ ...adminEditForm, status: e.target.value })} className="w-full bg-[#120F17] border border-white/10 rounded-lg p-2 text-white text-xs [&>option]:bg-[#120F17] outline-none">
+                          <option value="active">Active</option>
+                          <option value="suspended">Suspended</option>
+                        </select>
+                      </div>
+                      <div className="flex space-x-2 pt-2">
+                        <button onClick={handleSaveEdit} disabled={adminLoading} className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-xl py-2 text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center space-x-1">
+                          <Save className="w-3 h-3 mr-1" /> Save
+                        </button>
+                        <button onClick={() => setEditingAdminId(null)} className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl py-2 text-[9px] font-black uppercase tracking-widest transition-all">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : adminDeleteConfirmId === admin.id ? (
+                    /* ── DELETE CONFIRM ── */
+                    <div className="flex flex-col items-center justify-center py-4 text-center space-y-4 animate-in fade-in duration-200">
+                      <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                        <Trash2 className="w-6 h-6 text-red-500" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-white uppercase tracking-wider">Delete {admin.name}?</p>
+                        <p className="text-[9px] text-gray-500 mt-1">This action cannot be undone.</p>
+                      </div>
+                      <div className="flex w-full space-x-2">
+                        <button onClick={() => handleDeleteAdmin(admin.id)} disabled={adminLoading} className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-xl py-2 text-[9px] font-black uppercase tracking-widest transition-all">
+                          Confirm Delete
+                        </button>
+                        <button onClick={() => setAdminDeleteConfirmId(null)} className="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl py-2 text-[9px] font-black uppercase tracking-widest transition-all">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ── VIEW MODE ── */
+                    <>
+                      <div className="flex justify-between items-start mb-5">
+                        <div>
+                          <h4 className="text-sm font-black text-white uppercase tracking-wider">{admin.name}</h4>
+                          <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mt-1">{admin.email}</p>
+                          {admin.contact && <p className="text-[9px] text-gray-600 font-bold mt-0.5">📞 {admin.contact}</p>}
+                          {admin.role && (
+                            <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                              {admin.role}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                            admin.status === 'active'
+                              ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                              : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                          }`}>
+                            {admin.status}
+                          </span>
+                          {/* Edit & Delete icon buttons */}
+                          <div className="flex space-x-1 mt-1">
+                            <button
+                              onClick={() => { setEditingAdminId(admin.id); setAdminEditForm({ ...admin }); setAdminErr(''); }}
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/30 text-gray-400 hover:text-purple-400 transition-all"
+                              title="Edit Admin"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setAdminDeleteConfirmId(admin.id)}
+                              className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/5 hover:border-red-500/30 text-gray-400 hover:text-red-400 transition-all"
+                              title="Delete Admin"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col space-y-3 pt-4 border-t border-white/5">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleImpersonateUser({
+                              id: admin.id,
+                              name: admin.name,
+                              email: admin.email || `${String(admin.name).toLowerCase().replace(/[^a-z0-9]/g, '')}@admin.com`,
+                              role: 'admin'
+                            })}
+                            className="px-4 py-2 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 text-purple-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 flex-1"
+                          >
+                            Login As
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const newStatus = admin.status === 'active' ? 'suspended' : 'active';
+                              await updateAdmin(admin.id, { ...admin, status: newStatus });
+                              updateMockDB();
+                            }}
+                            className={`px-4 py-2 border rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex-1 ${
+                              admin.status === 'active'
+                                ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                                : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20'
+                            }`}
+                          >
+                            {admin.status === 'active' ? 'Suspend' : 'Activate'}
+                          </button>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">ID:</span>
+                          <span className="text-[9px] font-black text-purple-400 font-mono">{admin.id}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </BorderGlow>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── CREATE ADMIN MODAL ───────────────────────────────────────── */}
+        {showCreateAdminModal && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="relative w-full max-w-lg bg-[#120F17]/90 border border-purple-500/30 shadow-[0_0_60px_rgba(139,92,246,0.2)] rounded-3xl overflow-hidden">
+              {/* Accent bar */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-600 to-blue-500" />
+
+              <div className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h4 className="text-base font-black text-white uppercase tracking-widest">New Admin Account</h4>
+                    <p className="text-[9px] text-gray-500 uppercase tracking-widest mt-1">Grant admin-level access to a new user</p>
+                  </div>
+                  <button onClick={() => { setShowCreateAdminModal(false); setAdminErr(''); }} className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                    <XCircle className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {adminErr && (
+                  <div className="mb-4 p-3 bg-red-500/20 text-red-400 border border-red-500/50 rounded-xl text-xs font-bold">✕ {adminErr}</div>
+                )}
+
+                <form onSubmit={handleCreateAdmin} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="adminId" className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Admin ID *</label>
+                      <input
+                        id="adminId"
+                        name="adminId"
+                        required
+                        value={adminCreateForm.id}
+                        onChange={e => setAdminCreateForm({ ...adminCreateForm, id: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none transition-colors"
+                        placeholder="e.g. A04"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="adminRole" className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Role</label>
+                      <select
+                        id="adminRole"
+                        name="adminRole"
+                        value={adminCreateForm.role}
+                        onChange={e => setAdminCreateForm({ ...adminCreateForm, role: e.target.value })}
+                        className="w-full bg-[#120F17] border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none [&>option]:bg-[#120F17]"
+                      >
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                        <option value="moderator">Moderator</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="adminName" className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Full Name *</label>
+                    <input
+                      id="adminName"
+                      name="adminName"
+                      required
+                      value={adminCreateForm.name}
+                      onChange={e => setAdminCreateForm({ ...adminCreateForm, name: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none transition-colors"
+                      placeholder="e.g. Ravi Kumar"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="adminEmail" className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email *</label>
+                      <input
+                        id="adminEmail"
+                        name="adminEmail"
+                        required
+                        type="email"
+                        value={adminCreateForm.email}
+                        onChange={e => setAdminCreateForm({ ...adminCreateForm, email: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none transition-colors"
+                        placeholder="admin@company.com"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="adminPhone" className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Phone</label>
+                      <input
+                        id="adminPhone"
+                        name="adminPhone"
+                        value={adminCreateForm.contact}
+                        onChange={e => setAdminCreateForm({ ...adminCreateForm, contact: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                        maxLength={10}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none transition-colors"
+                        placeholder="10-digit number"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="adminPassword" className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password *</label>
+                    <input
+                      id="adminPassword"
+                      name="adminPassword"
+                      required
+                      type="text"
+                      value={adminCreateForm.password}
+                      onChange={e => setAdminCreateForm({ ...adminCreateForm, password: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none transition-colors"
+                      placeholder="Set a strong password"
+                    />
+                  </div>
+                  <div className="flex space-x-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={adminLoading}
+                      className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-black uppercase tracking-widest py-3 rounded-2xl transition-all shadow-lg shadow-purple-900/30 text-xs"
+                    >
+                      {adminLoading ? 'Creating...' : 'Create Admin Account'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowCreateAdminModal(false); setAdminErr(''); }}
+                      className="px-6 py-3 bg-white/5 hover:bg-white/10 text-gray-300 font-black uppercase tracking-widest rounded-2xl transition-all text-xs"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
   // Device Management View
   const DevicesView = () => {
 
@@ -1341,16 +1767,16 @@ export default function SuperAdminPortal() {
                   style={{ left: `${hoveredMissions.x}%` }}
                 />
                 <div
-                  className="absolute z-30 bg-black/95 backdrop-blur-md border border-blue-500/30 p-2.5 rounded-2xl text-[10px] pointer-events-none text-left min-w-[125px] transition-all duration-75 shadow-[0_0_15px_rgba(59,130,246,0.25)]"
+                  className="absolute z-30 bg-white backdrop-blur-md border border-blue-500/30 p-2.5 rounded-2xl text-[10px] pointer-events-none text-left min-w-[125px] transition-all duration-75 shadow-[0_0_15px_rgba(59,130,246,0.25)]"
                   style={{
                     left: `${Math.min(72, Math.max(8, hoveredMissions.x - 15))}%`,
                     top: `${Math.min(65, Math.max(10, hoveredMissions.y - 30))}%`
                   }}
                 >
                   <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-0.5">UPLINK TIME</div>
-                  <div className="text-white font-bold text-sm mb-1">{hoveredMissions.time}</div>
-                  <div className="flex items-center space-x-1.5 text-blue-400 font-black">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  <div className="text-gray-900 font-bold text-sm mb-1">{hoveredMissions.time}</div>
+                  <div className="flex items-center space-x-1.5 text-blue-600 font-black">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
                     <span>{hoveredMissions.val} ACTIVE NODES</span>
                   </div>
                 </div>
@@ -1372,15 +1798,7 @@ export default function SuperAdminPortal() {
           <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Active Node Revenue Cycles</h3>
 
           <div className="h-64 flex items-end justify-around relative pt-6 px-4">
-            {[
-              { day: 'Mon-1', val: 72, revenue: 145000, change: '+12.4%' },
-              { day: 'Mon-2', val: 85, revenue: 168000, change: '+15.8%' },
-              { day: 'Mon-3', val: 90, revenue: 182000, change: '+18.2%' },
-              { day: 'Mon-4', val: 64, revenue: 124000, change: '+8.5%' },
-              { day: 'Mon-5', val: 98, revenue: 198000, change: '+24.1%' },
-              { day: 'Mon-6', val: 80, revenue: 156000, change: '+14.7%' },
-              { day: 'Mon-7', val: 88, revenue: 178000, change: '+19.5%' }
-            ].map((cycle, i) => (
+            {[].map((cycle, i) => (
               <div
                 key={i}
                 className="flex flex-col items-center w-full max-w-[28px] group cursor-pointer relative"
@@ -1389,10 +1807,10 @@ export default function SuperAdminPortal() {
               >
                 {/* Floating Glassmorphic Tooltip */}
                 {hoveredRevenueCycle === i && (
-                  <div className="absolute bottom-48 z-30 bg-black/95 backdrop-blur-md border border-cyan-500/40 p-2.5 rounded-2xl text-[10px] w-32 shadow-[0_0_20px_rgba(34,211,238,0.25)] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <div className="absolute bottom-48 z-30 bg-white backdrop-blur-md border border-cyan-500/40 p-2.5 rounded-2xl text-[10px] w-32 shadow-[0_0_20px_rgba(34,211,238,0.25)] animate-in fade-in slide-in-from-bottom-2 duration-200">
                     <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-0.5">{cycle.day} YIELD</div>
-                    <div className="text-cyan-400 font-black text-sm">{formatShorthand(cycle.revenue)}</div>
-                    <div className="text-green-400 font-bold text-[8px] mt-0.5">{cycle.change} vs prev</div>
+                    <div className="text-cyan-600 font-black text-sm">{formatShorthand(cycle.revenue)}</div>
+                    <div className="text-green-600 font-bold text-[8px] mt-0.5">{cycle.change} vs prev</div>
                   </div>
                 )}
 
@@ -1598,6 +2016,7 @@ export default function SuperAdminPortal() {
               <Route path="/stats" element={<StatsView />} />
               <Route path="/owners" element={<OwnersView />} />
               <Route path="/pilots" element={<PilotsView />} />
+              <Route path="/admins" element={AdminsView()} />
               <Route path="/devices" element={<DevicesView />} />
               <Route path="/tracking" element={<TrackingView telemetry={telemetry} owners={owners} pilots={pilots} devices={devices} />} />
               <Route path="/analytics" element={<AnalyticsView />} />

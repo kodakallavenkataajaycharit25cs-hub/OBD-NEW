@@ -107,7 +107,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
         if (error) {
             console.error('[Supabase Admin Error]:', error.message);
-            throw error;
+            return res.status(400).json({ error: error.message });
         }
         
         const resetLink = data.properties.action_link;
@@ -342,16 +342,239 @@ app.delete('/api/pilots/:id', async (req, res) => {
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Revenue Update Background Task
-setInterval(async () => {
+// Transaction Route (Real-Time Revenue Tracking)
+app.post('/api/transactions', async (req, res) => {
     try {
-        const owners = await sql`SELECT id, revenue FROM owners`;
-        for (const owner of owners) {
-            const newRevenue = Math.max(0, Number(owner.revenue) + Math.floor(Math.random() * 8000) - 3000);
-            await sql`UPDATE owners SET revenue = ${newRevenue} WHERE id = ${owner.id}`;
+        const { userEmail, role, amount, type } = req.body;
+        
+        let targetOwner = null;
+        
+        if (role === 'driver') {
+            const pilots = await sql`SELECT owner_id FROM pilots WHERE email = ${userEmail}`;
+            if (pilots.length > 0) {
+                const owners = await sql`SELECT * FROM owners WHERE id = ${pilots[0].owner_id}`;
+                if (owners.length > 0) targetOwner = owners[0];
+            }
+        } else if (role === 'owner') {
+            const owners = await sql`SELECT * FROM owners WHERE email = ${userEmail}`;
+            if (owners.length > 0) targetOwner = owners[0];
         }
-    } catch (err) { console.error('Revenue update failed:', err.message); }
-}, 15000);
+
+        if (!targetOwner) {
+            // Fallback for demo: just update the first owner 'O1'
+            const owners = await sql`SELECT * FROM owners WHERE id = 'O1'`;
+            if (owners.length > 0) targetOwner = owners[0];
+        }
+
+        if (targetOwner) {
+            const change = type === 'credit' ? Number(amount) : -Number(amount);
+            await sql`UPDATE owners SET revenue = GREATEST(0, revenue + ${change}) WHERE id = ${targetOwner.id}`;
+            res.json({ success: true, change });
+        } else {
+            res.status(404).json({ error: 'Owner not found' });
+        }
+    } catch (err) {
+        console.error('Transaction failed:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ──────────────────────────────────────────────────────
+// ADMIN CRUD ROUTES
+// ──────────────────────────────────────────────────────
+
+app.get('/api/admins', async (req, res) => {
+    try {
+        const rows = await sql`SELECT id, name, email, contact, role, status, created_at FROM admins ORDER BY created_at DESC`;
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admins', async (req, res) => {
+    try {
+        const { id, name, email, contact, password, status, role } = req.body;
+        if (!id || !name || !email) return res.status(400).json({ error: 'id, name, and email are required.' });
+
+        // Create Supabase Auth user
+        if (email && password) {
+            const { error } = await supabaseAdmin.auth.admin.createUser({
+                email,
+                password,
+                email_confirm: true,
+                user_metadata: { name, role: role || 'admin' }
+            });
+            if (error) return res.status(400).json({ error: `Auth error: ${error.message}` });
+        }
+
+        await sql`INSERT INTO admins (id, name, email, contact, role, status) VALUES (${id}, ${name}, ${email}, ${contact || ''}, ${role || 'admin'}, ${status || 'active'})`;
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admins/:id', async (req, res) => {
+    try {
+        const { name, email, contact, status, role, password } = req.body;
+
+        // Update password in Supabase Auth if provided
+        if (email && password) {
+            const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+            const userToUpdate = usersData?.users?.find(u => u.email === email);
+            if (userToUpdate) {
+                await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, { password });
+            }
+        }
+
+        await sql`UPDATE admins SET
+            name = COALESCE(${name}, name),
+            email = COALESCE(${email}, email),
+            contact = COALESCE(${contact}, contact),
+            role = COALESCE(${role || null}, role),
+            status = COALESCE(${status}, status)
+            WHERE id = ${req.params.id}`;
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admins/:id', async (req, res) => {
+    try {
+        // Optionally delete from Supabase Auth too
+        const rows = await sql`SELECT email FROM admins WHERE id = ${req.params.id}`;
+        if (rows.length > 0) {
+            const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+            const authUser = usersData?.users?.find(u => u.email === rows[0].email);
+            if (authUser) await supabaseAdmin.auth.admin.deleteUser(authUser.id);
+        }
+        await sql`DELETE FROM admins WHERE id = ${req.params.id}`;
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+let spotBookings = [];
+
+
+app.post('/api/bookings', async (req, res) => {
+    try {
+        const { driverEmail, ...bookingDetails } = req.body;
+        let ownerEmail = null;
+
+        // Try to find the driver's owner email and driver details
+        if (driverEmail) {
+            const pilots = await sql`SELECT owner_id, name, contact, vehicle_number, vehicle_model FROM pilots WHERE email = ${driverEmail}`;
+            if (pilots.length > 0) {
+                const pilot = pilots[0];
+                
+                // Override booking details with real data from DB
+                if (pilot.name) bookingDetails.driverName = pilot.name;
+                if (pilot.contact) bookingDetails.driverPhone = pilot.contact;
+                if (pilot.vehicle_number) bookingDetails.vehicleNumber = pilot.vehicle_number;
+                if (pilot.vehicle_model) bookingDetails.car = pilot.vehicle_model;
+
+                if (pilot.owner_id) {
+                    try {
+                        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(pilot.owner_id);
+                        if (userData && userData.user) {
+                            ownerEmail = userData.user.email;
+                        }
+                    } catch(e) {}
+                    
+                    // Fallback to owners table if not a Supabase UUID
+                    if (!ownerEmail) {
+                        const owners = await sql`SELECT email FROM owners WHERE id = ${pilot.owner_id}`;
+                        if (owners.length > 0) ownerEmail = owners[0].email;
+                    }
+                }
+            }
+        }
+
+        if (!ownerEmail) {
+            return res.status(400).json({ success: false, error: "Your account is not linked to any owner/fleet." });
+        }
+        
+        // Only send email if an owner is actually linked to this driver
+        if (ownerEmail) {
+            const mailOptions = {
+                from: `"Sukrutha Mobility" <${process.env.SMTP_USER}>`,
+                to: ownerEmail,
+                subject: `New Spot Booking: ${bookingDetails.departure} to ${bookingDetails.destination}`,
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #3b82f6;">New Spot Booking Received</h2>
+                        <p>A new spot booking has been executed by one of your drivers.</p>
+                        
+                        <h4 style="margin-bottom: 5px;">Customer Details:</h4>
+                        <ul style="margin-top: 0;">
+                            <li>Name: <strong>${bookingDetails.customerName}</strong></li>
+                            <li>Phone: <strong>${bookingDetails.customerPhone}</strong></li>
+                            <li>Passengers: <strong>${bookingDetails.passengers}</strong></li>
+                        </ul>
+
+                        <h4 style="margin-bottom: 5px;">Trip Details:</h4>
+                        <ul style="margin-top: 0;">
+                            <li>From: <strong>${bookingDetails.departure}</strong></li>
+                            <li>To: <strong>${bookingDetails.destination}</strong></li>
+                            <li>Date: <strong>${bookingDetails.date}</strong></li>
+                            <li>Time: <strong>${bookingDetails.time}</strong></li>
+                            <li>Price: <strong>₹${bookingDetails.price}</strong></li>
+                        </ul>
+
+                        <h4 style="margin-bottom: 5px;">Driver Details:</h4>
+                        <ul style="margin-top: 0;">
+                            <li>Driver Name: <strong>${bookingDetails.driverName}</strong></li>
+                            <li>Driver Phone: <strong>${bookingDetails.driverPhone}</strong></li>
+                            <li>Vehicle Model: <strong>${bookingDetails.car}</strong></li>
+                            <li>Vehicle Number: <strong>${bookingDetails.vehicleNumber}</strong></li>
+                        </ul>
+                    </div>
+                `,
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+            } catch(emailErr) {
+                console.error('Email sending failed for booking:', emailErr.message);
+            }
+        }
+
+        // Update driver availability to busy
+        if (driverEmail) {
+            try {
+                await sql`UPDATE pilots SET availability = 'busy' WHERE email = ${driverEmail}`;
+            } catch(e) {
+                console.error('Failed to update driver availability:', e);
+            }
+        }
+
+        const newBooking = { id: Date.now().toString(), ownerEmail, driverEmail, ...bookingDetails, createdAt: new Date() };
+        if (ownerEmail) {
+            spotBookings.push(newBooking);
+        }
+
+        res.json({ success: true, booking: newBooking });
+    } catch (err) {
+        console.error('Booking creation failed:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/bookings/:email', (req, res) => {
+    const email = req.params.email;
+    const ownerBookings = spotBookings.filter(b => b.ownerEmail === email);
+    res.json(ownerBookings);
+});
+
+app.delete('/api/bookings/:id', (req, res) => {
+    spotBookings = spotBookings.filter(b => b.id !== req.params.id);
+    res.json({ success: true });
+});
+
+// Telemetry endpoints
+app.get('/api/engine_temp', (req, res) => {
+    res.json({ temp: Math.floor(Math.random() * 20) + 80 }); // 80-100
+});
+
+app.get('/api/o2_level', (req, res) => {
+    res.json({ level: (Math.random() * (0.9 - 0.1) + 0.1).toFixed(2) }); // 0.1-0.9
+});
 
 // Helper for ELM327
 function sendOBDCommand(command) {

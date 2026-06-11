@@ -49,53 +49,7 @@ export default function VehicleHealth() {
     }
   }, [selectedVehicle]);
 
-  const vehicles = [
-    {
-      id: 'MH-02-AB-1234',
-      model: 'Toyota Innova Crysta',
-      driver: 'Suresh Singh',
-      status: telemetry.diagnostics?.mil_status === 'ON' ? 'critical' : 'good',
-      rpm: telemetry.rpm || 2450,
-      coolantTemp: telemetry.diagnostics?.coolant_temp ? parseInt(telemetry.diagnostics.coolant_temp) : 87,
-      fuelEfficiency: 14.8,
-      tyrePressure: { fl: 32, fr: 32, rl: 30, rr: 31 },
-      engineCodes: telemetry.diagnostics?.dtc || [],
-      lastService: '2024-12-15',
-      nextService: '2025-03-15',
-      mileage: 45680,
-      location: 'En route to Pune'
-    },
-    {
-      id: 'DL-01-CD-5678',
-      model: 'Tempo Traveller',
-      driver: 'Ramesh Sharma',
-      status: 'warning',
-      rpm: 2800,
-      coolantTemp: 95,
-      fuelEfficiency: 11.2,
-      tyrePressure: { fl: 35, fr: 34, rl: 28, rr: 29 },
-      engineCodes: ['P0128'],
-      lastService: '2024-11-20',
-      nextService: '2025-02-20',
-      mileage: 67432,
-      location: 'Mumbai Depot'
-    },
-    {
-      id: 'KA-05-EF-9012',
-      model: 'Force Traveller',
-      driver: 'Vikram Patel',
-      status: 'critical',
-      rpm: 3200,
-      coolantTemp: 103,
-      fuelEfficiency: 9.8,
-      tyrePressure: { fl: 30, fr: 32, rl: 25, rr: 26 },
-      engineCodes: ['P0300', 'P0171'],
-      lastService: '2024-10-05',
-      nextService: '2025-01-05',
-      mileage: 89123,
-      location: 'Service Center'
-    }
-  ];
+  const vehicles: any[] = [];
 
   const selectedVehicleData = vehicles.find(v => v.id === selectedVehicle) || vehicles[0];
 
@@ -120,23 +74,23 @@ export default function VehicleHealth() {
   const obdMetrics = [
     {
       name: 'Engine RPM',
-      value: selectedVehicleData.rpm,
+      value: selectedVehicleData ? selectedVehicleData.rpm : 0,
       unit: 'RPM',
-      status: selectedVehicleData.rpm > 3000 ? 'critical' : selectedVehicleData.rpm > 2500 ? 'warning' : 'good',
+      status: selectedVehicleData ? (selectedVehicleData.rpm > 3000 ? 'critical' : selectedVehicleData.rpm > 2500 ? 'warning' : 'good') : 'gray',
       icon: Gauge
     },
     {
       name: 'Coolant Temperature',
-      value: selectedVehicleData.coolantTemp,
+      value: selectedVehicleData ? selectedVehicleData.coolantTemp : 0,
       unit: '°C',
-      status: selectedVehicleData.coolantTemp > 100 ? 'critical' : selectedVehicleData.coolantTemp > 90 ? 'warning' : 'good',
+      status: selectedVehicleData ? (selectedVehicleData.coolantTemp > 100 ? 'critical' : selectedVehicleData.coolantTemp > 90 ? 'warning' : 'good') : 'gray',
       icon: Thermometer
     },
     {
       name: 'Fuel Efficiency',
-      value: selectedVehicleData.fuelEfficiency,
+      value: selectedVehicleData ? selectedVehicleData.fuelEfficiency : 0,
       unit: 'km/l',
-      status: selectedVehicleData.fuelEfficiency < 10 ? 'critical' : selectedVehicleData.fuelEfficiency < 12 ? 'warning' : 'good',
+      status: selectedVehicleData ? (selectedVehicleData.fuelEfficiency < 10 ? 'critical' : selectedVehicleData.fuelEfficiency < 12 ? 'warning' : 'good') : 'gray',
       icon: Fuel
     }
   ];
@@ -183,8 +137,15 @@ export default function VehicleHealth() {
         </div>
       </BorderGlow>
 
-      {/* Selected Vehicle Overview */}
+      {vehicles.length === 0 ? (
+        <div className="p-12 text-center text-gray-500 bg-[#120F17] rounded-2xl border border-white/5">
+          <Car className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <h3 className="text-xl font-black uppercase tracking-widest text-white mb-2">No Vehicles Assigned</h3>
+          <p>Assign a vehicle to one of your drivers to view health data.</p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Selected Vehicle Overview */}
         <div className="lg:col-span-2 space-y-4">
           <BorderGlow
             borderRadius={28}
@@ -225,14 +186,14 @@ export default function VehicleHealth() {
           </BorderGlow>
 
           {/* Engine Diagnostic Codes */}
-          {selectedVehicleData.engineCodes.length > 0 && (
+          {selectedVehicleData && selectedVehicleData.engineCodes?.length > 0 && (
             <div className="bg-[#120F17] border border-white/5 backdrop-blur-sm rounded-2xl p-6">
               <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center">
                 <AlertTriangle className="w-6 h-6 mr-2" />
                 Engine Diagnostic Codes
               </h3>
               <div className="space-y-3">
-                {selectedVehicleData.engineCodes.map((code, index) => (
+                {selectedVehicleData.engineCodes.map((code: string, index: number) => (
                   <div key={index} className="bg-red-500/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-bold text-red-400">{code}</span>
@@ -256,24 +217,7 @@ export default function VehicleHealth() {
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Recent Violations</h3>
 
             <div className="space-y-4">
-              {[
-                { type: 'Speed', location: 'Mumbai-Pune Highway', time: '2 hours ago', severity: 'high' },
-                { type: 'Geofence', location: 'Unauthorized route deviation', time: '1 day ago', severity: 'medium' },
-                { type: 'Idle', location: 'Extended idling at toll plaza', time: '2 days ago', severity: 'low' }
-              ].map((violation, index) => (
-                <div key={index} className="clay-card-hover p-4 bg-black/20 border-white/5 shadow-inner border-l-4 border-l-orange-500 group transition-all rounded-2xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${violation.severity === 'high' ? 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30' :
-                      violation.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30' :
-                        'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
-                      }`}>
-                      {violation.type}
-                    </span>
-                    <span className="text-[10px] uppercase font-black tracking-widest text-gray-500 group-hover:text-gray-400 transition-colors">{violation.time}</span>
-                  </div>
-                  <p className="text-sm text-gray-300 group-hover:text-white transition-colors">{violation.location}</p>
-                </div>
-              ))}
+              {[]}
             </div>
           </BorderGlow>
         </div>
@@ -293,24 +237,24 @@ export default function VehicleHealth() {
             <div className="space-y-4">
               <div>
                 <span className="text-gray-400 text-sm">Model</span>
-                <p className="text-white font-semibold">{selectedVehicleData.model}</p>
+                <p className="text-white font-semibold">{selectedVehicleData?.model}</p>
               </div>
               <div>
                 <span className="text-gray-400 text-sm">Driver</span>
-                <p className="text-white font-semibold">{selectedVehicleData.driver}</p>
+                <p className="text-white font-semibold">{selectedVehicleData?.driver}</p>
               </div>
               <div>
                 <span className="text-gray-400 text-sm">Current Location</span>
-                <p className="text-white font-semibold">{selectedVehicleData.location}</p>
+                <p className="text-white font-semibold">{selectedVehicleData?.location}</p>
               </div>
               <div>
                 <span className="text-gray-400 text-sm">Mileage</span>
-                <p className="text-white font-semibold">{selectedVehicleData.mileage.toLocaleString('en-IN')} km</p>
+                <p className="text-white font-semibold">{selectedVehicleData?.mileage?.toLocaleString('en-IN')} km</p>
               </div>
               <div>
                 <span className="text-gray-400 text-sm">Status</span>
                 <div className="flex items-center space-x-2 mt-1">
-                  {(() => {
+                  {selectedVehicleData && (() => {
                     const StatusIcon = getStatusIcon(selectedVehicleData.status);
                     const statusColor = getStatusColor(selectedVehicleData.status);
 
@@ -339,32 +283,36 @@ export default function VehicleHealth() {
             <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-4">Maintenance Schedule</h3>
 
             <div className="space-y-4">
-              <div>
-                <span className="text-gray-400 text-sm">Last Service</span>
-                <p className="text-white font-semibold">
-                  {new Date(selectedVehicleData.lastService).toLocaleDateString('en-IN')}
-                </p>
-              </div>
-              <div>
-                <span className="text-gray-400 text-sm">Next Service Due</span>
-                <p className="text-white font-semibold">
-                  {new Date(selectedVehicleData.nextService).toLocaleDateString('en-IN')}
-                </p>
-              </div>
+              {selectedVehicleData && (
+                <>
+                  <div>
+                    <span className="text-gray-400 text-sm">Last Service</span>
+                    <p className="text-white font-semibold">
+                      {new Date(selectedVehicleData.lastService).toLocaleDateString('en-IN')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 text-sm">Next Service Due</span>
+                    <p className="text-white font-semibold">
+                      {new Date(selectedVehicleData.nextService).toLocaleDateString('en-IN')}
+                    </p>
+                  </div>
 
-              <div className="mt-4">
-                {new Date(selectedVehicleData.nextService) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) ? (
-                  <div className="bg-[#120F17] border border-white/5 rounded-lg p-3 text-center">
-                    <AlertTriangle className="w-5 h-5 text-yellow-400 mx-auto mb-2" />
-                    <span className="text-yellow-400 text-sm font-medium">Service Due Soon</span>
+                  <div className="mt-4">
+                    {new Date(selectedVehicleData.nextService) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) ? (
+                      <div className="bg-[#120F17] border border-white/5 rounded-lg p-3 text-center">
+                        <AlertTriangle className="w-5 h-5 text-yellow-400 mx-auto mb-2" />
+                        <span className="text-yellow-400 text-sm font-medium">Service Due Soon</span>
+                      </div>
+                    ) : (
+                      <div className="bg-[#120F17] border border-white/5 rounded-lg p-3 text-center">
+                        <CheckCircle className="w-5 h-5 text-green-400 mx-auto mb-2" />
+                        <span className="text-green-400 text-sm font-medium">Service Up to Date</span>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="bg-[#120F17] border border-white/5 rounded-lg p-3 text-center">
-                    <CheckCircle className="w-5 h-5 text-green-400 mx-auto mb-2" />
-                    <span className="text-green-400 text-sm font-medium">Service Up to Date</span>
-                  </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </BorderGlow>
 
@@ -404,6 +352,7 @@ export default function VehicleHealth() {
           </BorderGlow>
         </div>
       </div>
+      )}
     </div>
   );
 }

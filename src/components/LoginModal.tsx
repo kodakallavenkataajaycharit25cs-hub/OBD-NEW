@@ -33,7 +33,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }
 
     try {
-      const { success, user } = await login(email, password);
+      const { success, user, error: loginError } = await login(email, password);
       if (success && user) {
         onClose();
         
@@ -51,7 +51,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           }
         }, 100);
       } else {
-        setError('Invalid credentials sequence');
+        setError(loginError || 'Invalid credentials sequence');
       }
     } catch (err) {
       setError('Connection timeout. Retry session.');

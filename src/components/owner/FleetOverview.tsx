@@ -50,8 +50,9 @@ export default function FleetOverview() {
         );
         setFleetAlerts(myAlerts);
 
-        // For demo, we'll show all pilots as being part of the network
-        setFleetPilots(pilots);
+        // Filter pilots belonging to this owner only
+        const myPilots = pilots.filter((p: any) => p.owner_id === currentOwner?.id);
+        setFleetPilots(myPilots);
         
         setLoading(false);
       } catch (error) {
@@ -122,18 +123,13 @@ export default function FleetOverview() {
     }
   ];
 
-  const topRoutes = [
-    { route: 'Mumbai → Pune', trips: 47, profit: 142800, margin: '23.4%' },
-    { route: 'Delhi → Agra', trips: 32, profit: 98600, margin: '21.8%' },
-    { route: 'Bengaluru → Coorg', trips: 28, profit: 87400, margin: '19.6%' },
-    { route: 'Mumbai → Goa', trips: 24, profit: 156000, margin: '28.7%' },
-  ];
+  const topRoutes: any[] = [];
 
   const topDrivers = fleetPilots.slice(0, 3).map((p, i) => ({
     name: p.name,
-    score: p.safetyScore,
-    trips: p.trips,
-    earnings: p.trips * 1200 // Demo calculation
+    score: p.safetyScore ?? p.safety_score ?? '—',
+    trips: p.trips ?? 0,
+    earnings: null // earnings not tracked yet
   }));
 
   const recentAlerts = fleetAlerts.slice(0, 3).map(a => ({
@@ -234,7 +230,7 @@ export default function FleetOverview() {
                     </div>
                   </div>
                   <span className="text-lg font-black text-green-400 tabular-nums font-sans not-italic">
-                    {formatIndianCurrency(driver.earnings)}
+                    {driver.earnings !== null ? formatIndianCurrency(driver.earnings) : '—'}
                   </span>
                 </div>
               </div>
@@ -261,10 +257,10 @@ export default function FleetOverview() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
             {[
-              { l: 'Nominal', v: 28, c: 'green' },
-              { l: 'Alert', v: 6, c: 'yellow' },
-              { l: 'Revised', v: 3, c: 'orange' },
-              { l: 'Critical', v: 1, c: 'red' }
+              { l: 'Nominal', v: 0, c: 'green' },
+              { l: 'Alert', v: 0, c: 'yellow' },
+              { l: 'Revised', v: 0, c: 'orange' },
+              { l: 'Critical', v: 0, c: 'red' }
             ].map((stat, i) => (
               <div key={i} className={`clay-card p-4 bg-${stat.c}-500/5 border-${stat.c}-500/20 text-center group`}>
                 <div className={`text-2xl font-black text-${stat.c}-500 tabular-nums font-sans not-italic group-hover:scale-110 transition-transform`}>{stat.v}</div>
@@ -275,9 +271,9 @@ export default function FleetOverview() {
 
           <div className="space-y-4 px-2">
             {[
-              { l: 'Fleet Efficiency Alpha', v: '14.2 km/l', p: 85 },
-              { l: 'Operational Flux', v: '89.5%', p: 90 },
-              { l: 'Mean Mission Distance', v: '167 km', p: 65 }
+              { l: 'Fleet Efficiency Alpha', v: '0 km/l', p: 0 },
+              { l: 'Operational Flux', v: '0%', p: 0 },
+              { l: 'Mean Mission Distance', v: '0 km', p: 0 }
             ].map((m, i) => (
               <div key={i}>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">

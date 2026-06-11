@@ -243,6 +243,11 @@
   color: var(--success-green) !important;
 }
 
+.light-mode .bg-purple-600 .text-white,
+.light-mode .bg-purple-600.text-white {
+  color: #ffffff !important;
+}
+
 .light-mode .text-blue-500,
 .light-mode .text-blue-400 {
   color: var(--brand-blue) !important;
@@ -604,8 +609,4 @@
   100% { transform: translateX(150%) skewX(20deg); }
 }
 
-/* Force all text to black in light mode across all portals */
-.light-mode,
-.light-mode * {
-  color: #000000 !important;
-}
+/* End of index.css */

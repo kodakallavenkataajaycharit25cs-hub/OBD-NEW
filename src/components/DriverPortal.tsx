@@ -112,6 +112,9 @@ export default function DriverPortal() {
   };
 
   const handleTriggerSOS = async () => {
+    const confirmed = window.confirm('Are you sure you want to trigger the SOS alert?');
+    if (!confirmed) return;
+
     setSosLoading(true);
     try {
       await createAlert({
@@ -143,50 +146,45 @@ export default function DriverPortal() {
   // Map Supabase pilot data to the UI format
   const getDriverDataForPeriod = (period: '7d' | '1m' | '3m' | '1y') => {
     const baseData = {
-      vehicleAssigned: 'Toyota Innova Crysta - MH-12-PQ-8890',
+      vehicleAssigned: pilotRecord?.vehicle_number ? `${pilotRecord.vehicle_number} - ${pilotRecord.vehicle_model}` : 'Unassigned',
       safetyScore: pilotRecord?.safetyScore || 8.5,
       fuelEfficiencyScore: 7.9,
       customerRating: pilotRecord?.rating || 4.5,
       totalTrips: pilotRecord?.trips || 0,
       totalDistance: `${(pilotRecord?.hours || 0) * 45} km`, // Simple calc for demo
-      documents: [
-        { name: 'Driving License', status: 'valid', expiry: '2026-03-15' },
-        { name: 'Commercial Permit', status: 'expiring', expiry: '2025-02-20' },
-        { name: 'Vehicle Registration', status: 'valid', expiry: '2027-01-10' },
-        { name: 'Medical Certificate', status: 'expired', expiry: '2024-12-01' }
-      ]
+      documents: []
     };
 
     switch (period) {
       case '7d':
         return {
           ...baseData,
-          currentPeriodEarnings: (pilotRecord?.trips || 0) * 150,
-          previousPeriodEarnings: 7800,
+          currentPeriodEarnings: 0,
+          previousPeriodEarnings: 0,
           periodLabel: 'This Week',
           previousLabel: 'Last Week'
         };
       case '1m':
         return {
           ...baseData,
-          currentPeriodEarnings: (pilotRecord?.trips || 0) * 450,
-          previousPeriodEarnings: 29800,
+          currentPeriodEarnings: 0,
+          previousPeriodEarnings: 0,
           periodLabel: 'This Month',
           previousLabel: 'Last Month'
         };
       case '3m':
         return {
           ...baseData,
-          currentPeriodEarnings: (pilotRecord?.trips || 0) * 1200,
-          previousPeriodEarnings: 89200,
+          currentPeriodEarnings: 0,
+          previousPeriodEarnings: 0,
           periodLabel: 'Last 3 Months',
           previousLabel: 'Previous 3 Months'
         };
       case '1y':
         return {
           ...baseData,
-          currentPeriodEarnings: (pilotRecord?.trips || 0) * 4800,
-          previousPeriodEarnings: 362000,
+          currentPeriodEarnings: 0,
+          previousPeriodEarnings: 0,
           periodLabel: 'This Year',
           previousLabel: 'Last Year'
         };
@@ -359,7 +357,7 @@ export default function DriverPortal() {
                 </div>
               </div>
               <div className="px-5 py-3 bg-green-500 border-none text-xs md:text-sm font-black text-white uppercase tracking-widest shadow-green-900/40 rounded-2xl">
-                +{(((driverData.currentPeriodEarnings - driverData.previousPeriodEarnings) / driverData.previousPeriodEarnings) * 100).toFixed(1)}% Yield
+                +0.0% Yield
               </div>
             </div>
           </div>

@@ -115,12 +115,12 @@ export default function AdminPortal() {
     const selectedClient = selectedClientId ? clientStats.find(c => (c.id || c.name) === selectedClientId) : null;
 
     if (selectedClient) {
-      // Generate some mock drivers for this client to display
-      const clientDrivers = Array.from({ length: selectedClient.driverCount }).map((_, i) => ({
-        id: `DRV-${selectedClient.id || 'C'}-${1000 + i}`,
-        name: `Driver ${i + 1}`,
-        status: i % 5 === 0 ? 'off-duty' : 'on-duty',
-        rating: (4 + Math.random()).toFixed(1)
+      // Get real drivers for this client
+      const clientDrivers = pilots.filter(p => p.owner_id === selectedClient.id).map(p => ({
+        id: p.id,
+        name: p.name,
+        status: p.status || 'off-duty',
+        rating: p.rating || 5.0
       }));
 
       return (
