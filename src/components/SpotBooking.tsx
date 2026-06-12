@@ -9,6 +9,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import BorderGlow from './BorderGlow';
+import { CustomDateInput, CustomTimeInput } from './ui/DateTimeInputs';
 
 import { useAuth } from '../contexts/AuthContext';
 import { createBooking } from '../services/obdApi';
@@ -180,10 +181,9 @@ export default function SpotBooking() {
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Mission Date</label>
                   <div className="relative group">
-                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
-                    <input
+                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors pointer-events-none z-20" />
+                    <CustomDateInput
                       required
-                      type="date"
                       value={booking.date}
                       onChange={(e) => setBooking(prev => ({ ...prev, date: e.target.value }))}
                       className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none transition-all"
@@ -193,10 +193,9 @@ export default function SpotBooking() {
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Launch Time</label>
                   <div className="relative group">
-                    <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
-                    <input
+                    <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors pointer-events-none z-20" />
+                    <CustomTimeInput
                       required
-                      type="time"
                       value={booking.time}
                       onChange={(e) => setBooking(prev => ({ ...prev, time: e.target.value }))}
                       className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none transition-all"

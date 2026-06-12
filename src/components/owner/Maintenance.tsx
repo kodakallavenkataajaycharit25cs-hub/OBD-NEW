@@ -13,6 +13,7 @@ import {
   Filter
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { formatDate } from '../../utils/dateFormat';
 
 export default function Maintenance() {
   const [selectedView, setSelectedView] = useState<'schedule' | 'jobs' | 'analytics'>('schedule');
@@ -118,7 +119,7 @@ export default function Maintenance() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-300">Due: {new Date(maintenance.dueDate).toLocaleDateString('en-IN')}</span>
+                  <span className="text-gray-300">Due: {formatDate(maintenance.dueDate)}</span>
                   <span className={`ml-2 text-sm ${daysUntilDue <= 3 ? 'text-red-400' : 'text-yellow-400'}`}>
                     ({daysUntilDue} days)
                   </span>
@@ -254,11 +255,11 @@ export default function Maintenance() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-green-400" />
-                    <span className="text-gray-300">Started: {new Date(job.startDate).toLocaleDateString('en-IN')}</span>
+                    <span className="text-gray-300">Started: {formatDate(job.startDate)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4 text-yellow-400" />
-                    <span className="text-gray-300">Due: {new Date(job.estimatedCompletion).toLocaleDateString('en-IN')}</span>
+                    <span className="text-gray-300">Due: {formatDate(job.estimatedCompletion)}</span>
                   </div>
                 </div>
 

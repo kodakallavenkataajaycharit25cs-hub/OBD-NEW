@@ -9,6 +9,70 @@ import { Link, useNavigate } from 'react-router-dom';
 import TiltedCard from './TiltedCard';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { BlurTextAnimation } from '@/components/ui/blur-text-animation';
+import { TestimonialsColumn } from '@/components/ui/testimonials-columns-1';
+import { motion } from 'motion/react';
+
+const testimonialsData = [
+  {
+    text: "Sukrutha isn't software; it's our edge. 35% cost reduction and zero safety incidents since implementation.",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Arjun Patel",
+    role: "CEO, Golden Travels",
+  },
+  {
+    text: "The OBD granularity identified ₹15 lakh in annual fuel wastage. ROI was achieved in just 3 months.",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Priya Sharma",
+    role: "Operations Strategist",
+  },
+  {
+    text: "Predictive maintenance reduced our downtime by 60%. Customer satisfaction is at an all-time high.",
+    image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Vikram Singh",
+    role: "Fleet Director",
+  },
+  {
+    text: "The automated billing and fast invoicing has improved our cash flow significantly. Incredible system.",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Anjali Desai",
+    role: "Finance Head",
+  },
+  {
+    text: "Spot bookings and direct route allocations are incredibly smooth now. We don't miss any opportunities.",
+    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Rahul Verma",
+    role: "Dispatch Manager",
+  },
+  {
+    text: "Live tracking combined with passenger SOS features gives our enterprise clients complete peace of mind.",
+    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Sneha Kapoor",
+    role: "Client Relations",
+  },
+  {
+    text: "Integrating with our existing vehicles was plug-and-play. The insights we get now are simply game-changing.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Karan Malhotra",
+    role: "Technical Lead",
+  },
+  {
+    text: "We've managed to scale our fleet by 40% without adding administrative overhead, thanks to this platform.",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Roshni Iyer",
+    role: "Managing Director",
+  },
+  {
+    text: "Driver behavior monitoring has significantly reduced our insurance premiums and improved overall safety.",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&auto=format&fit=crop&q=80",
+    name: "Amit Joshi",
+    role: "Safety Officer",
+  },
+];
+
+const firstColumn = testimonialsData.slice(0, 3);
+const secondColumn = testimonialsData.slice(3, 6);
+const thirdColumn = testimonialsData.slice(6, 9);
 
 interface LandingPageProps {
   onLoginClick: () => void;
@@ -47,9 +111,13 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
                 TRACK<br />
                 <span className="text-blue-500">ANALYZE</span> OPTIMIZE
               </h1>
-              <p className="text-xl md:text-2xl text-gray-400 max-w-2xl leading-relaxed font-light mb-12">
-                The Indian fleet landscape is brutal. We give you the <span className="text-white font-bold">OBD-powered neural edge</span> to master it. Diagnostics, AI safety, and extreme efficiency.
-              </p>
+              <BlurTextAnimation 
+                text="The Indian fleet landscape is brutal. We give you the OBD-powered neural edge to master it. Diagnostics, AI safety, and extreme efficiency."
+                className="justify-start min-h-0 bg-transparent !items-start text-left mb-12 m-0 p-0"
+                textColor="text-gray-400"
+                fontSize="text-xl md:text-2xl"
+                animationDelay={60000}
+              />
 
               <div className="flex flex-col sm:flex-row gap-8">
                 <Link to="/features" className="clay-btn clay-btn-white flex items-center justify-between min-w-[280px]">
@@ -110,31 +178,32 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Clay Testimonials */}
-      <section className="py-40 bg-zinc-800/30">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-black tracking-wide text-blue-400 mb-20 uppercase font-display">Elite Fleet Leaders</h2>
+      {/* Animated Testimonials */}
+      <section className="bg-transparent my-20 relative z-10">
+        <div className="container z-10 mx-auto px-6 lg:px-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center justify-center max-w-[540px] mx-auto text-center"
+          >
+            <div className="flex justify-center">
+              <div className="border border-blue-500/30 text-blue-400 py-1 px-4 rounded-lg uppercase tracking-widest text-xs font-bold bg-blue-500/10">Proven Results</div>
+            </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 text-left">
-            {[
-              { n: 'Arjun Patel', r: 'CEO, Golden Travels', t: 'Sukrutha isn\'t software; it\'s our edge. 35% cost reduction and zero safety incidents since implementation.' },
-              { n: 'Priya Sharma', r: 'Operations Strategist', t: 'The OBD granularity identified ₹15 lakh in annual fuel wastage. ROI was achieved in just 3 months.' },
-              { n: 'Vikram Singh', r: 'Fleet Director', t: 'Predictive maintenance reduced our downtime by 60%. Customer satisfaction is at an all-time high.' }
-            ].map((tm, i) => (
-              <div key={i} className="clay-card-hover rounded-2xl p-12 group transition-all">
-                <div className="flex space-x-1 mb-10 text-yellow-500">
-                  {[...Array(5)].map((_, k) => <Star key={k} className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />)}
-                </div>
-                <p className="text-xl font-light text-gray-300 leading-relaxed mb-12 flex-grow">"{tm.t}"</p>
-                <div className="flex items-center space-x-5 mt-auto pt-8 border-t border-white/5">
-                  <div className="w-16 h-16 rounded-[1.2rem] bg-blue-600 flex items-center justify-center font-black text-2xl text-white shadow-lg group-hover:rotate-6 transition-transform">{tm.n[0]}</div>
-                  <div className="flex flex-col">
-                    <span className="font-black text-white uppercase tracking-tighter text-lg leading-tight group-hover:text-blue-400 transition-colors">{tm.n}</span>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{tm.r}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter mt-5 uppercase clay-text-3d text-white">
+              ELITE FLEET LEADERS
+            </h2>
+            <p className="text-center mt-5 opacity-75 text-gray-400 font-bold uppercase tracking-widest text-xs">
+              See how top fleets are transforming their operations with our platform.
+            </p>
+          </motion.div>
+
+          <div className="flex justify-center gap-6 mt-10 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
+            <TestimonialsColumn testimonials={firstColumn} duration={15} />
+            <TestimonialsColumn testimonials={secondColumn} className="hidden md:block" duration={19} />
+            <TestimonialsColumn testimonials={thirdColumn} className="hidden lg:block" duration={17} />
           </div>
         </div>
       </section>
@@ -144,10 +213,10 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
       {/* Puffy CTA */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="relative py-20 px-8 md:px-16 overflow-hidden text-center bg-blue-600 border-none rounded-2xl">
+          <div className="relative py-20 px-8 md:px-16 overflow-hidden text-center bg-blue-600 border-[3px] border-white/10 rounded-2xl">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
             
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 relative z-10 uppercase font-display tracking-wide">
+            <h2 className="text-3x2 md:text-5xl font-black text-white mb-4 relative z-10 uppercase font-display tracking-wide">
               READY FOR THE LONG HAUL?
             </h2>
             
@@ -156,7 +225,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
             </p>
             
             <div className="flex justify-center relative z-10">
-              <Link to="/contact" className="px-8 py-3.5 bg-white text-black rounded-xl font-black hover:bg-gray-100 transition-colors uppercase tracking-widest text-xs">
+              <Link to="/contact" className="px-8 py-3.5 bg-white text-black border border-gray-200 rounded-xl font-black hover:bg-gray-100 transition-colors uppercase tracking-widest text-xs">
                 GET IN TOUCH
               </Link>
             </div>

@@ -44,6 +44,7 @@ import BorderGlow from '../BorderGlow';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, updateOwner, updatePilot, fetchAdmins, createAdmin, updateAdmin, deleteAdmin, OBDData } from '../../services/obdApi';
 import { CreateView, UpdateView, RemoveView } from './CrudViews';
+import { formatCurrentDate, formatCurrentTime } from '../../utils/dateFormat';
 
 // Impersonate Modal Component
 const ImpersonateModal = ({ isOpen, onClose, targetUser, onConfirm }: { isOpen: boolean; onClose: () => void; targetUser: any; onConfirm: () => void }) => {
@@ -209,7 +210,7 @@ const TrackingView = ({ telemetry, owners, pilots, devices }: { telemetry: OBDDa
     return {
       id: owner.id,
       name: owner.name,
-      location: 'India', // Default to India, or you could add location to Owner table
+      location: owner.headquarters || 'India', // Use headquarters for live map target
       coords: '20.5937° N, 78.9629° E',
       status: owner.status.toUpperCase(),
       vehicles: ownerDevices.map((dev, idx) => {
@@ -540,7 +541,7 @@ export default function SuperAdminPortal() {
   useEffect(() => {
     if (isBooted) {
       updateMockDB();
-      const interval = setInterval(updateMockDB, 5000); // Sync mock DB every 5 seconds
+      const interval = setInterval(updateMockDB, 15 * 60 * 1000); // Sync mock DB every 15 mins
       return () => clearInterval(interval);
     }
   }, [isBooted]);
@@ -683,7 +684,7 @@ export default function SuperAdminPortal() {
       const actions = ['PING SUCCESSful (45ms)', 'GPS coordinate sync', 'OBD stream packet verified', 'telemetry heartbeat received'];
       const randomHost = randomHosts[Math.floor(Math.random() * randomHosts.length)];
       const randomAction = actions[Math.floor(Math.random() * actions.length)];
-      const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const timestamp = formatCurrentTime();
 
       setLogs((prev) => [
         `[${timestamp}] ${randomHost} -> ${randomAction}`,
@@ -743,7 +744,7 @@ export default function SuperAdminPortal() {
         ? { ...dev, firmware: 'v4.2.1-stable', health: 100 }
         : dev
     ));
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const timestamp = formatCurrentTime();
     setLogs(prev => [
       `[${timestamp}] FIRMWARE PATCH DEPLOYED TO ${id} SUCCESS`,
       ...prev
@@ -2002,10 +2003,10 @@ export default function SuperAdminPortal() {
             <div className="text-right font-sans">
               <div className="text-xl font-black text-blue-400 flex items-center justify-end space-x-2">
                 <Clock className="w-4 h-4 text-blue-500 animate-spin" style={{ animationDuration: '6s' }} />
-                <span>{new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+                <span>{formatCurrentTime()}</span>
               </div>
               <div className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mt-1">
-                {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {formatCurrentDate()}
               </div>
             </div>
           </div>

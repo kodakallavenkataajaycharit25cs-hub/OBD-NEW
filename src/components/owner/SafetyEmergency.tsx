@@ -14,6 +14,7 @@ import {
   Play
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { formatDate, formatTime } from '../../utils/dateFormat';
 
 export default function SafetyEmergency() {
   const [selectedIncident, setSelectedIncident] = useState<string | null>(null);
@@ -296,7 +297,7 @@ export default function SafetyEmergency() {
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Chronological Timestamp</span>
-                <p className="text-white font-bold">{new Date(selectedIncidentData.timestamp).toLocaleString('en-IN')}</p>
+                <p className="text-white font-semibold text-sm mt-1">{formatDate(selectedIncidentData.timestamp)} {formatTime(selectedIncidentData.timestamp)}</p>
               </div>
               <div className="flex space-x-3 pt-2">
                 <button 

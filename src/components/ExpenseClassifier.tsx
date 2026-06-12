@@ -18,6 +18,7 @@ import {
 import { triggerDownload } from '../utils/download';
 import { useAuth } from '../contexts/AuthContext';
 import { recordTransaction } from '../services/obdApi';
+import { formatDate } from '../utils/dateFormat';
 
 declare const cv: any; // OpenCV global
 
@@ -472,7 +473,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Date:</span>
-                    <span className="text-white ml-2">{new Date(expense.date).toLocaleDateString('en-IN')}</span>
+                    <div className="text-xs text-gray-500 uppercase tracking-widest font-black mt-1">{formatDate(expense.date)}</div>
                   </div>
                   <div>
                     <span className="text-gray-400">Invoice:</span>

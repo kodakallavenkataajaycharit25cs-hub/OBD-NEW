@@ -13,7 +13,8 @@ import {
   Activity
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
-import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, OBDData } from '../../services/obdApi';
+import { fetchDiagnostics, fetchRPM, fetchSpeed, fetchEngineTemp, fetchO2Level, OBDData } from '../../services/obdApi';
+import { formatDate } from '../../utils/dateFormat';
 
 export default function VehicleHealth() {
   const [selectedVehicle, setSelectedVehicle] = useState('MH-02-AB-1234');
@@ -288,13 +289,13 @@ export default function VehicleHealth() {
                   <div>
                     <span className="text-gray-400 text-sm">Last Service</span>
                     <p className="text-white font-semibold">
-                      {new Date(selectedVehicleData.lastService).toLocaleDateString('en-IN')}
+                      <span className="text-white ml-2">{formatDate(selectedVehicleData.lastService)}</span>
                     </p>
                   </div>
                   <div>
                     <span className="text-gray-400 text-sm">Next Service Due</span>
                     <p className="text-white font-semibold">
-                      {new Date(selectedVehicleData.nextService).toLocaleDateString('en-IN')}
+                      <span className="text-white ml-2">{formatDate(selectedVehicleData.nextService)}</span>
                     </p>
                   </div>
 

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BorderGlow from './BorderGlow';
+import { CustomDateInput, CustomTimeInput } from './ui/DateTimeInputs';
 
 interface BookingPageProps {
   onLoginClick: () => void;
@@ -195,8 +196,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Mission Date</label>
-                  <input
-                    type="date"
+                  <CustomDateInput
                     value={booking.date}
                     onChange={(e) => setBooking(prev => ({ ...prev, date: e.target.value }))}
                     className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner"
@@ -204,8 +204,7 @@ export default function BookingPage({ onLoginClick }: BookingPageProps) {
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Payload Time</label>
-                  <input
-                    type="time"
+                  <CustomTimeInput
                     value={booking.time}
                     onChange={(e) => setBooking(prev => ({ ...prev, time: e.target.value }))}
                     className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner"

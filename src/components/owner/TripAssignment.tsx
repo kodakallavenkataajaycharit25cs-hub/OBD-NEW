@@ -16,8 +16,11 @@ import {
   Clock,
   ChevronDown
 } from 'lucide-react';
+import { CustomDateInput, CustomTimeInput } from '../ui/DateTimeInputs';
 import BorderGlow from '../BorderGlow';
 import { fetchPilots } from '../../services/obdApi';
+import { useAuth } from '../../contexts/AuthContext';
+import { formatDate, formatTime } from '../../utils/dateFormat';
 
 interface TripAssignment {
   id: string;
@@ -58,6 +61,7 @@ const emptyForm = {
 };
 
 export default function TripAssignment() {
+  const { user } = useAuth();
   const [trips, setTrips] = useState<TripAssignment[]>(initialTrips);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -78,13 +82,15 @@ export default function TripAssignment() {
     const loadPilots = async () => {
       try {
         const data = await fetchPilots();
-        setPilots(data || []);
+        const ownerId = user?.id || 'owner-default';
+        const myPilots = (data || []).filter((p: any) => p.owner_id === ownerId);
+        setPilots(myPilots);
       } catch (err) {
         console.error('Failed to load pilots:', err);
       }
     };
     loadPilots();
-  }, []);
+  }, [user]);
 
   const calculateMockDuration = (origin: string, destination: string) => {
     if (!origin || !destination) return 0;
@@ -101,7 +107,7 @@ export default function TripAssignment() {
       if (isNaN(startDate.getTime())) return '';
       
       startDate.setHours(startDate.getHours() + totalDurationWithBuffer);
-      return startDate.toTimeString().slice(0, 5);
+      return formatTime(startDate);
     }
     return '';
   };
@@ -393,8 +399,7 @@ Drive safe and please confirm receipt of this message!`;
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <label className={labelClass}>Trip Date *</label>
-                      <input
-                        type="date"
+                      <CustomDateInput
                         required
                         value={form.tripDate}
                         onChange={e => setForm({ ...form, tripDate: e.target.value })}
@@ -403,8 +408,7 @@ Drive safe and please confirm receipt of this message!`;
                     </div>
                     <div>
                       <label className={labelClass}>Start Time *</label>
-                      <input
-                        type="time"
+                      <CustomTimeInput
                         required
                         value={form.startTime}
                         onChange={e => setForm({ ...form, startTime: e.target.value })}
@@ -536,7 +540,7 @@ Drive safe and please confirm receipt of this message!`;
                     <Clock className="w-4 h-4 text-gray-400 shrink-0" />
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 block">Created</span>
-                      <span className="text-gray-300 font-medium">{new Date(viewTrip.createdAt).toLocaleString('en-IN')}</span>
+                      <span className="text-gray-300 font-medium">{formatDate(viewTrip.createdAt)} {formatTime(viewTrip.createdAt)}</span>
                     </div>
                   </div>
                 </div>
@@ -659,11 +663,11 @@ Drive safe and please confirm receipt of this message!`;
                 </div>
                 <div>
                   <label className={labelClass}>Trip Date *</label>
-                  <input type="date" required value={form.tripDate} onChange={e => setForm({ ...form, tripDate: e.target.value })} className={inputClass} />
+                  <CustomDateInput required value={form.tripDate} onChange={e => setForm({ ...form, tripDate: e.target.value })} className={inputClass} />
                 </div>
                 <div>
                   <label className={labelClass}>Start Time *</label>
-                  <input type="time" required value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} className={inputClass} />
+                  <CustomTimeInput required value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} className={inputClass} />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

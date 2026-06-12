@@ -1,7 +1,8 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
+import { Zap, Truck, Shield, Route } from 'lucide-react';
 import Navbar from './Navbar';
-import MagicBento from './MagicBento';
+import { Casestudy5 } from '@/components/ui/casestudy-5';
+import { BlurTextAnimation } from '@/components/ui/blur-text-animation';
 import Footer from './Footer';
 
 interface FeaturesPageProps {
@@ -21,7 +22,7 @@ export default function FeaturesPage({ onLoginClick }: FeaturesPageProps) {
 
       <section className="py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-24">
+          <div className="text-center mb-5">
             <div className="inline-flex items-center space-x-3 px-6 py-3 rounded-full bg-blue-500/10 border border-blue-400/20 mb-8 shadow-inner">
               <Zap className="w-4 h-4 text-blue-500" />
               <span className="text-[10px] font-black tracking-[0.3em] text-blue-100 uppercase">Interactive Diagnostics</span>
@@ -29,31 +30,50 @@ export default function FeaturesPage({ onLoginClick }: FeaturesPageProps) {
             <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] clay-text-3d text-white uppercase font-display">
               NEXT-GEN<br />OPERATIONAL EDGE.
             </h1>
-            <p className="mt-8 text-xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
-              Explore the advanced telemetry, machine learning cost optimization, and real-time safety controls designed for modern Indian fleets.
-            </p>
-            <div className="mt-16 relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 max-w-5xl mx-auto">
-              <img 
-                src="/features-hero.jpg" 
-                alt="AI and Telemetry Dashboard" 
-                className="w-full h-[350px] object-cover transform hover:scale-100 transition-transform duration-1000"
+            <div className="flex justify-center mt-8">
+              <BlurTextAnimation 
+                text="Explore the advanced telemetry, machine learning cost optimization, and real-time safety controls designed for modern Indian fleets."
+                className="justify-center text-center max-w-2xl mx-auto"
+                textColor="text-gray-400"
+                fontSize="text-xl"
+                animationDelay={60000}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#120F17] via-transparent to-transparent"></div>
             </div>
           </div>
 
-          <MagicBento
-            textAutoHide={true}
-            enableStars={true}
-            enableSpotlight={true}
-            enableBorderGlow={true}
-            enableTilt={true}
-            enableMagnetism={true}
-            clickEffect={true}
-            spotlightRadius={300}
-            particleCount={15}
-            glowColor="59, 130, 246"
-          />
+          <div className="mt-4">
+            <Casestudy5 
+              featuredCasestudy={{
+                logo: <Truck className="h-8 w-8 text-blue-500" />,
+                company: "Sukrutha Logistics",
+                tags: "SUPPLY CHAIN / AI AUTOMATION",
+                title: "Slashing fuel costs by 15% with AI.",
+                subtitle: "How Sukrutha Logistics transformed their fleet efficiency.",
+                image: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=1200&q=80",
+                link: "#",
+              }}
+              casestudies={[
+                {
+                  logo: <Shield className="h-8 w-8 text-purple-500" />,
+                  company: "Apex Transport",
+                  tags: "SAFETY / TELEMATICS",
+                  title: "Zero critical incidents in 2025.",
+                  subtitle: "A safety-first approach using predictive behavior analytics.",
+                  image: "",
+                  link: "#",
+                },
+                {
+                  logo: <Route className="h-8 w-8 text-green-500" />,
+                  company: "Rapid Freight",
+                  tags: "NEURAL ROUTING / LOGISTICS",
+                  title: "Cutting delivery times by 30%.",
+                  subtitle: "Mastering neural routing for more efficient dispatch operations.",
+                  image: "",
+                  link: "#",
+                },
+              ]}
+            />
+          </div>
         </div>
       </section>
 

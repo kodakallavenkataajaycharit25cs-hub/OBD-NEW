@@ -18,6 +18,7 @@ import {
   Trash2
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
+import { formatDate } from '../../utils/dateFormat';
 import { fetchPilots, updatePilot } from '../../services/obdApi';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -307,7 +308,7 @@ export default function DriverManagement() {
                   <div className="flex justify-between">
                     <span className="text-gray-400">Expires:</span>
                     <span className="text-gray-300">
-                      {new Date(docData.expiry).toLocaleDateString('en-IN')}
+                      <span className="text-white ml-2">{formatDate(docData.expiry)}</span>
                     </span>
                   </div>
                 </div>

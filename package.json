@@ -10,12 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-avatar": "^1.1.12",
+    "@radix-ui/react-label": "^2.1.9",
+    "@radix-ui/react-separator": "^1.1.9",
+    "@radix-ui/react-slot": "^1.2.5",
     "@supabase/supabase-js": "^2.107.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^12.40.0",
     "gsap": "^3.15.0",
     "lucide-react": "^0.344.0",
-    "motion": "^12.38.0",
+    "motion": "^12.40.0",
     "react": "^18.3.1",
+    "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.8.1",
     "tailwind-merge": "^3.6.0"

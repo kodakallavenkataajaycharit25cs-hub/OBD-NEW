@@ -9,7 +9,7 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
   const [selectedFleetId, setSelectedFleetId] = useState<string | null>(null);
 
   // Form states
-  const [ownerForm, setOwnerForm] = useState({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0 });
+  const [ownerForm, setOwnerForm] = useState({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0, headquarters: '' });
   const [pilotForm, setPilotForm] = useState({ id: '', name: '', email: '', contact: '', password: '', owner_id: '', vehicleNumber: '', vehicleModel: '' });
 
   const handleCreateOwner = async (e: React.FormEvent) => {
@@ -52,7 +52,7 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
 
     await createOwner({ ...ownerForm, revenue: 0, score: 10, status: 'active' });
     setMessage('Client created successfully!');
-    setOwnerForm({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0 });
+    setOwnerForm({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0, headquarters: '' });
     onRefresh();
     setLoading(false);
   };
@@ -206,6 +206,10 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
             <div>
               <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Company Name</label>
               <input required value={ownerForm.name} onChange={e => setOwnerForm({...ownerForm, name: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="e.g. Delta Logistics" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Headquarters Location</label>
+              <input required value={ownerForm.headquarters} onChange={e => setOwnerForm({...ownerForm, headquarters: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="e.g. Mumbai, India" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -508,6 +512,10 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                     </div>
                   </div>
                   <div>
+                    <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Headquarters Location</label>
+                    <input type="text" value={editForm.headquarters || ''} onChange={e => setEditForm({...editForm, headquarters: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" placeholder="e.g. Mumbai, India" />
+                  </div>
+                  <div>
                     <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Fleet Size</label>
                     <input type="number" value={editForm.fleetSize || editForm.fleet_size} onChange={e => setEditForm({...editForm, fleetSize: parseInt(e.target.value)})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
                   </div>
@@ -522,6 +530,7 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                     <h4 className="text-sm font-black text-white uppercase tracking-wider">{item.name}</h4>
                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">ID: {item.id}</p>
                     <div className="mt-2 space-y-0.5">
+                      {item.headquarters && <p className="text-xs text-gray-400">📍 {item.headquarters}</p>}
                       {item.contact && <p className="text-xs text-gray-400">📞 {item.contact}</p>}
                       {item.email && <p className="text-xs text-gray-400">✉ {item.email}</p>}
                       <p className="text-xs text-blue-400">Fleet: {item.fleetSize || item.fleet_size}</p>

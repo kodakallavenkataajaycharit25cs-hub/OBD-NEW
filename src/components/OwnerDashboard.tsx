@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchBookings, dismissBooking } from '../services/obdApi';
+import { formatTime } from '../utils/dateFormat';
 import ExpenseClassifier from './ExpenseClassifier';
 
 import FleetOverview from './owner/FleetOverview';
@@ -215,7 +216,7 @@ export default function OwnerDashboard() {
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-[10px] font-black uppercase text-blue-400 bg-blue-500/10 px-2 py-1 rounded">Spot Booking</span>
                             <div className="flex items-center space-x-3">
-                              <span className="text-[10px] text-gray-500">{new Date(b.createdAt).toLocaleTimeString()}</span>
+                              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{formatTime(b.createdAt)}</span>
                               <input 
                                 type="checkbox" 
                                 onChange={() => handleDismissBooking(b.id)}

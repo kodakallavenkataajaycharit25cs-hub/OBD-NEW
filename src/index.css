@@ -415,8 +415,9 @@
 .light-mode .clay-card-hover,
 .light-mode .glass-panel,
 .light-mode [class*="bg-white/[0.02]"],
-.light-mode [class*="bg-blue-600/10"] {
-  border: 1px solid #B8BCC2 !important;
+.light-mode [class*="bg-blue-600/10"],
+.light-mode .login-modal-wrapper {
+  border: 1.35px solid #CCCBCA !important;
 }
 
 .light-mode .clay-card-hover:hover,

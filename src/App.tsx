@@ -11,6 +11,7 @@ import SuperAdminPortal from './components/admin/SuperAdminPortal';
 import AdminPortal from './components/admin/AdminPortal';
 import LoginModal from './components/LoginModal';
 import ResetPasswordPage from './components/ResetPasswordPage';
+import { NotFoundPage } from './components/ui/404-page-not-found';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 function ScrollToTop() {
@@ -70,7 +71,7 @@ function AppContent() {
               user?.role === 'admin' ? <AdminPortal /> : <Navigate to="/" replace />
             } 
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
         {showLogin && (

@@ -19,6 +19,7 @@ import BorderGlow from '../BorderGlow';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { fetchOwners, fetchPilots, fetchDevices, createOwner, createPilot, updateOwner, updatePilot, deleteOwner, deletePilot } from '../../services/obdApi';
 import { CreateView, UpdateView, RemoveView } from './CrudViews';
+import { formatCurrentDate, formatCurrentTime } from '../../utils/dateFormat';
 
 export default function AdminPortal() {
   const { user, logout } = useAuth();
@@ -57,7 +58,7 @@ export default function AdminPortal() {
   useEffect(() => {
     if (isBooted) {
       updateMockDB();
-      const interval = setInterval(updateMockDB, 5000); 
+      const interval = setInterval(updateMockDB, 15 * 60 * 1000); // Sync mock DB every 15 mins
       return () => clearInterval(interval);
     }
   }, [isBooted]);
@@ -119,7 +120,7 @@ export default function AdminPortal() {
       const clientDrivers = pilots.filter(p => p.owner_id === selectedClient.id).map(p => ({
         id: p.id,
         name: p.name,
-        status: p.status || 'off-duty',
+        status: p.availability || p.status || 'off-duty',
         rating: p.rating || 5.0
       }));
 
@@ -350,10 +351,10 @@ export default function AdminPortal() {
             <div className="text-right font-sans">
               <div className="text-xl font-black text-blue-400 flex items-center justify-end space-x-2">
                 <Clock className="w-4 h-4 text-blue-500 animate-spin" style={{ animationDuration: '6s' }} />
-                <span>{new Date().toLocaleTimeString('en-US', { hour12: false })}</span>
+                <span>{formatCurrentTime()}</span>
               </div>
               <div className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mt-1">
-                {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {formatCurrentDate()}
               </div>
             </div>
           </div>

@@ -16,6 +16,7 @@ import { triggerDownload } from '../../utils/download';
 import { useAuth } from '../../contexts/AuthContext';
 import { recordTransaction } from '../../services/obdApi';
 import BorderGlow from '../BorderGlow';
+import { formatDate, formatCurrentDate, formatCurrentTime } from '../../utils/dateFormat';
 
 export default function BillingFinance() {
   const { user } = useAuth();
@@ -114,7 +115,7 @@ export default function BillingFinance() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div>
                   <span className="text-gray-400 text-sm">Invoice Date</span>
-                  <p className="text-white font-medium">{new Date(invoice.date).toLocaleDateString('en-IN')}</p>
+                  <div className="text-white mt-1">{formatDate(invoice.date)}</div>
                 </div>
                 <div>
                   <span className="text-gray-400 text-sm">Due Date</span>
@@ -317,7 +318,7 @@ export default function BillingFinance() {
           <button 
             onClick={() => {
               const headers = 'Driver Name,Vehicle,Basic Salary,Incentives,Fuel Bonus,Deductions,Gross Pay,Net Pay,Status,Pay Date\n';
-              const rows = driverPayroll.map(p => `${p.driverName},${p.vehicle},${p.basicSalary},${p.incentives},${p.fuelBonus},${p.deductions},${p.grossPay},${p.netPay},${p.status},${p.payDate}`).join('\n');
+              const rows = payroll.map(p => `${p.driverName},${p.vehicle},${p.basicSalary},${p.incentives},${p.fuelBonus},${p.deductions},${p.grossPay},${p.netPay},${p.status},${p.payDate}`).join('\n');
               triggerDownload('payroll_export.csv', headers + rows, 'text/csv');
             }}
             className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors"
@@ -362,7 +363,7 @@ export default function BillingFinance() {
                   </span>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-green-400">{formatIndianCurrency(payrollItem.netPay)}</div>
-                    <div className="text-[10px] uppercase font-black tracking-widest text-gray-500">Net Pay</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black mt-2">Generated on: {formatCurrentDate()} {formatCurrentTime()}</div>
                   </div>
                 </div>
               </div>
@@ -387,9 +388,7 @@ export default function BillingFinance() {
                   </div>
                   <div className="text-center border-l border-white/20 pl-4">
                     <span className="text-gray-400">Pay Date</span>
-                    <p className="text-white font-semibold">
-                      {new Date(payrollItem.payDate).toLocaleDateString('en-IN')}
-                    </p>
+                    <span className="text-xs text-gray-500 font-medium uppercase tracking-widest block mb-1">{formatDate(payrollItem.payDate)}</span>
                   </div>
                 </div>
               </div>

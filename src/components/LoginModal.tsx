@@ -97,7 +97,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
       {/* Horizontal Mini-Page Modal */}
-      <div className="relative w-full max-w-5xl bg-[#120F17]/60 border-white/10 shadow-3xl overflow-hidden flex flex-col md:flex-row min-h-[550px] animate-in zoom-in-95 duration-300 rounded-2xl">
+      <div className="login-modal-wrapper border relative w-full max-w-5xl bg-[#120F17]/60 border-white/10 shadow-3xl overflow-hidden flex flex-col md:flex-row min-h-[550px] animate-in zoom-in-95 duration-300 rounded-2xl">
         
         {/* Graph Pattern Overlay */}
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none" 

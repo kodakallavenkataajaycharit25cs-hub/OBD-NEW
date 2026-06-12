@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { formatTime } from '../utils/dateFormat';
 import {
   Mic,
   MicOff,
@@ -176,7 +177,7 @@ export default function AIVoiceAssistant({ onHighlightSection }: AIVoiceAssistan
             >
               <p className={message.type === 'assistant' ? 'italic' : ''}>{message.content}</p>
               <div className="flex items-center justify-between mt-3 opacity-30 text-[8px] uppercase tracking-widest font-black">
-                <span>{message.timestamp.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="text-[10px] text-gray-500 font-black tracking-widest">{formatTime(message.timestamp)}</span>
                 {message.type === 'assistant' && (
                   <button className="hover:text-blue-400 transition-colors">
                     <Volume2 className="w-3 h-3" />

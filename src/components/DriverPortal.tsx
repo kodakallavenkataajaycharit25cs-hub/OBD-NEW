@@ -38,6 +38,7 @@ import {
   fetchO2Level,
   OBDData 
 } from '../services/obdApi';
+import { formatDate } from '../utils/dateFormat';
 
 export default function DriverPortal() {
   const { user, logout, loginAs } = useAuth();
@@ -398,7 +399,7 @@ export default function DriverPortal() {
               </div>
               <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-6">
                 <span>Expiry Registry</span>
-                <span className="text-white">{new Date(doc.expiry).toLocaleDateString('en-IN')}</span>
+                <span className="text-white">{formatDate(doc.expiry)}</span>
               </div>
               <button 
                 onClick={() => alert(`Opening file dialog to upload revision for ${doc.name}`)}
@@ -439,7 +440,7 @@ export default function DriverPortal() {
                 <div>
                   <h3 className="text-lg font-black text-white tracking tight uppercase group-hover:text-blue-400 transition-colors">Mission Vector: {trip.id}</h3>
                   <div className="flex items-center space-x-4 text-[10px] font-black uppercase tracking-widest text-gray-600 mt-2">
-                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1 text-blue-500/50" /> {new Date(trip.start_time).toLocaleDateString()}</span>
+                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1 text-blue-500/50" /> {formatDate(trip.start_time)}</span>
                     <span className="flex items-center"><TrendingUp className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.distance} km</span>
                     <span className="flex items-center"><Activity className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.status}</span>
                   </div>

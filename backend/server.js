@@ -207,7 +207,8 @@ app.get('/api/owners', async (req, res) => {
         res.json(rows.map(r => ({
             id: r.id, name: r.name, email: r.email, contact: r.contact,
             fleetSize: r.fleet_size, activeVehicles: r.active_vehicles,
-            revenue: Number(r.revenue), score: Number(r.score), status: r.status
+            revenue: Number(r.revenue), score: Number(r.score), status: r.status,
+            headquarters: r.headquarters
         })));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -219,7 +220,8 @@ app.get('/api/pilots', async (req, res) => {
             id: r.id, name: r.name, email: r.email, contact: r.contact,
             owner_id: r.owner_id, trips: r.trips, hours: r.hours,
             safetyScore: Number(r.safety_score), status: r.status,
-            availability: r.availability, rating: Number(r.rating)
+            availability: r.availability, rating: Number(r.rating),
+            vehicle_number: r.vehicle_number, vehicle_model: r.vehicle_model
         })));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -256,7 +258,7 @@ app.post('/api/trips', async (req, res) => {
 
 app.post('/api/owners', async (req, res) => {
     try {
-        const { id, name, email, contact, fleetSize, activeVehicles, revenue, score, status, password } = req.body;
+        const { id, name, email, contact, fleetSize, activeVehicles, revenue, score, status, password, headquarters } = req.body;
         
         if (email && password) {
             const { data, error } = await supabaseAdmin.auth.admin.createUser({
@@ -268,7 +270,7 @@ app.post('/api/owners', async (req, res) => {
             if (error) console.error('[Supabase Auth Error]:', error.message);
         }
 
-        await sql`INSERT INTO owners (id, name, email, contact, fleet_size, active_vehicles, revenue, score, status) VALUES (${id}, ${name}, ${email || ''}, ${contact || ''}, ${fleetSize || 0}, ${activeVehicles || 0}, ${revenue || 0}, ${score || 10.0}, ${status || 'active'})`;
+        await sql`INSERT INTO owners (id, name, email, contact, fleet_size, active_vehicles, revenue, score, status, headquarters) VALUES (${id}, ${name}, ${email || null}, ${contact || null}, ${fleetSize || 0}, ${activeVehicles || 0}, ${revenue || 0}, ${score || 10.0}, ${status || 'active'}, ${headquarters || 'India'})`;
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -278,7 +280,7 @@ app.post('/api/owners', async (req, res) => {
 
 app.put('/api/owners/:id', async (req, res) => {
     try {
-        const { name, email, contact, fleetSize, activeVehicles, status, password } = req.body;
+        const { name = null, email = null, contact = null, fleetSize = null, activeVehicles = null, status = null, password = null, headquarters = null } = req.body;
         
         if (email && password) {
             const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
@@ -288,7 +290,7 @@ app.put('/api/owners/:id', async (req, res) => {
             }
         }
 
-        await sql`UPDATE owners SET name = COALESCE(${name}, name), email = COALESCE(${email}, email), contact = COALESCE(${contact}, contact), fleet_size = COALESCE(${fleetSize}, fleet_size), active_vehicles = COALESCE(${activeVehicles}, active_vehicles), status = COALESCE(${status}, status) WHERE id = ${req.params.id}`;
+        await sql`UPDATE owners SET name = COALESCE(${name}, name), email = COALESCE(${email}, email), contact = COALESCE(${contact}, contact), fleet_size = COALESCE(${fleetSize}, fleet_size), active_vehicles = COALESCE(${activeVehicles}, active_vehicles), status = COALESCE(${status}, status), headquarters = COALESCE(${headquarters}, headquarters) WHERE id = ${req.params.id}`;
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -315,14 +317,14 @@ app.post('/api/pilots', async (req, res) => {
             if (error) console.error('[Supabase Auth Error]:', error.message);
         }
 
-        await sql`INSERT INTO pilots (id, name, email, contact, owner_id, trips, hours, safety_score, status, availability, rating, vehicle_number, vehicle_model) VALUES (${id}, ${name}, ${email || ''}, ${contact || ''}, ${owner_id || null}, ${trips || 0}, ${hours || 0}, ${safetyScore || 10.0}, ${status || 'active'}, ${availability || 'off-duty'}, ${rating || 5.0}, ${vehicleNumber || null}, ${vehicleModel || null})`;
+        await sql`INSERT INTO pilots (id, name, email, contact, owner_id, trips, hours, safety_score, status, availability, rating, vehicle_number, vehicle_model) VALUES (${id}, ${name}, ${email || null}, ${contact || null}, ${owner_id || null}, ${trips || 0}, ${hours || 0}, ${safetyScore || 10.0}, ${status || 'active'}, ${availability || 'off-duty'}, ${rating || 5.0}, ${vehicleNumber || null}, ${vehicleModel || null})`;
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.put('/api/pilots/:id', async (req, res) => {
     try {
-        const { name, email, contact, owner_id, status, availability, password, vehicleNumber, vehicleModel } = req.body;
+        const { name = null, email = null, contact = null, owner_id = null, status = null, availability = null, password = null, vehicleNumber = null, vehicleModel = null } = req.body;
         
         if (email && password) {
             const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
@@ -413,7 +415,7 @@ app.post('/api/admins', async (req, res) => {
 
 app.put('/api/admins/:id', async (req, res) => {
     try {
-        const { name, email, contact, status, role, password } = req.body;
+        const { name = null, email = null, contact = null, status = null, role = null, password = null } = req.body;
 
         // Update password in Supabase Auth if provided
         if (email && password) {
