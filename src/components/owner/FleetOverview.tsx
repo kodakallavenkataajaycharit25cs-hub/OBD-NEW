@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   TrendingUp,
   Truck,
@@ -126,10 +127,11 @@ export default function FleetOverview() {
   const topRoutes: any[] = [];
 
   const topDrivers = fleetPilots.slice(0, 3).map((p, i) => ({
+    id: p.id,
     name: p.name,
     score: p.safetyScore ?? p.safety_score ?? '—',
     trips: p.trips ?? 0,
-    earnings: null // earnings not tracked yet
+    earnings: null
   }));
 
   const recentAlerts = fleetAlerts.slice(0, 3).map(a => ({
@@ -215,7 +217,11 @@ export default function FleetOverview() {
           </div>
           <div className="space-y-4">
             {topDrivers.map((driver, index) => (
-              <div key={index} className="p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group rounded-2xl">
+              <Link 
+                to={`/owner/drivers?driverId=${driver.id}`}
+                key={index} 
+                className="block p-5 bg-black/20 border-white/5 shadow-inner hover:bg-white/5 transition-all group rounded-2xl cursor-pointer"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 rounded-xl bg-zinc-800 border-none flex items-center justify-center text-white font-black text-xs shadow-lg">
@@ -233,7 +239,7 @@ export default function FleetOverview() {
                     {driver.earnings !== null ? formatIndianCurrency(driver.earnings) : '—'}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </BorderGlow>

@@ -356,3 +356,190 @@ export const deleteAdmin = async (id: string) => {
   }
 };
 
+export interface ClassifiedExpense {
+  id: string;
+  fileName: string;
+  category: 'fuel' | 'maintenance' | 'tolls' | 'parking' | 'other';
+  amount: number;
+  date: string;
+  vendor: string;
+  address?: string;
+  invoiceNumber?: string;
+  confidence: number;
+  status: 'processing' | 'classified' | 'verified';
+  ocrText?: string;
+  imageUrl?: string;
+}
+
+export const fetchExpenses = async (): Promise<ClassifiedExpense[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses`);
+    if (!response.ok) throw new Error('Failed to fetch expenses');
+    const data = await response.json();
+    return data.map((row: any) => ({
+      id: row.id,
+      fileName: row.file_name,
+      category: row.category,
+      amount: Number(row.amount),
+      date: row.date,
+      vendor: row.vendor,
+      address: row.address,
+      invoiceNumber: row.invoice_number,
+      confidence: Number(row.confidence),
+      status: row.status,
+      ocrText: row.ocr_text,
+      imageUrl: row.image_url
+    }));
+  } catch (error) {
+    console.error('Error fetching expenses:', error);
+    return [];
+  }
+};
+
+export const createExpense = async (expenseData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: expenseData.id,
+        file_name: expenseData.fileName,
+        category: expenseData.category,
+        amount: expenseData.amount,
+        date: expenseData.date,
+        vendor: expenseData.vendor,
+        address: expenseData.address,
+        invoice_number: expenseData.invoiceNumber,
+        confidence: expenseData.confidence,
+        status: expenseData.status,
+        ocr_text: expenseData.ocrText,
+        image_url: expenseData.imageUrl
+      })
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating expense:', error);
+    return { success: false };
+  }
+};
+
+export const verifyExpense = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses/${id}/verify`, {
+      method: 'PUT'
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error verifying expense:', error);
+    return { success: false };
+  }
+};
+
+export interface PricingModel {
+  id: string;
+  name: string;
+  people_count: number;
+  total_amount: number;
+  custom_option?: string;
+  created_at?: string;
+}
+
+export const fetchPricingModels = async (): Promise<PricingModel[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pricing-models`);
+    if (!response.ok) throw new Error('Failed to fetch pricing models');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching pricing models:', error);
+    return [];
+  }
+};
+
+export const createPricingModel = async (data: PricingModel) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pricing-models`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating pricing model:', error);
+    return { success: false };
+  }
+};
+
+export const updatePricingModel = async (id: string, data: Partial<PricingModel>) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pricing-models/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error updating pricing model:', error);
+    return { success: false };
+  }
+};
+
+export const deletePricingModel = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pricing-models/${id}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error deleting pricing model:', error);
+    return { success: false };
+  }
+};
+
+export interface PilotDocument {
+  id: string;
+  pilot_email: string;
+  name: string;
+  file_name: string;
+  file_url: string;
+  expiry: string;
+  status?: string;
+  created_at?: string;
+}
+
+export const fetchPilotDocuments = async (email: string): Promise<PilotDocument[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilot-documents?email=${encodeURIComponent(email)}`);
+    if (!response.ok) throw new Error('Failed to fetch pilot documents');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching pilot documents:', error);
+    return [];
+  }
+};
+
+export const createPilotDocument = async (data: PilotDocument) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilot-documents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error creating pilot document:', error);
+    return { success: false };
+  }
+};
+
+export const deletePilotDocument = async (id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/pilot-documents/${id}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error deleting pilot document:', error);
+    return { success: false };
+  }
+};
+

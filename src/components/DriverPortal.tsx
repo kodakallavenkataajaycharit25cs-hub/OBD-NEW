@@ -18,7 +18,10 @@ import {
   Zap,
   Thermometer,
   Gauge,
-  ShieldAlert
+  ShieldAlert,
+  Plus,
+  Trash2,
+  X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import ExpenseClassifier from './ExpenseClassifier';
@@ -36,7 +39,11 @@ import {
   createAlert, 
   fetchEngineTemp, 
   fetchO2Level,
-  OBDData 
+  fetchPilotDocuments,
+  createPilotDocument,
+  deletePilotDocument,
+  OBDData,
+  PilotDocument 
 } from '../services/obdApi';
 import { formatDate } from '../utils/dateFormat';
 
@@ -52,6 +59,16 @@ export default function DriverPortal() {
   const [trips, setTrips] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sosLoading, setSosLoading] = useState(false);
+
+  // Pilot documents states
+  const [pilotDocuments, setPilotDocuments] = useState<PilotDocument[]>([]);
+  const [showDocUploadModal, setShowDocUploadModal] = useState(false);
+  const [newDocName, setNewDocName] = useState("Driver's License");
+  const [customDocName, setCustomDocName] = useState("");
+  const [docExpiry, setDocExpiry] = useState("");
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docBase64, setDocBase64] = useState("");
+  const [viewingDocUrl, setViewingDocUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const updateTelemetry = async () => {
@@ -93,6 +110,11 @@ export default function DriverPortal() {
           const myTrips = tripsData.filter((t: any) => t.pilot_id === record.id);
           setTrips(myTrips);
         }
+
+        if (user?.email) {
+          const docs = await fetchPilotDocuments(user.email);
+          setPilotDocuments(docs);
+        }
         
         setLoading(false);
       } catch (error) {
@@ -131,6 +153,70 @@ export default function DriverPortal() {
       alert('SOS Alert broadcast! Emergency team has been notified.');
     } finally {
       setSosLoading(false);
+    }
+  };
+
+  const handleDocUploadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.email) return;
+    const finalDocName = newDocName === 'Other' ? customDocName : newDocName;
+    if (!finalDocName.trim()) {
+      alert("Please enter a document name.");
+      return;
+    }
+    if (!docBase64) {
+      alert("Please choose a file to upload.");
+      return;
+    }
+    if (!docExpiry) {
+      alert("Please select an expiry date.");
+      return;
+    }
+
+    try {
+      const newDoc: PilotDocument = {
+        id: `DOC-${Date.now()}`,
+        pilot_email: user.email,
+        name: finalDocName,
+        file_name: docFile?.name || 'document.pdf',
+        file_url: docBase64,
+        expiry: docExpiry,
+        status: new Date(docExpiry) < new Date() ? 'expired' : 'valid'
+      };
+
+      const result = await createPilotDocument(newDoc);
+      setPilotDocuments(prev => [result, ...prev]);
+      setShowDocUploadModal(false);
+      setDocFile(null);
+      setDocBase64('');
+      setCustomDocName('');
+      setDocExpiry('');
+      alert("Document uploaded successfully!");
+    } catch (error) {
+      console.error("Failed to upload document:", error);
+      alert("Failed to upload document.");
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDocFile(file);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setDocBase64(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteDoc = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this document?")) return;
+    try {
+      await deletePilotDocument(id);
+      setPilotDocuments(prev => prev.filter(d => d.id !== id));
+    } catch (error) {
+      console.error("Failed to delete document:", error);
+      alert("Failed to delete document.");
     }
   };
 
@@ -368,7 +454,7 @@ export default function DriverPortal() {
   );
 
   const DocumentsSection = () => (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       <BorderGlow
         borderRadius={28}
         backgroundColor="#120F17"
@@ -376,42 +462,206 @@ export default function DriverPortal() {
         glowIntensity={1}
         className="p-8 border-white/5 h-full"
       >
-        <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Document Archives</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {driverData.documents?.map((doc: any, index: number) => (
-            <BorderGlow
-              key={index}
-              borderRadius={28}
-              glowRadius={40}
-              glowIntensity={1}
-              backgroundColor="#120F17"
-              className="p-6 border-white/5 shadow-inner h-full"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-black text-white uppercase tracking-tight">{doc.name}</h3>
-                <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${doc.status === 'valid' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                  doc.status === 'expiring' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
-                    'bg-red-500/10 text-red-400 border border-red-500/20'
-                  }`}>
-                  {doc.status}
-                </div>
-              </div>
-              <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-6">
-                <span>Expiry Registry</span>
-                <span className="text-white">{formatDate(doc.expiry)}</span>
-              </div>
-              <button 
-                onClick={() => alert(`Opening file dialog to upload revision for ${doc.name}`)}
-                className="w-full clay-btn clay-btn-blue h-12 flex items-center justify-center space-x-3 text-[10px]"
-              >
-                <Upload className="w-4 h-4" />
-                <span>UPLOAD REVISION</span>
-              </button>
-            </BorderGlow>
-          ))}
+        <div className="flex items-center justify-between mb-10">
+          <h2 className="text-2xl font-black text-white tracking-tighter uppercase clay-text-3d">Document Archives</h2>
+          <button
+            onClick={() => {
+              setNewDocName("Driver's License");
+              setCustomDocName("");
+              setDocExpiry("");
+              setDocFile(null);
+              setDocBase64("");
+              setShowDocUploadModal(true);
+            }}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors text-white text-xs font-bold uppercase tracking-wider h-11"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Upload Document</span>
+          </button>
         </div>
+
+        {pilotDocuments.length === 0 ? (
+          <div className="text-center py-16 bg-white/5 border border-white/10 rounded-3xl">
+            <FileText className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-400 text-sm">No compliance documents uploaded yet.</p>
+            <p className="text-gray-500 text-xs mt-1">Upload your Driver's License, Aadhar Card, or other documents to archive them.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {pilotDocuments.map((doc) => (
+              <BorderGlow
+                key={doc.id}
+                borderRadius={28}
+                glowRadius={40}
+                glowIntensity={1}
+                backgroundColor="#120F17"
+                className="p-6 border-white/5 shadow-inner h-full flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-black text-white uppercase tracking-tight">{doc.name}</h3>
+                    <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                      doc.status === 'valid' 
+                        ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
+                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                      {doc.status}
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-gray-400 mb-4 bg-black/30 p-3 rounded-xl border border-white/5 font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+                    <span className="text-gray-500 text-[10px] block uppercase tracking-wider font-bold mb-1">File Name</span>
+                    {doc.file_name}
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-6">
+                    <span>Expiry Registry</span>
+                    <span className="text-white">{formatDate(doc.expiry)}</span>
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 mt-4">
+                  <button 
+                    onClick={() => setViewingDocUrl(doc.file_url)}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase tracking-wider h-11 rounded-xl transition-all flex items-center justify-center space-x-2"
+                  >
+                    <span>View Document</span>
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteDoc(doc.id)}
+                    className="w-11 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-xl transition-all flex items-center justify-center border border-red-500/20"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </BorderGlow>
+            ))}
+          </div>
+        )}
       </BorderGlow>
+
+      {/* Upload Modal */}
+      {showDocUploadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="relative bg-[#120F17] border border-white/10 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden p-6 animate-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black tracking-tight text-white uppercase">Upload Document</h3>
+              <button
+                onClick={() => setShowDocUploadModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleDocUploadSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Document Type</label>
+                <select
+                  value={newDocName}
+                  onChange={(e) => setNewDocName(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none focus:border-blue-500 text-sm"
+                >
+                  <option value="Driver's License">Driver's License</option>
+                  <option value="Aadhar Card">Aadhar Card</option>
+                  <option value="Medical Certificate">Medical Certificate</option>
+                  <option value="Vehicle Insurance">Vehicle Insurance</option>
+                  <option value="Other">Other (Specify below)</option>
+                </select>
+              </div>
+
+              {newDocName === 'Other' && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Custom Document Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={customDocName}
+                    onChange={(e) => setCustomDocName(e.target.value)}
+                    placeholder="e.g. Pancard"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none focus:border-blue-500 text-sm"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Expiry Date</label>
+                <input
+                  type="date"
+                  required
+                  value={docExpiry}
+                  onChange={(e) => setDocExpiry(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none focus:border-blue-500 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Select Document (PDF/Image)</label>
+                <input
+                  type="file"
+                  required
+                  accept=".pdf,image/*"
+                  onChange={handleFileChange}
+                  className="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                />
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDocUploadModal(false)}
+                  className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2.5 rounded-xl transition-colors font-medium text-xs uppercase"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl transition-colors font-medium text-xs uppercase"
+                >
+                  Upload
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Doc Preview Modal */}
+      {viewingDocUrl && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          onClick={() => setViewingDocUrl(null)}
+        >
+          <div 
+            className="relative bg-[#120F17] border border-white/10 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <h3 className="font-black text-white uppercase tracking-tight text-sm">Document Preview</h3>
+              <button
+                onClick={() => setViewingDocUrl(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6 flex items-center justify-center min-h-[60vh]">
+              {viewingDocUrl.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={viewingDocUrl}
+                  className="w-full h-full min-h-[65vh] rounded-2xl bg-white"
+                  title="Doc Preview"
+                />
+              ) : (
+                <img
+                  src={viewingDocUrl}
+                  alt="Doc Preview"
+                  className="max-w-full max-h-[70vh] object-contain rounded-2xl border border-white/10 shadow-lg"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 

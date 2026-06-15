@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { triggerDownload } from '../utils/download';
 import { useAuth } from '../contexts/AuthContext';
-import { recordTransaction } from '../services/obdApi';
+import { recordTransaction, fetchExpenses, createExpense, verifyExpense } from '../services/obdApi';
 import { formatDate } from '../utils/dateFormat';
 
 declare const cv: any; // OpenCV global
@@ -92,9 +92,62 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [viewExpense, setViewExpense] = useState<ClassifiedExpense | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('GEMINI_API_KEY') || '');
+  const [apiKey, setApiKey] = useState(localStorage.getItem('OPENROUTER_API_KEY') || localStorage.getItem('GEMINI_API_KEY') || '');
   const [showKeyInput, setShowKeyInput] = useState(!apiKey);
   const [classifiedExpenses, setClassifiedExpenses] = useState<ClassifiedExpense[]>([]);
+
+  React.useEffect(() => {
+    const loadExpenses = async () => {
+      const data = await fetchExpenses();
+      setClassifiedExpenses(data);
+    };
+    loadExpenses();
+  }, []);
+
+  const loadPdfJs = async (): Promise<any> => {
+    if ((window as any).pdfjsLib) return (window as any).pdfjsLib;
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      script.onload = () => {
+        const pdfjsLib = (window as any).pdfjsLib;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve(pdfjsLib);
+      };
+      script.onerror = (e) => reject(new Error('Failed to load PDF.js: ' + e));
+      document.head.appendChild(script);
+    });
+  };
+
+  const convertPdfToImage = async (pdfBase64Url: string): Promise<string> => {
+    const pdfjsLib = await loadPdfJs();
+    const base64Data = pdfBase64Url.split(',')[1];
+    const binaryString = atob(base64Data);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    const loadingTask = pdfjsLib.getDocument({ data: bytes });
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(1);
+    
+    const viewport = page.getViewport({ scale: 1.5 });
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+    
+    if (context) {
+      await page.render({
+        canvasContext: context,
+        viewport: viewport
+      }).promise;
+      return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    }
+    throw new Error('Canvas 2D context not available');
+  };
 
   const processImageWithOpenCV = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -130,82 +183,83 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
     });
   };
 
-  const extractWithGemini = async (base64Image: string) => {
+  const extractWithOpenRouter = async (base64Image: string, mimeType: string = 'image/jpeg') => {
     if (!apiKey) throw new Error('API Key missing');
 
-    // Validate key format - Gemini API keys always start with AIzaSy
-    if (!apiKey.startsWith('AIza')) {
-      throw new Error('INVALID_KEY: Your API key appears to be invalid. Gemini API keys always start with "AIzaSy". Please get a fresh key from aistudio.google.com');
-    }
+    const prompt = `You are a professional receipt OCR extractor.
+Extract the receipt/invoice data. Return ONLY a valid JSON object matching this schema:
+{
+  "amount": number,
+  "date": "YYYY-MM-DD",
+  "address": "string",
+  "vendor": "string",
+  "invoice": "string",
+  "category": "fuel" | "maintenance" | "tolls" | "parking" | "other"
+}
+Do not include any Markdown tags, comments or other text. Return ONLY the JSON object.`;
 
-    const prompt = `Extract receipt data in JSON format: { "amount": number, "date": "YYYY-MM-DD", "vendor": "string", "invoice": "string", "category": "fuel|maintenance|tolls|parking|other" }. Return ONLY JSON. If multiple amounts, pick the TOTAL.`;
+    const models = [
+      "nvidia/nemotron-nano-12b-2-vl",
+      "google/gemma-3-27b-it",
+      "google/gemma-4-31b-instruct",
+      "qwen/qwen-2.5-vl-7b-instruct"
+    ];
 
-    // Try models in order — stop on rate limit (429), skip on 404
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-    let lastError: Error | null = null;
+    let lastError: any = null;
 
     for (const model of models) {
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+        console.log(`Attempting OCR extraction using OpenRouter model: ${model}`);
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': window.location.origin,
+            'X-Title': 'Sukrutha Mobility Fleet Management'
+          },
           body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: prompt },
-                { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-              ]
-            }]
-          })
-        });
-
-        if (response.status === 429) {
-          // Rate limited — wait 3 seconds then retry same model once
-          await new Promise(res => setTimeout(res, 3000));
-          const retry = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: prompt },
-                  { inline_data: { mime_type: "image/jpeg", data: base64Image } }
-                ]
-              }]
-            })
-          });
-          if (!retry.ok) {
-            const errBody = await retry.json().catch(() => ({}));
-            lastError = new Error(`Rate limit hit (${retry.status}). Please wait a moment and try again. Details: ${errBody?.error?.message || retry.statusText}`);
-            continue;
+            model: model,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: prompt },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:${mimeType};base64,${base64Image}`
+                }
+              }
+            ]
           }
-          const result = await retry.json();
-          const text = result.candidates[0].content.parts[0].text;
-          return JSON.parse(text.replace(/```json|```/g, '').trim());
-        }
+        ]
+      })
+    });
 
         if (!response.ok) {
           const errBody = await response.json().catch(() => ({}));
-          const errMsg = errBody?.error?.message || response.statusText;
-          lastError = new Error(`API Error ${response.status}: ${errMsg}`);
-          continue; // try next model
+          lastError = new Error(`OpenRouter Error ${response.status} (${model}): ${errBody?.error?.message || response.statusText}`);
+          console.warn(lastError.message);
+          continue; // Try next model
         }
 
         const result = await response.json();
-        const text = result.candidates[0].content.parts[0].text;
+        const text = result.choices[0].message.content;
         const cleanJson = text.replace(/```json|```/g, '').trim();
         return JSON.parse(cleanJson);
       } catch (err: any) {
         lastError = err;
+        console.warn(`Extraction failed with model ${model}:`, err.message || err);
       }
     }
 
-    throw lastError || new Error('All models failed');
+    throw lastError || new Error('All OpenRouter models failed to extract receipt data.');
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!apiKey) {
-      alert("Please enter your Gemini API Key first.");
+      alert("Please enter your OpenRouter API Key first.");
       setShowKeyInput(true);
       return;
     }
@@ -216,35 +270,44 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
 
     for (const file of files) {
       try {
-        const imageUrl = URL.createObjectURL(file);
-        const processedBase64 = await processImageWithOpenCV(file);
-        const extracted = await extractWithGemini(processedBase64);
+        const base64DataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const isPdf = file.type === 'application/pdf';
+        
+        let processedBase64 = '';
+        if (isPdf) {
+          processedBase64 = await convertPdfToImage(base64DataUrl);
+        } else {
+          processedBase64 = await processImageWithOpenCV(file);
+        }
+
+        const extracted = await extractWithOpenRouter(processedBase64, 'image/jpeg');
 
         const newExpense: ClassifiedExpense = {
           id: `EXP-${Date.now()}`,
           fileName: file.name,
-          category: extracted.category,
-          amount: extracted.amount,
-          date: extracted.date,
-          vendor: extracted.vendor,
+          category: extracted.category || 'other',
+          amount: Number(extracted.amount) || 0,
+          date: extracted.date || new Date().toISOString().split('T')[0],
+          vendor: extracted.vendor || extracted.address || 'Unknown Vendor',
+          address: extracted.address || '',
           invoiceNumber: extracted.invoice,
           confidence: 100,
           status: 'classified',
-          ocrText: `AI Verified Data for ${extracted.vendor}`,
-          imageUrl
+          ocrText: `Vendor Address: ${extracted.address || 'N/A'}\nInvoice/Receipt: ${extracted.invoice || 'N/A'}`,
+          imageUrl: base64DataUrl
         };
 
+        await createExpense(newExpense);
         setClassifiedExpenses(prev => [newExpense, ...prev]);
       } catch (error: any) {
         console.error('AI Extraction failed:', error);
-        if (error?.message?.startsWith('INVALID_KEY:')) {
-          alert(error.message.replace('INVALID_KEY: ', ''));
-          setShowKeyInput(true);
-          setApiKey('');
-          localStorage.removeItem('GEMINI_API_KEY');
-        } else {
-          alert(`Extraction failed for ${file.name}:\n${error?.message || 'Unknown error'}\n\nTip: Make sure your API key starts with "AIzaSy" and is from aistudio.google.com`);
-        }
+        alert(`Extraction failed for ${file.name}:\n${error?.message || 'Unknown error'}`);
       }
     }
 
@@ -253,12 +316,12 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
   };
 
   const saveApiKey = () => {
+    localStorage.setItem('OPENROUTER_API_KEY', apiKey);
     localStorage.setItem('GEMINI_API_KEY', apiKey);
     setShowKeyInput(false);
   };
 
   const exportExpenses = (format: 'csv' | 'pdf') => {
-    // Mock export functionality
     const data = classifiedExpenses.map(exp => ({
       Date: exp.date,
       Category: exp.category,
@@ -289,12 +352,18 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
     const expenseToVerify = classifiedExpenses.find(exp => exp.id === id);
     if (!expenseToVerify || expenseToVerify.status === 'verified') return;
 
-    setClassifiedExpenses(prev => 
-      prev.map(exp => exp.id === id ? { ...exp, status: 'verified' } : exp)
-    );
+    try {
+      await verifyExpense(id);
+      
+      setClassifiedExpenses(prev => 
+        prev.map(exp => exp.id === id ? { ...exp, status: 'verified' } : exp)
+      );
 
-    if (user && user.email) {
-      await recordTransaction(expenseToVerify.amount, 'debit', user.email, user.role);
+      if (user && user.email) {
+        await recordTransaction(expenseToVerify.amount, 'debit', user.email, user.role);
+      }
+    } catch (err) {
+      console.error('Failed to verify expense:', err);
     }
   };
 
@@ -317,18 +386,18 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
             </button>
           </div>
           <p className="text-gray-300">
-            Professional-grade extraction using OpenCV + Gemini 1.5 Flash Vision.
+            Professional-grade extraction using OpenCV + OpenRouter (NVIDIA Nemotron Nano 12B 2 VL).
           </p>
 
           {showKeyInput && (
             <div className="mt-4 p-4 bg-black/40 border border-purple-500/30 rounded-2xl animate-in fade-in slide-in-from-top-4 duration-300">
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-purple-300 mb-2">Gemini API Key (Required for 99% Accuracy)</label>
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-purple-300 mb-2">OpenRouter API Key (Required)</label>
               <div className="flex space-x-2">
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Paste your API key from Google AI Studio..."
+                  placeholder="Paste your API key from openrouter.ai..."
                   className="flex-1 bg-black/60 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:border-purple-500 outline-none transition-all"
                 />
                 <button
@@ -339,7 +408,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
                 </button>
               </div>
               <p className="mt-2 text-[10px] text-gray-500 font-medium italic">
-                Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-purple-400 underline">aistudio.google.com</a>
+                Get an API key at <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-purple-400 underline">openrouter.ai/keys</a>
               </p>
             </div>
           )}
@@ -443,7 +512,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
         <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Recent Classifications</h3>
         
         <div className="space-y-4">
-          {classifiedExpenses.slice(0, 10).map((expense) => {
+          {classifiedExpenses.slice(0, 5).map((expense) => {
             const Icon = getCategoryIcon(expense.category);
             const color = getCategoryColor(expense.category);
             
@@ -470,22 +539,22 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Date:</span>
                     <div className="text-xs text-gray-500 uppercase tracking-widest font-black mt-1">{formatDate(expense.date)}</div>
                   </div>
                   <div>
                     <span className="text-gray-400">Invoice:</span>
-                    <span className="text-white ml-2">{expense.invoiceNumber || 'N/A'}</span>
+                    <span className="text-white ml-2 block truncate">{expense.invoiceNumber || 'N/A'}</span>
                   </div>
-                  <div>
-                    <span className="text-gray-400">Confidence:</span>
-                    <span className="text-white ml-2">{expense.confidence}%</span>
+                  <div className="md:col-span-2">
+                    <span className="text-gray-400">Address:</span>
+                    <span className="text-white ml-2 block text-xs truncate mt-1" title={expense.address}>{expense.address || 'N/A'}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Status:</span>
-                    <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                    <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium block w-fit mt-1 ${
                       expense.status === 'verified' ? 'bg-green-500/30 text-green-300' :
                       expense.status === 'classified' ? 'bg-blue-500/30 text-blue-300' :
                       'bg-yellow-500/30 text-yellow-300'
@@ -497,7 +566,7 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
 
                 {expense.ocrText && (
                   <div className="mt-3 p-3 bg-white/5 rounded-2xl border-l-4 border-l-purple-500">
-                    <span className="text-gray-400 text-sm">OCR Text:</span>
+                    <span className="text-gray-400 text-sm">OCR Details:</span>
                     <p className="text-gray-300 text-sm mt-1 font-mono">{expense.ocrText}</p>
                   </div>
                 )}
@@ -551,20 +620,28 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
             </div>
 
             {/* Modal body */}
-            <div className="flex-1 overflow-auto p-6 flex items-center justify-center">
+            <div className="flex-1 overflow-auto p-6 flex items-center justify-center min-h-[50vh] w-full">
               {viewExpense.imageUrl ? (
-                <img
-                  src={viewExpense.imageUrl}
-                  alt={`Receipt: ${viewExpense.fileName}`}
-                  className="max-w-full max-h-[65vh] object-contain rounded-2xl shadow-lg border border-white/10"
-                />
+                viewExpense.imageUrl.startsWith('data:application/pdf') ? (
+                  <iframe
+                    src={viewExpense.imageUrl}
+                    className="w-full h-full min-h-[60vh] rounded-2xl border border-white/10 bg-white"
+                    title={`Receipt: ${viewExpense.fileName}`}
+                  />
+                ) : (
+                  <img
+                    src={viewExpense.imageUrl}
+                    alt={`Receipt: ${viewExpense.fileName}`}
+                    className="max-w-full max-h-[65vh] object-contain rounded-2xl shadow-lg border border-white/10"
+                  />
+                )
               ) : (
                 <div className="w-full">
                   <div className="mb-4 p-4 bg-white/5 rounded-2xl border-l-4 border-purple-500">
-                    <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-2">OCR Extracted Text</p>
-                    <p className="text-gray-200 text-sm font-mono whitespace-pre-wrap">{viewExpense.ocrText || 'No text extracted.'}</p>
+                    <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-2">OCR Extracted Details</p>
+                    <p className="text-gray-200 text-sm font-mono whitespace-pre-wrap">{viewExpense.ocrText || 'No details extracted.'}</p>
                   </div>
-                  <p className="text-center text-gray-500 text-xs">No image available for this entry. Upload a photo to see the receipt here.</p>
+                  <p className="text-center text-gray-500 text-xs">No preview available for this entry.</p>
                 </div>
               )}
             </div>

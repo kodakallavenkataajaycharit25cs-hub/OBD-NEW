@@ -15,11 +15,35 @@ export default function CreateDriver() {
 
   useEffect(() => {
     const loadPilots = async () => {
-      const pilots = await fetchPilots();
-      setExistingPilots(pilots);
+      try {
+        const pilots = await fetchPilots();
+        setExistingPilots(pilots);
+        
+        const ownerId = user?.id || 'owner-default';
+        const myDrivers = pilots.filter((p: any) => p.owner_id === ownerId);
+        
+        if (myDrivers.length === 0) {
+          setPilotForm(prev => ({ ...prev, id: 'D01' }));
+        } else {
+          let maxNum = 0;
+          myDrivers.forEach((d: any) => {
+            const match = d.id.match(/^D(\d+)$/i);
+            if (match) {
+              const num = parseInt(match[1], 10);
+              if (num > maxNum) {
+                maxNum = num;
+              }
+            }
+          });
+          const nextId = `D${String(maxNum + 1).padStart(2, '0')}`;
+          setPilotForm(prev => ({ ...prev, id: nextId }));
+        }
+      } catch (err) {
+        console.error('Failed to load pilots', err);
+      }
     };
     loadPilots();
-  }, []);
+  }, [user]);
 
   const handleCreatePilot = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +98,24 @@ export default function CreateDriver() {
     });
     
     setMessage('Driver created successfully!');
-    setPilotForm({ id: '', name: '', email: '', contact: '', password: '', vehicleNumber: '', vehicleModel: '' });
+    
+    // Auto-calculate the next ID
+    const updatedPilots = await fetchPilots();
+    setExistingPilots(updatedPilots);
+    const myDrivers = updatedPilots.filter((p: any) => p.owner_id === ownerId);
+    let maxNum = 0;
+    myDrivers.forEach((d: any) => {
+      const match = d.id.match(/^D(\d+)$/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+    const nextId = `D${String(maxNum + 1).padStart(2, '0')}`;
+    
+    setPilotForm({ id: nextId, name: '', email: '', contact: '', password: '', vehicleNumber: '', vehicleModel: '' });
     setLoading(false);
     
     // Clear message after 3 seconds

@@ -31,7 +31,8 @@ const supabaseAdmin = createClient(
 );
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request Logging Middleware
 app.use((req, res, next) => {
@@ -567,6 +568,194 @@ app.get('/api/bookings/:email', (req, res) => {
 app.delete('/api/bookings/:id', (req, res) => {
     spotBookings = spotBookings.filter(b => b.id !== req.params.id);
     res.json({ success: true });
+});
+
+// Initialize database tables for expenses
+async function initDB() {
+    try {
+        await sql`
+            CREATE TABLE IF NOT EXISTS expenses (
+                id TEXT PRIMARY KEY,
+                file_name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                amount NUMERIC NOT NULL,
+                date TEXT NOT NULL,
+                vendor TEXT NOT NULL,
+                address TEXT,
+                invoice_number TEXT,
+                confidence NUMERIC DEFAULT 100,
+                status TEXT DEFAULT 'classified',
+                ocr_text TEXT,
+                image_url TEXT,
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        `;
+        console.log('[DB] expenses table checked/created.');
+
+        await sql`
+            CREATE TABLE IF NOT EXISTS pricing_models (
+                id VARCHAR(100) PRIMARY KEY,
+                name TEXT NOT NULL,
+                people_count INTEGER NOT NULL,
+                total_amount NUMERIC NOT NULL,
+                custom_option TEXT,
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        `;
+        console.log('[DB] pricing_models table checked/created.');
+
+        await sql`
+            CREATE TABLE IF NOT EXISTS pilot_documents (
+                id VARCHAR(100) PRIMARY KEY,
+                pilot_email VARCHAR(255) NOT NULL,
+                name TEXT NOT NULL,
+                file_name TEXT NOT NULL,
+                file_url TEXT NOT NULL,
+                expiry TEXT NOT NULL,
+                status TEXT DEFAULT 'valid',
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+        `;
+        console.log('[DB] pilot_documents table checked/created.');
+    } catch (err) {
+        console.error('[DB] Failed to initialize database:', err.message);
+    }
+}
+initDB();
+
+// Pilot Documents CRUD Routes
+app.get('/api/pilot-documents', async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) return res.status(400).json({ error: 'Email is required' });
+        const rows = await sql`SELECT * FROM pilot_documents WHERE pilot_email = ${email} ORDER BY created_at DESC`;
+        res.json(rows);
+    } catch (err) {
+        console.error('Failed to fetch pilot documents:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/pilot-documents', async (req, res) => {
+    try {
+        const { id, pilot_email, name, file_name, file_url, expiry, status } = req.body;
+        const [row] = await sql`
+            INSERT INTO pilot_documents (id, pilot_email, name, file_name, file_url, expiry, status)
+            VALUES (${id}, ${pilot_email}, ${name}, ${file_name}, ${file_url}, ${expiry}, ${status || 'valid'})
+            RETURNING *
+        `;
+        res.json(row);
+    } catch (err) {
+        console.error('Failed to create pilot document:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/pilot-documents/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await sql`DELETE FROM pilot_documents WHERE id = ${id}`;
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Failed to delete pilot document:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Expenses CRUD Routes
+app.get('/api/expenses', async (req, res) => {
+    try {
+        const rows = await sql`SELECT * FROM expenses ORDER BY created_at DESC`;
+        res.json(rows);
+    } catch (err) {
+        console.error('Failed to fetch expenses:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/expenses', async (req, res) => {
+    try {
+        const { id, file_name, category, amount, date, vendor, address, invoice_number, confidence, status, ocr_text, image_url } = req.body;
+        const [row] = await sql`
+            INSERT INTO expenses (id, file_name, category, amount, date, vendor, address, invoice_number, confidence, status, ocr_text, image_url)
+            VALUES (${id}, ${file_name}, ${category}, ${amount}, ${date}, ${vendor}, ${address || null}, ${invoice_number || null}, ${confidence || 100}, ${status || 'classified'}, ${ocr_text || null}, ${image_url || null})
+            RETURNING *
+        `;
+        res.json(row);
+    } catch (err) {
+        console.error('Failed to create expense:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/expenses/:id/verify', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [row] = await sql`
+            UPDATE expenses 
+            SET status = 'verified' 
+            WHERE id = ${id} 
+            RETURNING *
+        `;
+        res.json({ success: true, expense: row });
+    } catch (err) {
+        console.error('Failed to verify expense:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Pricing Models CRUD Routes
+app.get('/api/pricing-models', async (req, res) => {
+    try {
+        const rows = await sql`SELECT * FROM pricing_models ORDER BY created_at DESC`;
+        res.json(rows);
+    } catch (err) {
+        console.error('Failed to fetch pricing models:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/pricing-models', async (req, res) => {
+    try {
+        const { id, name, people_count, total_amount, custom_option } = req.body;
+        const [row] = await sql`
+            INSERT INTO pricing_models (id, name, people_count, total_amount, custom_option)
+            VALUES (${id}, ${name}, ${people_count}, ${total_amount}, ${custom_option || null})
+            RETURNING *
+        `;
+        res.json(row);
+    } catch (err) {
+        console.error('Failed to create pricing model:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/pricing-models/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, people_count, total_amount, custom_option } = req.body;
+        const [row] = await sql`
+            UPDATE pricing_models
+            SET name = ${name}, people_count = ${people_count}, total_amount = ${total_amount}, custom_option = ${custom_option || null}
+            WHERE id = ${id}
+            RETURNING *
+        `;
+        res.json(row);
+    } catch (err) {
+        console.error('Failed to update pricing model:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/pricing-models/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await sql`DELETE FROM pricing_models WHERE id = ${id}`;
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Failed to delete pricing model:', err.message);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Telemetry endpoints

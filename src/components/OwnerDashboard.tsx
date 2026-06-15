@@ -29,7 +29,6 @@ import ExpenseClassifier from './ExpenseClassifier';
 
 import FleetOverview from './owner/FleetOverview';
 import VehicleHealth from './owner/VehicleHealth';
-import TripCosting from './owner/TripCosting';
 import DriverManagement from './owner/DriverManagement';
 import CreateDriver from './owner/CreateDriver';
 import UpdateDriver from './owner/UpdateDriver';
@@ -77,7 +76,6 @@ export default function OwnerDashboard() {
   const navigation = [
     { name: 'Overview', href: '/owner', icon: Home, current: location.pathname === '/owner' },
     { name: 'Fleet Health', href: '/owner/health', icon: Car, current: location.pathname === '/owner/health' },
-    { name: 'Trip Costing', href: '/owner/costing', icon: TrendingUp, current: location.pathname === '/owner/costing' },
     { name: 'Driver Management', href: '/owner/drivers', icon: Users, current: location.pathname === '/owner/drivers' },
 
     { name: 'Safety & Emergency', href: '/owner/safety', icon: Shield, current: location.pathname === '/owner/safety' },
@@ -273,7 +271,6 @@ export default function OwnerDashboard() {
             <Routes>
               <Route index element={<FleetOverview />} />
               <Route path="/health" element={<VehicleHealth />} />
-              <Route path="/costing" element={<TripCosting />} />
               <Route path="/drivers" element={<DriverManagement />} />
               <Route path="/drivers/create" element={<CreateDriver />} />
               <Route path="/drivers/update" element={<UpdateDriver />} />

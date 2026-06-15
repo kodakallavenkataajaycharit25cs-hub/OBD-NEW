@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Users,
   Star,
@@ -15,18 +15,25 @@ import {
   Car,
   Plus,
   Edit,
-  Trash2
+  Trash2,
+  X,
+  FileText
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
 import { formatDate } from '../../utils/dateFormat';
-import { fetchPilots, updatePilot } from '../../services/obdApi';
+import { fetchPilots, updatePilot, fetchPilotDocuments } from '../../services/obdApi';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function DriverManagement() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [drivers, setDrivers] = useState<any[]>([]);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDriverDocs, setSelectedDriverDocs] = useState<any[]>([]);
+  const [viewingDocUrl, setViewingDocUrl] = useState<string | null>(null);
+
+  const driverIdParam = searchParams.get('driverId');
 
   useEffect(() => {
     const loadDrivers = async () => {
@@ -35,7 +42,12 @@ export default function DriverManagement() {
         const ownerId = user?.id || 'owner-default';
         const myDrivers = allPilots.filter((p: any) => p.owner_id === ownerId);
         setDrivers(myDrivers);
-        if (myDrivers.length > 0) setSelectedDriver(myDrivers[0].id);
+        
+        if (driverIdParam && myDrivers.some((d: any) => d.id === driverIdParam)) {
+          setSelectedDriver(driverIdParam);
+        } else if (myDrivers.length > 0) {
+          setSelectedDriver(myDrivers[0].id);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -43,7 +55,31 @@ export default function DriverManagement() {
       }
     };
     loadDrivers();
-  }, [user]);
+  }, [user, driverIdParam]);
+
+  useEffect(() => {
+    if (driverIdParam && drivers.some((d: any) => d.id === driverIdParam)) {
+      setSelectedDriver(driverIdParam);
+    }
+  }, [driverIdParam, drivers]);
+
+  const selectedDriverData = drivers.find(d => d.id === selectedDriver) || drivers[0];
+
+  useEffect(() => {
+    const loadDocs = async () => {
+      if (selectedDriverData?.email) {
+        try {
+          const docs = await fetchPilotDocuments(selectedDriverData.email);
+          setSelectedDriverDocs(docs);
+        } catch (err) {
+          console.error("Failed to load documents for driver:", err);
+        }
+      } else {
+        setSelectedDriverDocs([]);
+      }
+    };
+    loadDocs();
+  }, [selectedDriver, selectedDriverData?.email]);
 
   const handleAvailabilityChange = async (id: string, newAvailability: string) => {
     try {
@@ -72,8 +108,6 @@ export default function DriverManagement() {
   };
 
   // Mock data functions for UI elements not yet in backend
-  const selectedDriverData = drivers.find(d => d.id === selectedDriver) || drivers[0];
-  
   const getScoreColor = (score: number) => {
     if (score >= 9) return 'green';
     if (score >= 8) return 'yellow';
@@ -129,19 +163,23 @@ export default function DriverManagement() {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">42</div>
+            <div className="text-2xl font-bold text-blue-400">{drivers.length}</div>
             <div className="text-sm text-blue-300">Total Drivers</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-green-400">38</div>
+            <div className="text-2xl font-bold text-green-400">{drivers.filter(d => d.status === 'active').length}</div>
             <div className="text-sm text-green-300">Active Today</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-400">8.7</div>
+            <div className="text-2xl font-bold text-yellow-400">
+              {(drivers.reduce((sum, d) => sum + Number(d.safety_score || 0), 0) / (drivers.length || 1)).toFixed(1)}
+            </div>
             <div className="text-sm text-yellow-300">Avg Score</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400">4.7</div>
+            <div className="text-2xl font-bold text-purple-400">
+              {(drivers.reduce((sum, d) => sum + Number(d.rating || 0), 0) / (drivers.length || 1)).toFixed(1)}
+            </div>
             <div className="text-sm text-purple-300">Avg Rating</div>
           </div>
         </div>
@@ -280,43 +318,91 @@ export default function DriverManagement() {
         backgroundColor="#120F17"
         className="p-6 border-white/5 shadow-2xl h-full"
       >
-        <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Document Status</h3>
+        <h3 className="text-xl font-black tracking-tighter uppercase clay-text-3d text-white mb-6">Document Archives & Compliance</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { name: 'Driving License', key: 'license' },
-            { name: 'Commercial Permit', key: 'permit' },
-            { name: 'Medical Certificate', key: 'medical' }
-          ].map((doc, index) => {
-            // Mocking documents for real drivers
-            const docData = { status: 'valid', expiry: '2026-01-01' };
-            const status = getDocumentStatus(docData.status);
+        {selectedDriverDocs.length === 0 ? (
+          <div className="text-center p-8 bg-black/20 border border-white/5 rounded-2xl">
+            <p className="text-gray-400 text-sm">No uploaded compliance documents found for this driver.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {selectedDriverDocs.map((doc, index) => {
+              const statusColor = doc.status === 'valid' ? 'green' : 'red';
+              const StatusIcon = doc.status === 'valid' ? CheckCircle : AlertTriangle;
 
-            return (
-              <div key={index} className="p-4 bg-black/20 border-white/5 shadow-inner rounded-2xl">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-black text-white uppercase tracking-tight">{doc.name}</h4>
-                  <status.icon className={`w-5 h-5 text-${status.color}-400`} />
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Status:</span>
-                    <span className={`text-${status.color}-400 font-medium capitalize`}>
-                      {docData.status}
-                    </span>
+              return (
+                <div key={doc.id} className="p-4 bg-black/20 border border-white/5 shadow-inner rounded-2xl flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-black text-white uppercase tracking-tight">{doc.name}</h4>
+                      <StatusIcon className={`w-5 h-5 text-${statusColor}-400`} />
+                    </div>
+                    <div className="space-y-2 text-sm mb-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Status:</span>
+                        <span className={`text-${statusColor}-400 font-medium capitalize`}>
+                          {doc.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Expires:</span>
+                        <span className="text-gray-300">
+                          <span className="text-white ml-2">{formatDate(doc.expiry)}</span>
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Expires:</span>
-                    <span className="text-gray-300">
-                      <span className="text-white ml-2">{formatDate(docData.expiry)}</span>
-                    </span>
-                  </div>
+                  <button
+                    onClick={() => setViewingDocUrl(doc.file_url)}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider h-10 rounded-xl transition-all flex items-center justify-center space-x-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Open Document</span>
+                  </button>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </BorderGlow>
+
+      {/* Doc Preview Modal */}
+      {viewingDocUrl && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          onClick={() => setViewingDocUrl(null)}
+        >
+          <div 
+            className="relative bg-[#120F17] border border-white/10 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <h3 className="font-black text-white uppercase tracking-tight text-sm">Document Preview</h3>
+              <button
+                onClick={() => setViewingDocUrl(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-gray-300 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6 flex items-center justify-center min-h-[60vh]">
+              {viewingDocUrl.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={viewingDocUrl}
+                  className="w-full h-full min-h-[65vh] rounded-2xl bg-white"
+                  title="Doc Preview"
+                />
+              ) : (
+                <img
+                  src={viewingDocUrl}
+                  alt="Doc Preview"
+                  className="max-w-full max-h-[70vh] object-contain rounded-2xl border border-white/10 shadow-lg"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
