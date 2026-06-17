@@ -35,19 +35,22 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
             </div>
           </Link>
 
-          <div className="flex items-center space-x-8 md:space-x-12">
-            <Link to="/" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
               Home
             </Link>
-            <Link to="/about" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
+            <Link to="/about" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
               About Us
             </Link>
-            <Link to="/features" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
+            <Link to="/features" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
               Features
             </Link>
-            <Link to="/contact" className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors">
+            <Link to="/contact" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-white transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
               Contact
             </Link>
+          </div>
+
+          <div className="flex items-center space-x-4">
             <ThemeToggle />
             <button
               onClick={handleDashboardAccess}

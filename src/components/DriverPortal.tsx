@@ -24,6 +24,7 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../services/supabaseClient';
 import ExpenseClassifier from './ExpenseClassifier';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -164,7 +165,7 @@ export default function DriverPortal() {
       alert("Please enter a document name.");
       return;
     }
-    if (!docBase64) {
+    if (!docFile) {
       alert("Please choose a file to upload.");
       return;
     }
@@ -174,12 +175,30 @@ export default function DriverPortal() {
     }
 
     try {
+      // Upload file to Supabase Storage
+      const fileExt = docFile.name.split('.').pop();
+      const fileName = `${user.email.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.${fileExt}`;
+      const filePath = `driver-documents/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, docFile, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
       const newDoc: PilotDocument = {
         id: `DOC-${Date.now()}`,
         pilot_email: user.email,
         name: finalDocName,
-        file_name: docFile?.name || 'document.pdf',
-        file_url: docBase64,
+        file_name: docFile.name,
+        file_url: publicUrl,
         expiry: docExpiry,
         status: new Date(docExpiry) < new Date() ? 'expired' : 'valid'
       };

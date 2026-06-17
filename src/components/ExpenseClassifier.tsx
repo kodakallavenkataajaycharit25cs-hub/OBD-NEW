@@ -19,6 +19,7 @@ import { triggerDownload } from '../utils/download';
 import { useAuth } from '../contexts/AuthContext';
 import { recordTransaction, fetchExpenses, createExpense, verifyExpense } from '../services/obdApi';
 import { formatDate } from '../utils/dateFormat';
+import { supabase } from '../services/supabaseClient';
 
 declare const cv: any; // OpenCV global
 
@@ -199,10 +200,10 @@ Extract the receipt/invoice data. Return ONLY a valid JSON object matching this 
 Do not include any Markdown tags, comments or other text. Return ONLY the JSON object.`;
 
     const models = [
-      "nvidia/nemotron-nano-12b-2-vl",
-      "google/gemma-3-27b-it",
-      "google/gemma-4-31b-instruct",
-      "qwen/qwen-2.5-vl-7b-instruct"
+      "google/gemini-2.5-flash",
+      "meta-llama/llama-3.2-11b-vision-instruct",
+      "qwen/qwen-2.5-vl-7b-instruct",
+      "google/gemini-2.5-pro"
     ];
 
     let lastError: any = null;
@@ -286,6 +287,24 @@ Do not include any Markdown tags, comments or other text. Return ONLY the JSON o
           processedBase64 = await processImageWithOpenCV(file);
         }
 
+        // Upload file to Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `invoice_${Date.now()}.${fileExt}`;
+        const filePath = `invoices/${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('documents')
+          .getPublicUrl(filePath);
+
         const extracted = await extractWithOpenRouter(processedBase64, 'image/jpeg');
 
         const newExpense: ClassifiedExpense = {
@@ -300,7 +319,7 @@ Do not include any Markdown tags, comments or other text. Return ONLY the JSON o
           confidence: 100,
           status: 'classified',
           ocrText: `Vendor Address: ${extracted.address || 'N/A'}\nInvoice/Receipt: ${extracted.invoice || 'N/A'}`,
-          imageUrl: base64DataUrl
+          imageUrl: publicUrl
         };
 
         await createExpense(newExpense);

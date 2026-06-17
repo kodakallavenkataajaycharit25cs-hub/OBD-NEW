@@ -283,12 +283,39 @@ app.put('/api/owners/:id', async (req, res) => {
     try {
         const { name = null, email = null, contact = null, fleetSize = null, activeVehicles = null, status = null, password = null, headquarters = null } = req.body;
         
-        if (email && password) {
-            const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-            const userToUpdate = usersData?.users?.find(u => u.email === email);
-            if (userToUpdate) {
-                await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, { password });
+        // Find existing record to get old email and name
+        const currentRecord = await sql`SELECT name, email FROM owners WHERE id = ${req.params.id}`;
+        const oldEmail = currentRecord[0]?.email;
+        const oldName = currentRecord[0]?.name;
+
+        // Fetch list of users from Supabase Auth to find the user to update
+        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+        const userToUpdate = usersData?.users?.find(u => u.email === oldEmail) || (email && usersData?.users?.find(u => u.email === email));
+        
+        if (userToUpdate) {
+            const updateFields = {};
+            if (email && email !== userToUpdate.email) {
+                updateFields.email = email;
             }
+            if (password) {
+                updateFields.password = password;
+            }
+            if (name && name !== userToUpdate.user_metadata?.name) {
+                updateFields.user_metadata = { ...userToUpdate.user_metadata, name };
+            }
+            if (Object.keys(updateFields).length > 0) {
+                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, updateFields);
+                if (updateError) console.error('[Supabase Auth Owner Update Error]:', updateError.message);
+            }
+        } else if (email || oldEmail) {
+            // If the user does not exist in Supabase Auth yet, create them
+            const { error: createError } = await supabaseAdmin.auth.admin.createUser({
+                email: email || oldEmail,
+                password: password || 'DefaultPassword123!',
+                email_confirm: true,
+                user_metadata: { name: name || oldName || 'Owner', role: 'owner' }
+            });
+            if (createError) console.error('[Supabase Auth Owner Creation Error]:', createError.message);
         }
 
         await sql`UPDATE owners SET name = COALESCE(${name}, name), email = COALESCE(${email}, email), contact = COALESCE(${contact}, contact), fleet_size = COALESCE(${fleetSize}, fleet_size), active_vehicles = COALESCE(${activeVehicles}, active_vehicles), status = COALESCE(${status}, status), headquarters = COALESCE(${headquarters}, headquarters) WHERE id = ${req.params.id}`;
@@ -327,12 +354,39 @@ app.put('/api/pilots/:id', async (req, res) => {
     try {
         const { name = null, email = null, contact = null, owner_id = null, status = null, availability = null, password = null, vehicleNumber = null, vehicleModel = null } = req.body;
         
-        if (email && password) {
-            const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-            const userToUpdate = usersData?.users?.find(u => u.email === email);
-            if (userToUpdate) {
-                await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, { password });
+        // Find existing record to get old email and name
+        const currentRecord = await sql`SELECT name, email FROM pilots WHERE id = ${req.params.id}`;
+        const oldEmail = currentRecord[0]?.email;
+        const oldName = currentRecord[0]?.name;
+
+        // Fetch list of users from Supabase Auth to find the user to update
+        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+        const userToUpdate = usersData?.users?.find(u => u.email === oldEmail) || (email && usersData?.users?.find(u => u.email === email));
+        
+        if (userToUpdate) {
+            const updateFields = {};
+            if (email && email !== userToUpdate.email) {
+                updateFields.email = email;
             }
+            if (password) {
+                updateFields.password = password;
+            }
+            if (name && name !== userToUpdate.user_metadata?.name) {
+                updateFields.user_metadata = { ...userToUpdate.user_metadata, name };
+            }
+            if (Object.keys(updateFields).length > 0) {
+                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, updateFields);
+                if (updateError) console.error('[Supabase Auth Pilot Update Error]:', updateError.message);
+            }
+        } else if (email || oldEmail) {
+            // If the user does not exist in Supabase Auth yet, create them
+            const { error: createError } = await supabaseAdmin.auth.admin.createUser({
+                email: email || oldEmail,
+                password: password || 'DefaultPassword123!',
+                email_confirm: true,
+                user_metadata: { name: name || oldName || 'Driver', role: 'driver' }
+            });
+            if (createError) console.error('[Supabase Auth Pilot Creation Error]:', createError.message);
         }
 
         await sql`UPDATE pilots SET name = COALESCE(${name}, name), email = COALESCE(${email}, email), contact = COALESCE(${contact}, contact), owner_id = COALESCE(${owner_id}, owner_id), status = COALESCE(${status}, status), availability = COALESCE(${availability}, availability), vehicle_number = COALESCE(${vehicleNumber}, vehicle_number), vehicle_model = COALESCE(${vehicleModel}, vehicle_model) WHERE id = ${req.params.id}`;
@@ -418,13 +472,40 @@ app.put('/api/admins/:id', async (req, res) => {
     try {
         const { name = null, email = null, contact = null, status = null, role = null, password = null } = req.body;
 
-        // Update password in Supabase Auth if provided
-        if (email && password) {
-            const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-            const userToUpdate = usersData?.users?.find(u => u.email === email);
-            if (userToUpdate) {
-                await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, { password });
+        // Find existing record to get old email and name
+        const currentRecord = await sql`SELECT name, email, role FROM admins WHERE id = ${req.params.id}`;
+        const oldEmail = currentRecord[0]?.email;
+        const oldName = currentRecord[0]?.name;
+
+        // Fetch list of users from Supabase Auth to find the user to update
+        const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+        const userToUpdate = usersData?.users?.find(u => u.email === oldEmail) || (email && usersData?.users?.find(u => u.email === email));
+        
+        if (userToUpdate) {
+            const updateFields = {};
+            if (email && email !== userToUpdate.email) {
+                updateFields.email = email;
             }
+            if (password) {
+                updateFields.password = password;
+            }
+            const nextRole = role || currentRecord[0]?.role || 'admin';
+            const nextName = name || oldName || 'Admin';
+            updateFields.user_metadata = { ...userToUpdate.user_metadata, name: nextName, role: nextRole };
+            
+            if (Object.keys(updateFields).length > 0) {
+                const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, updateFields);
+                if (updateError) console.error('[Supabase Auth Admin Update Error]:', updateError.message);
+            }
+        } else if (email || oldEmail) {
+            // If the user does not exist in Supabase Auth yet, create them
+            const { error: createError } = await supabaseAdmin.auth.admin.createUser({
+                email: email || oldEmail,
+                password: password || 'DefaultPassword123!',
+                email_confirm: true,
+                user_metadata: { name: name || oldName || 'Admin', role: role || currentRecord[0]?.role || 'admin' }
+            });
+            if (createError) console.error('[Supabase Auth Admin Creation Error]:', createError.message);
         }
 
         await sql`UPDATE admins SET

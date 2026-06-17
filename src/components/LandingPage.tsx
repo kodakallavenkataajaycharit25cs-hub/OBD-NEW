@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Shield,
   ArrowRight,
-  Star
+  Star,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -74,6 +75,31 @@ const firstColumn = testimonialsData.slice(0, 3);
 const secondColumn = testimonialsData.slice(3, 6);
 const thirdColumn = testimonialsData.slice(6, 9);
 
+function AnimateNumber({ value, duration = 1500 }: { value: number; duration?: number }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const end = value;
+    if (start === end) return;
+
+    const totalMiliseconds = duration;
+    const incrementTime = Math.max(Math.floor(totalMiliseconds / end), 20);
+    
+    const timer = setInterval(() => {
+      start += 1;
+      setCount(start);
+      if (start === end) {
+        clearInterval(timer);
+      }
+    }, incrementTime);
+
+    return () => clearInterval(timer);
+  }, [value, duration]);
+
+  return <>{count}</>;
+}
+
 interface LandingPageProps {
   onLoginClick: () => void;
 }
@@ -100,63 +126,141 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         <div className="absolute bottom-[10%] right-[5%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
-      <Navbar onLoginClick={onLoginClick} />
+      {/* Light-Themed Header + Hero wrapper */}
+      <div className="bg-white text-slate-900 relative overflow-hidden">
+        {/* Soft Background Blob */}
+        <div className="absolute top-0 right-0 w-[45%] h-[60%] bg-blue-50/50 blur-[80px] rounded-full pointer-events-none" />
 
-      {/* Claymorphic Hero */}
-      <section className="relative pt-16 pb-20 px-6 lg:px-12 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
-            <div className="lg:col-span-8 z-10">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.85] mb-10 clay-text-3d text-white font-display">
-                TRACK<br />
-                <span className="text-blue-500">ANALYZE</span> OPTIMIZE
-              </h1>
-              <BlurTextAnimation 
-                text="The Indian fleet landscape is brutal. We give you the OBD-powered neural edge to master it. Diagnostics, AI safety, and extreme efficiency."
-                className="justify-start min-h-0 bg-transparent !items-start text-left mb-12 m-0 p-0"
-                textColor="text-gray-400"
-                fontSize="text-xl md:text-2xl"
-                animationDelay={60000}
-              />
-
-              <div className="flex flex-col sm:flex-row gap-8">
-                <Link to="/features" className="clay-btn clay-btn-white flex items-center justify-between min-w-[280px]">
-                  <span className="text-lg">EXPLORE FEATURES</span>
-                  <ArrowRight className="w-6 h-6" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="lg:col-span-4 relative mt-12 lg:mt-0">
-              <div className="animate-float relative lg:top-[-40px]">
-                <TiltedCard
-                  imageSrc="https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg"
-                  altText="Sukrutha Fleet Vehicle"
-                  containerHeight="400px"
-                  containerWidth="100%"
-                  imageHeight="350px"
-                  imageWidth="350px"
-                  rotateAmplitude={12}
-                  scaleOnHover={1.08}
-                  showMobileWarning={false}
-                  showTooltip={false}
-                  displayOverlayContent={true}
-                  overlayContent={
-                    <div className="absolute bottom-6 right-6 p-5 border-none bg-blue-600/80 backdrop-blur-md max-w-[200px] rounded-2xl glass-overlay-card">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-blue-100 leading-none">Fleet Command</span>
-                        <Shield className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="text-xl font-black tracking-tighter text-white">FULL CONTROL</div>
-                      <div className="text-[10px] text-blue-100/60 font-bold uppercase tracking-widest mt-0.5">On Your Fleet</div>
-                    </div>
-                  }
-                />
-              </div>
-            </div>
+        {/* Custom Light Header */}
+        <header className="py-6 px-6 lg:px-12 max-w-7xl mx-auto flex justify-between items-center relative z-20">
+          <Link to="/" className="flex items-center space-x-2 group">
+            <span className="text-2xl font-black tracking-tighter text-slate-900">SUKRUTHA</span>
+          </Link>
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-950 transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
+              Home
+            </Link>
+            <Link to="/about" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-950 transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
+              About Us
+            </Link>
+            <Link to="/features" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-950 transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
+              Features
+            </Link>
+            <Link to="/contact" className="relative pb-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-950 transition-colors after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-current hover:after:w-full after:transition-all after:duration-300">
+              Contact
+            </Link>
           </div>
+          <div>
+            <button
+              onClick={handleDashboardAccess}
+              className="px-6 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-full font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+            >
+              {user ? 'View Dashboard' : 'Member Login'}
+            </button>
+          </div>
+        </header>
+
+        {/* Separator line between Navbar and Hero */}
+        <div className="border-b border-slate-300 w-full relative z-20" />
+
+        {/* Custom Light Hero */}
+        <section className="relative pt-12 pb-24 px-6 lg:px-12 z-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              
+              {/* Left Column */}
+              <div className="lg:col-span-6 space-y-8">
+                <div className="inline-flex items-center space-x-2 bg-[#EFF6FF] border border-[#BFDBFE] text-[#2563EB] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] animate-pulse" />
+                  <span>AI - Powered Fleet Intelligence</span>
+                </div>
+
+                <h1 className="text-5xl md:text-7xl font-black text-slate-950 tracking-tight leading-[1.05]">
+                  Master Your<br />
+                  <span className="text-[#1E293B]">Fleet Horizon.</span>
+                </h1>
+
+                <BlurTextAnimation
+                  text="Empowering Indian fleet operators with real-time OBD analytics, AI-driven safety protocols, and automated expense classification to drive maximum profitability."
+                  fontSize="text-lg md:text-xl"
+                  textColor="text-slate-600 font-medium"
+                  className="leading-relaxed"
+                  animationDelay={60000}
+                />
+
+                <div>
+                  <Link
+                    to="/features"
+                    className="inline-flex items-center justify-center px-8 py-4 bg-white border border-slate-200 text-slate-800 rounded-2xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-md shadow-slate-100 hover:shadow-lg active:scale-95"
+                  >
+                    Explore Features
+                  </Link>
+                </div>
+
+                {/* Stats Ticker Row */}
+                <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-100">
+                  <div>
+                    <div className="text-3xl font-black text-slate-950"><AnimateNumber value={18} />%</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Fuel Savings</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-black text-slate-950"><AnimateNumber value={40} />%</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Safety Score Increase</div>
+                  </div>
+                  <div>
+                    <div className="text-3xl font-black text-slate-950">Live</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">OBD Telemetry</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="lg:col-span-6 relative mt-12 lg:mt-0 flex justify-center items-center">
+                
+                {/* Fleet Uptime Badge */}
+                <div className="absolute top-[-20px] left-[10%] bg-white border border-slate-100 p-4 rounded-2xl shadow-xl flex items-center space-x-3 z-30 animate-bounce" style={{ animationDuration: '6s' }}>
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <TrendingUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Fleet Uptime</div>
+                    <div className="text-lg font-black text-slate-950">99.7%</div>
+                  </div>
+                </div>
+
+                {/* Perspective Dashboard Mockup */}
+                <div className="relative w-full max-w-lg rounded-3xl overflow-hidden group border border-slate-100 shadow-2xl bg-slate-50">
+                  <img
+                    src="/dashboard_flat.png"
+                    alt="Sukrutha Dashboard"
+                    className="w-full h-full object-contain rounded-3xl transition-transform duration-700 group-hover:scale-105"
+                  />
+                  
+                  {/* Decorative Wavy Terrain overlay at the bottom, like in the 2nd attachment */}
+                  <div className="absolute bottom-0 left-0 w-full pointer-events-none translate-y-2 z-10">
+                    <svg viewBox="0 0 1440 320" className="w-full h-auto text-emerald-600/90 fill-current">
+                      <path d="M0,224L48,218.7C96,213,192,203,288,186.7C384,171,480,149,576,165.3C672,181,768,235,864,245.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
+                  </div>
+                  <div className="absolute bottom-0 left-0 w-full pointer-events-none translate-y-3 opacity-60">
+                    <svg viewBox="0 0 1440 320" className="w-full h-auto text-emerald-500/80 fill-current">
+                      <path d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,218.7C672,203,768,149,864,138.7C960,128,1056,160,1152,181.3C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
+                  </div>
+                </div>
+                  
+                  {/* AI Driver Safety Notification Badge */}
+                  <div className="absolute bottom-[10%] left-[-5%] bg-[#111827] border border-white/5 text-white p-5 rounded-2xl shadow-2xl max-w-[280px] z-30 transition-all duration-500 hover:scale-105">
+                    <div className="text-[9px] font-black uppercase tracking-widest text-amber-500 mb-1">AI Driver Safety</div>
+                    <p className="text-xs font-bold leading-normal text-slate-200">
+                      Real-time alert: Fatigue detected in Route #402. Rerouting to nearest hub.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
 
       {/* Clay Stats Ticker */}
       <section className="py-24 border-y border-white/5 bg-white/[0.02] overflow-hidden">

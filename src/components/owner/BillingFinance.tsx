@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { triggerDownload } from '../../utils/download';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../services/supabaseClient';
 import { 
   recordTransaction, 
   fetchExpenses, 
@@ -272,6 +273,25 @@ export default function BillingFinance() {
       }
 
       const newInvoiceId = `EXP-${Date.now()}`;
+      
+      // Upload file to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `invoice_${Date.now()}.${fileExt}`;
+      const filePath = `invoices/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
       const key = localStorage.getItem('OPENROUTER_API_KEY') || localStorage.getItem('GEMINI_API_KEY');
       let extracted = { 
         vendor: file.name.substring(0, file.name.lastIndexOf('.')) || file.name, 
@@ -341,7 +361,7 @@ export default function BillingFinance() {
           confidence: 100,
           status: 'classified',
           ocr_text: `Uploaded invoice ${file.name}`,
-          image_url: base64DataUrl
+          image_url: publicUrl
         })
       });
 
