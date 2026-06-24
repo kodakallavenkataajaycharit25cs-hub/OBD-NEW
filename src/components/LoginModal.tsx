@@ -184,7 +184,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                           type="email"
                           required
                           value={resetEmail}
-                          onChange={(e) => setResetEmail(e.target.value)}
+                          onChange={(e) => setResetEmail(e.target.value.toLowerCase())}
                           className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-800 focus:outline-none focus:border-blue-500/40 shadow-inner text-xs font-bold"
                           placeholder="operator@domain.com"
                         />
@@ -240,7 +240,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       <input
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => setEmail(e.target.value.toLowerCase())}
                         className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-white placeholder-gray-800 focus:outline-none focus:border-blue-500/40 shadow-inner text-xs font-bold"
                         placeholder="Operator ID"
                         required

@@ -42,7 +42,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import BorderGlow from '../BorderGlow';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, updateOwner, updatePilot, fetchAdmins, createAdmin, updateAdmin, deleteAdmin, OBDData } from '../../services/obdApi';
+import { fetchRPM, fetchSpeed, fetchFuelLevel, fetchDiagnostics, fetchOwners, fetchPilots, fetchDevices, fetchAlerts, updateOwner, updatePilot, fetchAdmins, createAdmin, updateAdmin, deleteAdmin, fetchTrips, OBDData } from '../../services/obdApi';
 import { CreateView, UpdateView, RemoveView } from './CrudViews';
 import { formatCurrentDate, formatCurrentTime } from '../../utils/dateFormat';
 
@@ -521,18 +521,20 @@ export default function SuperAdminPortal() {
 
   const updateMockDB = async () => {
     try {
-      const [ownersData, pilotsData, devicesData, alertsData, adminsData] = await Promise.all([
+      const [ownersData, pilotsData, devicesData, alertsData, adminsData, tripsData] = await Promise.all([
         fetchOwners(),
         fetchPilots(),
         fetchDevices(),
         fetchAlerts(),
-        fetchAdmins()
+        fetchAdmins(),
+        fetchTrips()
       ]);
       setOwners(ownersData || []);
       setPilots(pilotsData || []);
       setDevices(devicesData || []);
       setAlerts(alertsData || []);
       setAdmins(adminsData || []);
+      setTrips(tripsData || []);
     } catch (error) {
       console.error('Failed to update mock DB:', error);
     }
@@ -631,6 +633,7 @@ export default function SuperAdminPortal() {
 
   const [alerts, setAlerts] = useState<any[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
+  const [trips, setTrips] = useState<any[]>([]);
 
   // Admin View State lifted to prevent reset on re-render
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
@@ -781,7 +784,6 @@ export default function SuperAdminPortal() {
     { name: 'Admin Accounts', href: '/super-admin-dashboard/admins', icon: ShieldAlert },
     { name: 'Device Management', href: '/super-admin-dashboard/devices', icon: Cpu },
     { name: 'Live Tracking', href: '/super-admin-dashboard/tracking', icon: MapPin },
-    { name: 'Analytics', href: '/super-admin-dashboard/analytics', icon: BarChart2 },
     { name: 'New Client', href: '/super-admin-dashboard/create', icon: PlusCircle },
     { name: 'Update Records', href: '/super-admin-dashboard/update', icon: Edit },
     { name: 'Remove Records', href: '/super-admin-dashboard/remove', icon: Trash2 },
@@ -889,7 +891,11 @@ export default function SuperAdminPortal() {
                     >
                       ₹{(
                         (() => {
-                          const realClientDrivers = pilots.filter(p => p.owner_id === client.id || String(p.owner_id).includes('owner'));
+                          const realClientDrivers = pilots.filter(p => 
+                            (p.owner_id && client.id && 
+                            String(p.owner_id).trim().replace(/^0+/, '') === String(client.id).trim().replace(/^0+/, '')) || 
+                            String(p.owner_id).includes('owner')
+                          );
                           const clientDrivers = realClientDrivers.length > 0 ? realClientDrivers : Array.from({ length: client.fleetSize }).map((_, i) => ({
                             id: `DRV-${client.id || 'C'}-${1000 + i}`,
                             name: `Driver ${i + 1}`,
@@ -989,48 +995,64 @@ export default function SuperAdminPortal() {
   );
 
   // System Stats Overview View
-  const StatsView = () => (
-    <div className="space-y-8 animate-in fade-in duration-500">
+  const StatsView = () => {
+    const totalDevices = owners.reduce((sum, o) => sum + (o.fleetSize || o.fleet_size || 0), 0);
+    const activeDevices = owners.reduce((sum, o) => sum + (o.activeVehicles || o.active_vehicles || 0), 0);
+    const offlineDevices = Math.max(0, totalDevices - activeDevices);
+    const maintenanceDevices = devices.filter(d => d.status === 'warning').length;
 
-      {/* 10 Stats Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {[
-          { label: 'Total Devices', value: '4,520', desc: 'Installed units', icon: Cpu, color: 'blue' },
-          { label: 'Active Devices', value: '4,289', desc: 'Online now', icon: ShieldCheck, color: 'green' },
-          { label: 'Offline Devices', value: '184', desc: 'Loss of sync', icon: XCircle, color: 'red' },
-          { label: 'Maintenance', value: '47', desc: 'Repairs/Updates', icon: RefreshCw, color: 'orange' },
-          { label: 'Fleet Owners', value: owners.length, desc: 'Registered corps', icon: Users, color: 'blue' },
-          { label: 'Total Pilots', value: pilots.length, desc: 'Unit roster', icon: Car, color: 'purple' },
-          { label: 'Active Trips', value: '342', desc: 'Realtime vectors', icon: MapPin, color: 'green' },
+    const activeTripsCount = trips.filter(t => t.status === 'active' || t.status === 'assigned' || t.status === 'in-progress').length;
 
-          { label: 'Daily Revenue', value: formatShorthand(582000), desc: 'Cleared today', icon: TrendingUp, color: 'green' },
-          { label: 'System Health', value: '98.4%', desc: 'Nominal condition', icon: Activity, color: 'blue' }
-        ].map((stat, i) => (
-          <BorderGlow
-            key={i}
-            borderRadius={28}
-            glowColor={stat.color === 'red' ? '239 68 68' : stat.color === 'green' ? '34 197 94' : stat.color === 'orange' ? '245 158 11' : '59 130 246'}
-            glowRadius={30}
-            glowIntensity={0.8}
-            backgroundColor="#120F17"
-            className="p-6 border-white/5 hover:translate-y-[-4px] transition-all duration-300 relative overflow-hidden group shadow-xl"
-          >
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
+    const totalOwnersRevenue = owners.reduce((sum, o) => sum + Number(o.revenue || 0), 0);
+    const dailyRevenueVal = totalOwnersRevenue > 0 ? Math.round(totalOwnersRevenue / 30) : 582000;
 
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{stat.label}</span>
-              <div className={`p-2 rounded-xl bg-[#120F17] border border-white/5 group-hover:border-blue-500/30 transition-colors`}>
-                <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
+    const systemHealthVal = devices.length > 0 
+      ? (devices.reduce((sum, d) => sum + Number(d.health || 0), 0) / devices.length).toFixed(1) + '%' 
+      : '98.4%';
+
+    const statList = [
+      { label: 'Total Devices', value: totalDevices || 4520, desc: 'Installed units', icon: Cpu, color: 'blue' },
+      { label: 'Active Devices', value: activeDevices || 4289, desc: 'Online now', icon: ShieldCheck, color: 'green' },
+      { label: 'Offline Devices', value: offlineDevices || 184, desc: 'Loss of sync', icon: XCircle, color: 'red' },
+      { label: 'Maintenance', value: maintenanceDevices || 47, desc: 'Repairs/Updates', icon: RefreshCw, color: 'orange' },
+      { label: 'Fleet Owners', value: owners.length, desc: 'Registered corps', icon: Users, color: 'blue' },
+      { label: 'Total Pilots', value: pilots.length, desc: 'Unit roster', icon: Car, color: 'purple' },
+      { label: 'Active Trips', value: activeTripsCount || 342, desc: 'Realtime vectors', icon: MapPin, color: 'green' },
+      { label: 'Daily Revenue', value: formatShorthand(dailyRevenueVal), desc: 'Cleared today', icon: TrendingUp, color: 'green' },
+      { label: 'System Health', value: systemHealthVal, desc: 'Nominal condition', icon: Activity, color: 'blue' }
+    ];
+
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        {/* 10 Stats Cards Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          {statList.map((stat, i) => (
+            <BorderGlow
+              key={i}
+              borderRadius={28}
+              glowColor={stat.color === 'red' ? '239 68 68' : stat.color === 'green' ? '34 197 94' : stat.color === 'orange' ? '245 158 11' : '59 130 246'}
+              glowRadius={30}
+              glowIntensity={0.8}
+              backgroundColor="#120F17"
+              className="p-6 border-white/5 hover:translate-y-[-4px] transition-all duration-300 relative overflow-hidden group shadow-xl"
+            >
+              <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:16px_16px]" />
+
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{stat.label}</span>
+                <div className={`p-2 rounded-xl bg-[#120F17] border border-white/5 group-hover:border-blue-500/30 transition-colors`}>
+                  <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
+                </div>
               </div>
-            </div>
 
-            <div className="text-3xl font-black text-white tracking-tight mb-1 font-sans">{stat.value}</div>
-            <p className="text-[9px] text-gray-500 uppercase tracking-wide font-bold">{stat.desc}</p>
-          </BorderGlow>
-        ))}
+              <div className="text-3xl font-black text-white tracking-tight mb-1 font-sans">{stat.value}</div>
+              <p className="text-[9px] text-gray-500 uppercase tracking-wide font-bold">{stat.desc}</p>
+            </BorderGlow>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Fleet Owner Management
   const OwnersView = () => (
@@ -1127,7 +1149,7 @@ export default function SuperAdminPortal() {
                 <div>
                   <h4 className="text-sm font-black text-white uppercase tracking-wider">{pilot.name}</h4>
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{pilot.id}</span>
+                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{pilot.id.includes('_') ? pilot.id.split('_')[1] : pilot.id}</span>
                     <span className="w-1 h-1 bg-gray-500 rounded-full" />
                     <span className="text-[9px] text-blue-400 font-bold uppercase tracking-widest">{pilot.availability}</span>
                   </div>
@@ -1313,7 +1335,7 @@ export default function SuperAdminPortal() {
                       </div>
                       <div>
                         <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email</label>
-                        <input type="email" value={adminEditForm.email || ''} onChange={e => setAdminEditForm({ ...adminEditForm, email: e.target.value })} className="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none" />
+                        <input type="email" value={adminEditForm.email || ''} onChange={e => setAdminEditForm({ ...adminEditForm, email: e.target.value.toLowerCase() })} className="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs focus:border-purple-500 outline-none" />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
@@ -1523,7 +1545,7 @@ export default function SuperAdminPortal() {
                         required
                         type="email"
                         value={adminCreateForm.email}
-                        onChange={e => setAdminCreateForm({ ...adminCreateForm, email: e.target.value })}
+                        onChange={e => setAdminCreateForm({ ...adminCreateForm, email: e.target.value.toLowerCase() })}
                         className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-xs focus:border-purple-500 outline-none transition-colors"
                         placeholder="admin@company.com"
                       />
@@ -1720,119 +1742,7 @@ export default function SuperAdminPortal() {
 
 
 
-  // Premium Custom Neon SVG Analytics Section
-  const AnalyticsView = () => (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        {/* Core Fleet Activity Area Graph */}
-        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Missions Stream (Daily)</h3>
-
-          <div
-            onMouseMove={handleMissionsMouseMove}
-            onMouseLeave={() => setHoveredMissions(null)}
-            className="h-64 flex items-end justify-between relative pt-6 px-4 cursor-crosshair select-none"
-          >
-            <div className="absolute inset-x-0 top-1/4 h-[1px] bg-white/5 pointer-events-none" />
-            <div className="absolute inset-x-0 top-2/4 h-[1px] bg-white/5 pointer-events-none" />
-            <div className="absolute inset-x-0 top-3/4 h-[1px] bg-white/5 pointer-events-none" />
-
-            <svg className="absolute inset-0 w-full h-full p-6 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2563EB" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-              <path d="M 0 90 Q 20 60 40 75 T 80 40 T 100 20 L 100 100 L 0 100 Z" fill="url(#areaGrad)" />
-              <path d="M 0 90 Q 20 60 40 75 T 80 40 T 100 20" fill="none" stroke="#3B82F6" strokeWidth="2.5" />
-
-              {/* Pulsing indicator on the SVG line */}
-              {hoveredMissions && (
-                <g>
-                  <circle cx={hoveredMissions.x} cy={hoveredMissions.y} r="2" fill="#60A5FA" />
-                  <circle cx={hoveredMissions.x} cy={hoveredMissions.y} r="2" fill="none" stroke="#3B82F6" strokeWidth="0.8" opacity="0.8">
-                    <animate attributeName="r" values="2;5.5" dur="1.2s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.8;0" dur="1.2s" repeatCount="indefinite" />
-                  </circle>
-                </g>
-              )}
-            </svg>
-
-            {/* Interactive Tracker Line & Futuristic Tooltip */}
-            {hoveredMissions && (
-              <>
-                <div
-                  className="absolute top-0 bottom-6 w-[1px] bg-blue-500/20 border-l border-dashed border-blue-400/40 pointer-events-none"
-                  style={{ left: `${hoveredMissions.x}%` }}
-                />
-                <div
-                  className="absolute z-30 bg-white backdrop-blur-md border border-blue-500/30 p-2.5 rounded-2xl text-[10px] pointer-events-none text-left min-w-[125px] transition-all duration-75 shadow-[0_0_15px_rgba(59,130,246,0.25)]"
-                  style={{
-                    left: `${Math.min(72, Math.max(8, hoveredMissions.x - 15))}%`,
-                    top: `${Math.min(65, Math.max(10, hoveredMissions.y - 30))}%`
-                  }}
-                >
-                  <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-0.5">UPLINK TIME</div>
-                  <div className="text-gray-900 font-bold text-sm mb-1">{hoveredMissions.time}</div>
-                  <div className="flex items-center space-x-1.5 text-blue-600 font-black">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-                    <span>{hoveredMissions.val} ACTIVE NODES</span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="absolute bottom-1 inset-x-0 flex justify-between px-6 text-[8px] text-gray-500 font-bold font-sans pointer-events-none">
-              <span>00:00</span>
-              <span>06:00</span>
-              <span>12:00</span>
-              <span>18:00</span>
-              <span>24:00</span>
-            </div>
-          </div>
-        </div>
-
-        {/* System Load Analytics Bar Chart */}
-        <div className="bg-[#120F17]/80 backdrop-blur-xl border border-white/5 p-6 rounded-3xl shadow-xl">
-          <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6 font-sans">Active Node Revenue Cycles</h3>
-
-          <div className="h-64 flex items-end justify-around relative pt-6 px-4">
-            {[].map((cycle, i) => (
-              <div
-                key={i}
-                className="flex flex-col items-center w-full max-w-[28px] group cursor-pointer relative"
-                onMouseEnter={() => setHoveredRevenueCycle(i)}
-                onMouseLeave={() => setHoveredRevenueCycle(null)}
-              >
-                {/* Floating Glassmorphic Tooltip */}
-                {hoveredRevenueCycle === i && (
-                  <div className="absolute bottom-48 z-30 bg-white backdrop-blur-md border border-cyan-500/40 p-2.5 rounded-2xl text-[10px] w-32 shadow-[0_0_20px_rgba(34,211,238,0.25)] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                    <div className="text-gray-500 font-black tracking-widest uppercase text-[7px] mb-0.5">{cycle.day} YIELD</div>
-                    <div className="text-cyan-600 font-black text-sm">{formatShorthand(cycle.revenue)}</div>
-                    <div className="text-green-600 font-bold text-[8px] mt-0.5">{cycle.change} vs prev</div>
-                  </div>
-                )}
-
-                <div className="relative w-full h-44 bg-white/5 rounded-t-lg overflow-hidden flex items-end">
-                  <div
-                    className={`w-full bg-gradient-to-t from-blue-600 to-cyan-400 group-hover:shadow-[0_0_15px_rgba(37,99,235,0.6)] group-hover:from-blue-500 group-hover:to-cyan-300 transition-all duration-300 rounded-t-lg ${hoveredRevenueCycle === i ? 'scale-x-110 brightness-110 shadow-[0_0_20px_rgba(6,182,212,0.8)]' : ''
-                      }`}
-                    style={{ height: `${cycle.val}%` }}
-                  />
-                </div>
-                <span className={`text-[8px] font-bold uppercase tracking-widest mt-3 transition-colors ${hoveredRevenueCycle === i ? 'text-cyan-400' : 'text-gray-500'
-                  }`}>
-                  {cycle.day}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   // Emergency SOS Console
   const AlertsView = () => (
@@ -2020,7 +1930,6 @@ export default function SuperAdminPortal() {
               <Route path="/admins" element={AdminsView()} />
               <Route path="/devices" element={<DevicesView />} />
               <Route path="/tracking" element={<TrackingView telemetry={telemetry} owners={owners} pilots={pilots} devices={devices} />} />
-              <Route path="/analytics" element={<AnalyticsView />} />
               <Route path="/alerts" element={<AlertsView />} />
               <Route path="/create" element={<CreateView onRefresh={updateMockDB} owners={owners} pilots={pilots} />} />
               <Route path="/update" element={<UpdateView onRefresh={updateMockDB} owners={owners} pilots={pilots} />} />

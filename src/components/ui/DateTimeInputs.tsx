@@ -59,6 +59,7 @@ export function CustomDateInput({ value, className, onChange, ...props }: Custom
             selected={selectedDate}
             onSelect={handleSelect}
             className="text-white"
+            disabled={{ before: new Date(new Date().setHours(0,0,0,0)) }}
           />
         </div>
       )}

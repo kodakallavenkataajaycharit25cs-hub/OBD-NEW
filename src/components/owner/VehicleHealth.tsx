@@ -13,7 +13,7 @@ import {
   Activity
 } from 'lucide-react';
 import BorderGlow from '../BorderGlow';
-import { fetchDiagnostics, fetchRPM, fetchSpeed, fetchEngineTemp, fetchO2Level, OBDData } from '../../services/obdApi';
+import { fetchDiagnostics, fetchRPM, fetchSpeed, fetchEngineTemp, fetchO2Level, fetchFuelLevel, OBDData } from '../../services/obdApi';
 import { formatDate } from '../../utils/dateFormat';
 
 export default function VehicleHealth() {

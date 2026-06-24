@@ -54,7 +54,7 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
             <ThemeToggle />
             <button
               onClick={handleDashboardAccess}
-              className="clay-btn clay-btn-blue text-[10px] uppercase tracking-[0.2em] px-4 py-2"
+              className="inline-flex items-center justify-center bg-[#EFF6FF] border border-[#BFDBFE] text-[#2563EB] px-4 py-2 rounded-full font-black text-xs uppercase tracking-wider transition-all hover:bg-[#DBEAFE] active:scale-95"
             >
               {user ? 'View Dashboard' : 'Member Login'}
             </button>

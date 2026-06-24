@@ -6,13 +6,150 @@ import {
   Car,
   CheckCircle,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Bookmark
 } from 'lucide-react';
 import BorderGlow from './BorderGlow';
 import { CustomDateInput, CustomTimeInput } from './ui/DateTimeInputs';
 
+interface LocationAutocompleteProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  icon: React.ReactNode;
+}
+
+function LocationAutocomplete({ value, onChange, placeholder, icon }: LocationAutocompleteProps) {
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  React.useEffect(() => {
+    if (value.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const localDb = [
+          { name: "RNSIT Entrance Location", type: "bookmark", desc: "Your list · 1 place" },
+          { name: "RNSIT Entrance Saved", type: "bookmark", desc: "Saved in RNSIT Entrance Lo..." },
+          { name: "RNS Institute of Technology (RNSIT)", type: "history", desc: "RNSIT College, Bangarappa Nagara, Bengaluru, Karnataka 560098" },
+          { name: "RNSIT CSE Department", type: "pin", desc: "Uttarahalli Main Road, Bengaluru" },
+          { name: "RNSIT College Bus Stand", type: "pin", desc: "23rd Cross Road, Dwaraka Nagar, Bengaluru" },
+          { name: "MG Road, Bengaluru", type: "history", desc: "Mahatma Gandhi Road, Bengaluru, Karnataka 560001" },
+          { name: "MG Road Metro Station", type: "pin", desc: "MG Road, Shivaji Nagar, Bengaluru, Karnataka" },
+          { name: "Indiranagar, Bengaluru", type: "pin", desc: "Bengaluru, Karnataka 560038" },
+          { name: "Koramangala, Bengaluru", type: "pin", desc: "Bengaluru, Karnataka" },
+          { name: "Kempegowda International Airport (BLR)", type: "pin", desc: "Devenahalli, Bengaluru, Karnataka" },
+          { name: "Majestic Railway Station", type: "history", desc: "Gubbi Thotadappa Road, Bengaluru" },
+          { name: "Electronic City Phase 1", type: "pin", desc: "Hosur Road, Bengaluru, Karnataka" },
+          { name: "Whitefield Inner Ring Road", type: "pin", desc: "Mahadevapura, Bengaluru" }
+        ];
+
+        const query = value.toLowerCase();
+        // Support spelling variations like benguluru / bengaluru
+        const queryNormalized = query.replace('benguluru', 'bengaluru');
+        const localMatches = localDb.filter(item => 
+          item.name.toLowerCase().includes(query) || 
+          item.desc.toLowerCase().includes(query) ||
+          item.name.toLowerCase().includes(queryNormalized) || 
+          item.desc.toLowerCase().includes(queryNormalized)
+        );
+
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&countrycodes=in&limit=10`, {
+          headers: { 'User-Agent': 'Sukrutha-Mobility-Client' }
+        });
+        const globalData = await response.json();
+        const globalMatches = globalData.map((item: any) => ({
+          name: item.name || item.display_name.split(',')[0],
+          type: "pin",
+          desc: item.display_name
+        }));
+
+        const combined = [
+          ...localMatches,
+          ...globalMatches.filter(g => !localMatches.some(l => l.name.toLowerCase() === g.name.toLowerCase()))
+        ];
+
+        setSuggestions(combined);
+      } catch (err) {
+        console.error("Autocomplete fetch error:", err);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [value]);
+
+  const handleSelect = (name: string) => {
+    onChange(name);
+    setShowDropdown(false);
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'bookmark':
+        return <Bookmark className="w-4 h-4 text-blue-500" />;
+      case 'history':
+        return <Clock className="w-4 h-4 text-gray-400" />;
+      default:
+        return <MapPin className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  return (
+    <div className="relative group w-full" ref={dropdownRef}>
+      {icon}
+      <input
+        required
+        type="text"
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setShowDropdown(true);
+        }}
+        onFocus={() => setShowDropdown(true)}
+        placeholder={placeholder}
+        className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner text-sm"
+      />
+      
+      {showDropdown && suggestions.length > 0 && (
+        <div className="absolute left-0 right-0 mt-2 bg-[#120F17] rounded-2xl shadow-2xl z-50 border border-white/10 overflow-hidden divide-y divide-white/5 overflow-y-auto max-h-72">
+          {suggestions.map((item, i) => (
+            <button
+              type="button"
+              key={i}
+              onClick={() => handleSelect(item.name)}
+              className="w-full px-5 py-3 flex items-start space-x-4 hover:bg-white/5 transition-colors text-left"
+            >
+              <div className="mt-1 flex-shrink-0">
+                {getIcon(item.type)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="block text-sm font-bold text-white truncate">{item.name}</span>
+                <span className="block text-xs text-gray-500 truncate mt-0.5">{item.desc}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 import { useAuth } from '../contexts/AuthContext';
-import { createBooking } from '../services/obdApi';
+import { createBooking, fetchPilots } from '../services/obdApi';
 
 export default function SpotBooking() {
   const { user } = useAuth();
@@ -25,11 +162,13 @@ export default function SpotBooking() {
     time: '',
     customerName: '',
     customerPhone: '',
-    price: ''
+    price: '',
+    vehicleNumber: ''
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fleetVehicles, setFleetVehicles] = useState<any[]>([]);
 
   const vehicles = [
     { id: 'innova', name: 'Innova Crysta', seats: 7 },
@@ -37,6 +176,46 @@ export default function SpotBooking() {
     { id: 'force', name: 'Force Traveller', seats: 15 },
     { id: 'harrier', name: 'Tata Harrier', seats: 5 },
   ];
+
+  React.useEffect(() => {
+    const loadFleetVehicles = async () => {
+      try {
+        const allPilots = await fetchPilots();
+        if (user && user.email) {
+          const currentPilot = allPilots.find((p: any) => p.email?.toLowerCase() === user.email.toLowerCase());
+          if (currentPilot && currentPilot.owner_id) {
+            const sameFleetPilots = allPilots.filter((p: any) => 
+              p.owner_id && 
+              String(p.owner_id).trim().replace(/^0+/, '') === String(currentPilot.owner_id).trim().replace(/^0+/, '')
+            );
+            const vehiclesMap = new Map();
+            sameFleetPilots.forEach((p: any) => {
+              if (p.vehicle_number && p.vehicle_number.trim() && p.vehicle_model && p.vehicle_model.trim()) {
+                vehiclesMap.set(p.vehicle_number.trim(), {
+                  id: p.id,
+                  name: p.vehicle_model,
+                  number: p.vehicle_number,
+                  seats: 5
+                });
+              }
+            });
+            setFleetVehicles(Array.from(vehiclesMap.values()));
+          }
+        }
+      } catch (err) {
+        console.error('Error loading fleet vehicles:', err);
+      }
+    };
+    loadFleetVehicles();
+  }, [user]);
+
+  React.useEffect(() => {
+    if (fleetVehicles.length > 0) {
+      setBooking(prev => ({ ...prev, car: fleetVehicles[0].name, vehicleNumber: fleetVehicles[0].number }));
+    } else {
+      setBooking(prev => ({ ...prev, car: vehicles[0].id, vehicleNumber: '' }));
+    }
+  }, [fleetVehicles]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +225,7 @@ export default function SpotBooking() {
       driverEmail: user?.email,
       driverName: user?.name,
       driverPhone: 'N/A',
-      vehicleNumber: 'N/A',
+      vehicleNumber: booking.vehicleNumber || 'N/A',
       car: vehicle ? vehicle.name : booking.car
     };
     setError(null);
@@ -55,6 +234,33 @@ export default function SpotBooking() {
     if (!response.success && response.error) {
       setError(response.error);
       return;
+    }
+
+    try {
+      const stored = localStorage.getItem('sukrutha_assigned_trips');
+      const allTrips = stored ? JSON.parse(stored) : [];
+      const newTrip = {
+        id: `TRIP-BOOK-${Date.now()}`,
+        driverName: user?.name || 'Unknown',
+        driverEmail: user?.email || '',
+        vehicle: bookingPayload.vehicleNumber || 'N/A',
+        origin: bookingPayload.departure,
+        destination: bookingPayload.destination,
+        tripDate: bookingPayload.date,
+        startTime: bookingPayload.time,
+        endTime: '',
+        tripCost: Number(bookingPayload.price) || 0,
+        customerName: bookingPayload.customerName,
+        customerPhone: bookingPayload.customerPhone,
+        customerEmail: user?.email || '',
+        numberOfPeople: Number(bookingPayload.passengers) || 1,
+        status: 'assigned',
+        createdAt: new Date().toISOString()
+      };
+      allTrips.unshift(newTrip);
+      localStorage.setItem('sukrutha_assigned_trips', JSON.stringify(allTrips));
+    } catch (err) {
+      console.error('Failed to sync booking to local trips:', err);
     }
 
     setSubmitted(true);
@@ -83,7 +289,7 @@ export default function SpotBooking() {
             backgroundColor="#120F17"
             glowRadius={40}
             glowIntensity={1}
-            className="p-8 border-white/5 shadow-2xl relative overflow-hidden h-full"
+            className="p-8 border-white/5 shadow-2xl relative h-full"
           >
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
@@ -92,31 +298,21 @@ export default function SpotBooking() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Departure Point</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors" />
-                    <input
-                      required
-                      type="text"
-                      value={booking.departure}
-                      onChange={(e) => setBooking(prev => ({ ...prev, departure: e.target.value }))}
-                      placeholder="Enter Pickup Location"
-                      className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner"
-                    />
-                  </div>
+                  <LocationAutocomplete
+                    value={booking.departure}
+                    onChange={(val) => setBooking(prev => ({ ...prev, departure: val }))}
+                    placeholder="Enter Pickup Location"
+                    icon={<MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors" />}
+                  />
                 </div>
                 <div className="space-y-3">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Destination Vector</label>
-                  <div className="relative group">
-                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 border-2 border-gray-700 rounded-full" />
-                    <input
-                      required
-                      type="text"
-                      value={booking.destination}
-                      onChange={(e) => setBooking(prev => ({ ...prev, destination: e.target.value }))}
-                      placeholder="Enter Dropoff Location"
-                      className="w-full pl-12 pr-6 py-4 bg-black/40 border border-white/10 rounded-2xl text-white placeholder-gray-700 focus:outline-none focus:border-blue-500/50 shadow-inner"
-                    />
-                  </div>
+                  <LocationAutocomplete
+                    value={booking.destination}
+                    onChange={(val) => setBooking(prev => ({ ...prev, destination: val }))}
+                    placeholder="Enter Dropoff Location"
+                    icon={<div className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 border-2 border-gray-700 rounded-full" />}
+                  />
                 </div>
               </div>
 
@@ -204,24 +400,41 @@ export default function SpotBooking() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 italic">Machine Allocation</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {vehicles.map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => setBooking(prev => ({ ...prev, car: v.id }))}
-                      className={`p-4 rounded-2xl text-center transition-all group ${booking.car === v.id
-                          ? 'clay-btn clay-btn-blue border-none shadow-blue-900/40'
-                          : 'bg-black/20 text-gray-600 hover:text-white hover:bg-white/5 border border-white/5 shadow-inner'
-                        }`}
-                    >
-                      <Car className={`w-6 h-6 mx-auto mb-2 ${booking.car === v.id ? '' : 'text-gray-700 group-hover:text-blue-500/50'}`} />
-                      <div className="text-[10px] font-black uppercase tracking-tighter leading-none">{v.name}</div>
-                      <div className="text-[8px] font-bold opacity-40 mt-1 uppercase">{v.seats} Seats</div>
-                    </button>
-                  ))}
+                <div className="relative group">
+                  <Car className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-700 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+                  <select
+                    value={booking.vehicleNumber ? `${booking.car}|${booking.vehicleNumber}` : booking.car}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.includes('|')) {
+                        const [carName, plate] = val.split('|');
+                        setBooking(prev => ({ ...prev, car: carName, vehicleNumber: plate }));
+                      } else {
+                        setBooking(prev => ({ ...prev, car: val, vehicleNumber: '' }));
+                      }
+                    }}
+                    className="w-full pl-12 pr-12 py-4 bg-black/40 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-blue-500/50 shadow-inner appearance-none transition-all cursor-pointer text-sm font-bold uppercase tracking-wider"
+                  >
+                    <option value="" disabled className="bg-[#120F17] text-gray-600">Select Vehicle</option>
+                    {fleetVehicles.length > 0 ? (
+                      fleetVehicles.map((v) => (
+                        <option key={v.number} value={`${v.name}|${v.number}`} className="bg-[#120F17]">
+                          {v.name.toUpperCase()} - {v.number}
+                        </option>
+                      ))
+                    ) : (
+                      vehicles.map((v) => (
+                        <option key={v.id} value={v.id} className="bg-[#120F17]">
+                          {v.name.toUpperCase()} ({v.seats} SEATS)
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  <div className="absolute right-5 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-500 text-xs">
+                    ▼
+                  </div>
                 </div>
               </div>
 

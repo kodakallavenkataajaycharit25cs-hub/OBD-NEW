@@ -1,5 +1,5 @@
 const postgres = require('postgres');
-require('dotenv').config();
+require('dotenv').config({ path: 'backend/.env' });
 
 const sql = postgres(process.env.DATABASE_URL);
 

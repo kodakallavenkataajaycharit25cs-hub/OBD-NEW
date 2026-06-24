@@ -20,14 +20,18 @@ export default function CreateDriver() {
         setExistingPilots(pilots);
         
         const ownerId = user?.id || 'owner-default';
-        const myDrivers = pilots.filter((p: any) => p.owner_id === ownerId);
+        const myDrivers = pilots.filter((p: any) => 
+          p.owner_id && ownerId && 
+          String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '')
+        );
         
         if (myDrivers.length === 0) {
           setPilotForm(prev => ({ ...prev, id: 'D01' }));
         } else {
           let maxNum = 0;
           myDrivers.forEach((d: any) => {
-            const match = d.id.match(/^D(\d+)$/i);
+            const actualId = d.id.includes('_') ? d.id.split('_')[1] : d.id;
+            const match = actualId.match(/^D(\d+)$/i);
             if (match) {
               const num = parseInt(match[1], 10);
               if (num > maxNum) {
@@ -63,7 +67,12 @@ export default function CreateDriver() {
       return;
     }
 
-    const duplicateId = existingPilots.find(p => p.id.toLowerCase() === pilotForm.id.toLowerCase());
+    const ownerId = user?.id || 'owner-default';
+    const duplicateId = existingPilots.find(p => 
+      String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '') &&
+      (p.id.toLowerCase() === pilotForm.id.toLowerCase() || 
+       (p.id.includes('_') && p.id.split('_')[1].toLowerCase() === pilotForm.id.toLowerCase()))
+    );
     const duplicateEmail = pilotForm.email && existingPilots.find(p => p.email?.toLowerCase() === pilotForm.email.toLowerCase());
     const duplicatePhone = pilotForm.contact && existingPilots.find(p => p.contact === pilotForm.contact);
 
@@ -83,11 +92,11 @@ export default function CreateDriver() {
       return;
     }
     
-    // Fallback to a default owner ID if user.id is somehow missing
-    const ownerId = user?.id || 'owner-default';
+    const dbId = `${ownerId}_${pilotForm.id}`;
     
     await createPilot({ 
       ...pilotForm, 
+      id: dbId,
       owner_id: ownerId, 
       trips: 0, 
       hours: 0, 
@@ -102,13 +111,18 @@ export default function CreateDriver() {
     // Auto-calculate the next ID
     const updatedPilots = await fetchPilots();
     setExistingPilots(updatedPilots);
-    const myDrivers = updatedPilots.filter((p: any) => p.owner_id === ownerId);
+    const myDrivers = updatedPilots.filter((p: any) => 
+      p.owner_id && ownerId && 
+      String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '')
+    );
     let maxNum = 0;
     myDrivers.forEach((d: any) => {
-      const match = d.id.match(/^D(\d+)$/i);
+      const actualId = d.id.includes('_') ? d.id.split('_')[1] : d.id;
+      const match = actualId.match(/^D(\d+)$/i);
       if (match) {
         const num = parseInt(match[1], 10);
         if (num > maxNum) {
+          num;
           maxNum = num;
         }
       }
@@ -189,7 +203,7 @@ export default function CreateDriver() {
                 <input 
                   type="email" 
                   value={pilotForm.email} 
-                  onChange={e => setPilotForm({...pilotForm, email: e.target.value})} 
+                  onChange={e => setPilotForm({...pilotForm, email: e.target.value.toLowerCase()})} 
                   className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors" 
                   placeholder="driver@example.com" 
                 />

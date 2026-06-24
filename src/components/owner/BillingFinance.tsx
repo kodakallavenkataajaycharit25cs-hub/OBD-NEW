@@ -69,18 +69,26 @@ export default function BillingFinance() {
   const [peopleCount, setPeopleCount] = useState(1);
   const [totalAmount, setTotalAmount] = useState(0);
   const [customOption, setCustomOption] = useState('');
+  const [ownerId, setOwnerId] = useState<string>('');
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const owners = await fetchOwners();
-        const currentOwner = owners.find((o: any) => o.email === user?.email) || owners[0];
+        const currentOwner = owners.find((o: any) => o.email?.toLowerCase() === user?.email?.toLowerCase()) || owners[0];
         if (currentOwner) {
           setRevenue(Number(currentOwner.revenue));
+          setOwnerId(currentOwner.id);
         }
 
         const expenseData = await fetchExpenses();
-        const mappedExpenses = expenseData.map((exp: any) => ({
+        const filteredExpenses = expenseData.filter(
+          (exp: any) =>
+            currentOwner && exp.owner_id &&
+            String(exp.owner_id).trim().replace(/^0+/, '') === String(currentOwner.id).trim().replace(/^0+/, '')
+        );
+
+        const mappedExpenses = filteredExpenses.map((exp: any) => ({
           id: exp.id,
           customer: exp.vendor,
           date: exp.date,
@@ -98,7 +106,12 @@ export default function BillingFinance() {
         setInvoices(mappedExpenses);
 
         const pmData = await fetchPricingModels();
-        setPricingModels(pmData);
+        const filteredPM = pmData.filter(
+          (pm: any) =>
+            currentOwner && pm.owner_id &&
+            String(pm.owner_id).trim().replace(/^0+/, '') === String(currentOwner.id).trim().replace(/^0+/, '')
+        );
+        setPricingModels(filteredPM);
       } catch (err) {
         console.error('Failed to load data for BillingFinance:', err);
       }
@@ -161,7 +174,8 @@ export default function BillingFinance() {
           name: modelName,
           people_count: Number(peopleCount),
           total_amount: Number(totalAmount),
-          custom_option: customOption
+          custom_option: customOption,
+          owner_id: ownerId
         });
         setPricingModels(prev => prev.map(m => m.id === editingPricingModel.id ? updated : m));
       } else {
@@ -171,7 +185,8 @@ export default function BillingFinance() {
           name: modelName,
           people_count: Number(peopleCount),
           total_amount: Number(totalAmount),
-          custom_option: customOption
+          custom_option: customOption,
+          owner_id: ownerId
         };
         const created = await createPricingModel(newItem);
         setPricingModels(prev => [created, ...prev]);

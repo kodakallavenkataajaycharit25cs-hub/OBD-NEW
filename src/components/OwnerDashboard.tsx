@@ -33,7 +33,6 @@ import DriverManagement from './owner/DriverManagement';
 import CreateDriver from './owner/CreateDriver';
 import UpdateDriver from './owner/UpdateDriver';
 import DeleteDriver from './owner/DeleteDriver';
-import SafetyEmergency from './owner/SafetyEmergency';
 import Maintenance from './owner/Maintenance';
 import BillingFinance from './owner/BillingFinance';
 import TripAssignment from './owner/TripAssignment';
@@ -78,7 +77,6 @@ export default function OwnerDashboard() {
     { name: 'Fleet Health', href: '/owner/health', icon: Car, current: location.pathname === '/owner/health' },
     { name: 'Driver Management', href: '/owner/drivers', icon: Users, current: location.pathname === '/owner/drivers' },
 
-    { name: 'Safety & Emergency', href: '/owner/safety', icon: Shield, current: location.pathname === '/owner/safety' },
     { name: 'Maintenance', href: '/owner/maintenance', icon: Wrench, current: location.pathname === '/owner/maintenance' },
     { name: 'Trip Assignment', href: '/owner/trip-assign', icon: RouteIcon, current: location.pathname === '/owner/trip-assign' },
     { name: 'Billing & Finance', href: '/owner/billing', icon: CreditCard, current: location.pathname === '/owner/billing' },
@@ -275,7 +273,6 @@ export default function OwnerDashboard() {
               <Route path="/drivers/create" element={<CreateDriver />} />
               <Route path="/drivers/update" element={<UpdateDriver />} />
               <Route path="/drivers/remove" element={<DeleteDriver />} />
-              <Route path="/safety" element={<SafetyEmergency />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/trip-assign" element={<TripAssignment />} />
               <Route path="/billing" element={<BillingFinance />} />

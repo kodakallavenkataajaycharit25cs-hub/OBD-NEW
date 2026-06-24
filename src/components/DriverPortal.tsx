@@ -21,7 +21,10 @@ import {
   ShieldAlert,
   Plus,
   Trash2,
-  X
+  X,
+  Users,
+  Phone,
+  CheckCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../services/supabaseClient';
@@ -108,7 +111,16 @@ export default function DriverPortal() {
         
         // Filter trips for this pilot
         if (record) {
-          const myTrips = tripsData.filter((t: any) => t.pilot_id === record.id);
+          const storedTrips = localStorage.getItem('sukrutha_assigned_trips');
+          let myTrips = [];
+          if (storedTrips) {
+            const allTrips = JSON.parse(storedTrips);
+            myTrips = allTrips.filter((t: any) => 
+              t.driverName === record.name || 
+              t.driverEmail === record.email ||
+              t.customerEmail === record.email
+            );
+          }
           setTrips(myTrips);
         }
 
@@ -126,9 +138,61 @@ export default function DriverPortal() {
 
     updateTelemetry();
     loadPilotProfile();
-    const interval = setInterval(updateTelemetry, 2000); 
+    const interval = setInterval(() => {
+      updateTelemetry();
+      loadPilotProfile();
+    }, 4000); 
     return () => clearInterval(interval);
   }, [user]);
+
+  const handleCompleteTrip = async (tripId: string) => {
+    const confirmed = window.confirm('Are you sure you want to mark this trip as completed?');
+    if (!confirmed) return;
+
+    try {
+      // 1. Update local storage trip status
+      const stored = localStorage.getItem('sukrutha_assigned_trips');
+      if (stored) {
+        const allTrips = JSON.parse(stored);
+        const updated = allTrips.map((t: any) => t.id === tripId ? { ...t, status: 'completed' } : t);
+        localStorage.setItem('sukrutha_assigned_trips', JSON.stringify(updated));
+        
+        if (pilotRecord) {
+          setTrips(updated.filter((t: any) => 
+            t.driverName === pilotRecord.name || 
+            t.driverEmail === user?.email ||
+            t.customerEmail === user?.email
+          ));
+        }
+      }
+
+      // Find the trip details to send to owner
+      const targetTrip = trips.find((t: any) => t.id === tripId);
+
+      // 2. Send notification to owner
+      if (user?.email && targetTrip) {
+        const notificationPayload = {
+          departure: targetTrip.origin || 'N/A',
+          destination: targetTrip.destination || 'N/A',
+          passengers: targetTrip.numberOfPeople || '1',
+          car: 'Trip Completed',
+          date: targetTrip.tripDate || new Date().toISOString().split('T')[0],
+          time: targetTrip.startTime || new Date().toTimeString().split(' ')[0],
+          customerName: `TRIP COMPLETED - ${targetTrip.customerName || 'Customer'}`,
+          customerPhone: targetTrip.customerPhone || 'N/A',
+          price: targetTrip.tripCost || '0',
+          driverEmail: user?.email,
+          driverName: user?.name || 'Driver'
+        };
+        await createBooking(notificationPayload);
+      }
+
+      alert('✅ Trip successfully completed! Notification sent to fleet owner.');
+    } catch (err) {
+      console.error('Failed to complete trip:', err);
+      alert('Error updating trip completion.');
+    }
+  };
 
   const handleSectionHighlight = (section: string) => {
     setHighlightedSection(section);
@@ -684,53 +748,173 @@ export default function DriverPortal() {
     </div>
   );
 
-  const TripLogsSection = () => (
-    <div className="space-y-8">
-      <BorderGlow
-        borderRadius={28}
-        backgroundColor="#120F17"
-        glowRadius={40}
-        glowIntensity={1}
-        className="p-8 border-white/5 h-full"
-      >
-        <h2 className="text-2xl font-black text-white mb-10 tracking-tighter uppercase clay-text-3d">Historical Missions</h2>
+  const TripLogsSection = () => {
+    // Helper to calculate status
+    const getTripStatus = (trip: any) => {
+      if (trip.status === 'completed' || trip.status === 'cancelled') {
+        return trip.status;
+      }
+      if (!trip.tripDate || !trip.startTime) return 'upcoming';
+      try {
+        const start = new Date(`${trip.tripDate}T${trip.startTime}`);
+        if (isNaN(start.getTime())) return 'upcoming';
+        const now = new Date();
+        const end = trip.endTime ? new Date(`${trip.tripDate}T${trip.endTime}`) : new Date(start.getTime() + 3 * 60 * 60 * 1000);
+        if (now >= start && now <= end) return 'ongoing';
+        if (now > end) return 'previous';
+      } catch (e) {}
+      return 'upcoming';
+    };
 
-        <div className="space-y-4">
-          {trips.length > 0 ? trips.map((trip, index) => (
-            <BorderGlow
-              key={index}
-              borderRadius={28}
-              glowRadius={40}
-              glowIntensity={1}
-              backgroundColor="#120F17"
-              className="p-6 shadow-inner hover:bg-white/5 transition-all group border-white/5"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-black text-white tracking tight uppercase group-hover:text-blue-400 transition-colors">Mission Vector: {trip.id}</h3>
-                  <div className="flex items-center space-x-4 text-[10px] font-black uppercase tracking-widest text-gray-600 mt-2">
-                    <span className="flex items-center"><Calendar className="w-3 h-3 mr-1 text-blue-500/50" /> {formatDate(trip.start_time)}</span>
-                    <span className="flex items-center"><TrendingUp className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.distance} km</span>
-                    <span className="flex items-center"><Activity className="w-3 h-3 mr-1 text-blue-500/50" /> {trip.status}</span>
+    const categorized = trips.reduce((acc: any, t: any) => {
+      const status = getTripStatus(t);
+      if (status === 'ongoing') acc.ongoing.push(t);
+      else if (status === 'upcoming') acc.upcoming.push(t);
+      else acc.previous.push(t);
+      return acc;
+    }, { upcoming: [], ongoing: [], previous: [] });
+
+    // Sort and slice previous
+    categorized.previous.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    const recentPrevious = categorized.previous.slice(0, 3);
+
+    return (
+      <div className="space-y-10">
+        {/* Ongoing Section */}
+        <BorderGlow
+          borderRadius={28}
+          backgroundColor="#120F17"
+          glowRadius={40}
+          glowIntensity={1}
+          className="p-8 border-white/5"
+        >
+          <div className="flex items-center space-x-3 mb-6">
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-ping" />
+            <h2 className="text-xl font-black text-white tracking-tighter uppercase">Ongoing Missions</h2>
+          </div>
+
+          <div className="space-y-4">
+            {categorized.ongoing.length > 0 ? categorized.ongoing.map((trip: any, index: number) => (
+              <BorderGlow
+                key={index}
+                borderRadius={28}
+                glowRadius={40}
+                glowIntensity={1}
+                backgroundColor="#15121B"
+                className="p-6 border-white/10 shadow-lg"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                    <h3 className="text-lg font-black text-yellow-400 tracking-tight uppercase">Vector: {trip.id}</h3>
+                    <p className="text-xs font-black text-white mt-1 uppercase tracking-wider">{trip.origin} → {trip.destination}</p>
+                    <div className="flex flex-wrap items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500 mt-3">
+                      <span className="flex items-center"><Calendar className="w-3.5 h-3.5 mr-1.5 text-yellow-500/50" /> {trip.tripDate} @ {trip.startTime}</span>
+                      <span className="flex items-center"><Users className="w-3.5 h-3.5 mr-1.5 text-yellow-500/50" /> {trip.customerName} ({trip.numberOfPeople} pax)</span>
+                      <span className="flex items-center"><Phone className="w-3.5 h-3.5 mr-1.5 text-yellow-500/50" /> {trip.customerPhone}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-6 justify-between md:justify-end">
+                    <div className="text-right">
+                      <div className="text-2xl font-black text-green-400 tracking-tighter">₹{trip.tripCost}</div>
+                      <div className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">Value</div>
+                    </div>
+                    <button
+                      onClick={() => handleCompleteTrip(trip.id)}
+                      className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-lg shadow-green-900/30"
+                    >
+                      Complete Trip
+                    </button>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl md:text-3xl font-black text-green-400 tracking-tighter">
-                    {formatIndianCurrency(trip.distance * 15)}
+              </BorderGlow>
+            )) : (
+              <div className="text-center py-8 bg-black/20 rounded-2xl border border-white/5">
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">No active ongoing missions in current time coordinate.</p>
+              </div>
+            )}
+          </div>
+        </BorderGlow>
+
+        {/* Upcoming Section */}
+        <BorderGlow
+          borderRadius={28}
+          backgroundColor="#120F17"
+          glowRadius={40}
+          glowIntensity={1}
+          className="p-8 border-white/5"
+        >
+          <div className="flex items-center space-x-3 mb-6">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+            <h2 className="text-xl font-black text-white tracking-tighter uppercase">Upcoming Missions</h2>
+          </div>
+
+          <div className="space-y-4">
+            {categorized.upcoming.length > 0 ? categorized.upcoming.map((trip: any, index: number) => (
+              <div key={index} className="p-6 bg-black/30 border border-white/5 hover:border-white/10 rounded-2xl transition-all">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-md font-black text-blue-400 tracking-tight uppercase">Vector: {trip.id}</h3>
+                    <p className="text-xs font-bold text-gray-300 mt-1 uppercase tracking-wider">{trip.origin} → {trip.destination}</p>
+                    <div className="flex flex-wrap items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500 mt-3">
+                      <span className="flex items-center"><Calendar className="w-3.5 h-3.5 mr-1.5 text-blue-500/30" /> {trip.tripDate} @ {trip.startTime}</span>
+                      <span className="flex items-center"><Users className="w-3.5 h-3.5 mr-1.5 text-blue-500/30" /> {trip.customerName}</span>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-gray-700 font-bold uppercase tracking-widest mt-1">Mission Credit</div>
+                  <div className="text-right">
+                    <div className="text-xl font-black text-white/80">₹{trip.tripCost}</div>
+                    <div className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-0.5">Value</div>
+                  </div>
                 </div>
               </div>
-            </BorderGlow>
-          )) : (
-            <div className="text-center py-20 bg-black/20 rounded-3xl border border-dashed border-white/5">
-              <p className="text-gray-500 font-black uppercase tracking-widest text-xs">No mission logs detected in current sector.</p>
-            </div>
-          )}
-        </div>
-      </BorderGlow>
-    </div>
-  );
+            )) : (
+              <div className="text-center py-8 bg-black/20 rounded-2xl border border-white/5">
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">No upcoming scheduled vectors detected.</p>
+              </div>
+            )}
+          </div>
+        </BorderGlow>
+
+        {/* Previous Section */}
+        <BorderGlow
+          borderRadius={28}
+          backgroundColor="#120F17"
+          glowRadius={40}
+          glowIntensity={1}
+          className="p-8 border-white/5"
+        >
+          <div className="flex items-center space-x-3 mb-6">
+            <span className="w-2.5 h-2.5 rounded-full bg-gray-500" />
+            <h2 className="text-xl font-black text-white tracking-tighter uppercase">Previous Missions (Recent 3)</h2>
+          </div>
+
+          <div className="space-y-4">
+            {recentPrevious.length > 0 ? recentPrevious.map((trip: any, index: number) => (
+              <div key={index} className="p-5 bg-black/10 border border-white/5 rounded-2xl opacity-60 hover:opacity-100 transition-opacity">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-black text-gray-400 tracking-tight uppercase">Vector: {trip.id}</h3>
+                    <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">{trip.origin} → {trip.destination}</p>
+                    <div className="flex flex-wrap items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-600 mt-2">
+                      <span className="flex items-center"><Calendar className="w-3.5 h-3.5 mr-1.5" /> {trip.tripDate} @ {trip.startTime}</span>
+                      <span className="flex items-center"><CheckCircle className="w-3.5 h-3.5 mr-1.5 text-green-500" /> {trip.status.toUpperCase()}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-black text-gray-400">₹{trip.tripCost}</div>
+                    <div className="text-[9px] text-gray-700 font-bold uppercase tracking-widest mt-0.5">Value</div>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="text-center py-8 bg-black/20 rounded-2xl border border-white/5">
+                <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">No historical data logs in archive.</p>
+              </div>
+            )}
+          </div>
+        </BorderGlow>
+      </div>
+    );
+  };
 
   const EarningsSection = () => (
     <div className="space-y-8">
@@ -1026,14 +1210,6 @@ export default function DriverPortal() {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button
-              onClick={handleTriggerSOS}
-              disabled={sosLoading}
-              className={`flex items-center px-6 py-3 bg-red-600 border-none text-white transition-all active:scale-95 group shadow-[0_0_20px_rgba(220,38,38,0.4)] rounded-2xl ${sosLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700'}`}
-            >
-              <ShieldAlert className={`w-5 h-5 mr-3 ${sosLoading ? 'animate-spin' : 'animate-pulse'}`} />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">{sosLoading ? 'Broadcasting...' : 'TRIGGER SOS'}</span>
-            </button>
             <div className="flex flex-col text-right">
               <span className="text-[8px] font-black uppercase tracking-widest text-gray-600 italic">Auth Level 4</span>
               <span className="text-sm font-black text-white uppercase tracking-tight">{user?.name}</span>

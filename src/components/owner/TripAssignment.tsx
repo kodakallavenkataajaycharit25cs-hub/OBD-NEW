@@ -14,13 +14,148 @@ import {
   Edit,
   X,
   Clock,
-  ChevronDown
+  ChevronDown,
+  Bookmark
 } from 'lucide-react';
 import { CustomDateInput, CustomTimeInput } from '../ui/DateTimeInputs';
 import BorderGlow from '../BorderGlow';
 import { fetchPilots } from '../../services/obdApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDate, formatTime } from '../../utils/dateFormat';
+
+interface LocationAutocompleteProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  className: string;
+}
+
+function LocationAutocomplete({ value, onChange, placeholder, className }: LocationAutocompleteProps) {
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  React.useEffect(() => {
+    if (value.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const localDb = [
+          { name: "RNSIT Entrance Location", type: "bookmark", desc: "Your list · 1 place" },
+          { name: "RNSIT Entrance Saved", type: "bookmark", desc: "Saved in RNSIT Entrance Lo..." },
+          { name: "RNS Institute of Technology (RNSIT)", type: "history", desc: "RNSIT College, Bangarappa Nagara, Bengaluru, Karnataka 560098" },
+          { name: "RNSIT CSE Department", type: "pin", desc: "Uttarahalli Main Road, Bengaluru" },
+          { name: "RNSIT College Bus Stand", type: "pin", desc: "23rd Cross Road, Dwaraka Nagar, Bengaluru" },
+          { name: "MG Road, Bengaluru", type: "history", desc: "Mahatma Gandhi Road, Bengaluru, Karnataka 560001" },
+          { name: "MG Road Metro Station", type: "pin", desc: "MG Road, Shivaji Nagar, Bengaluru, Karnataka" },
+          { name: "Indiranagar, Bengaluru", type: "pin", desc: "Bengaluru, Karnataka 560038" },
+          { name: "Koramangala, Bengaluru", type: "pin", desc: "Bengaluru, Karnataka" },
+          { name: "Kempegowda International Airport (BLR)", type: "pin", desc: "Devenahalli, Bengaluru, Karnataka" },
+          { name: "Majestic Railway Station", type: "history", desc: "Gubbi Thotadappa Road, Bengaluru" },
+          { name: "Electronic City Phase 1", type: "pin", desc: "Hosur Road, Bengaluru, Karnataka" },
+          { name: "Whitefield Inner Ring Road", type: "pin", desc: "Mahadevapura, Bengaluru" }
+        ];
+
+        const query = value.toLowerCase();
+        const queryNormalized = query.replace('benguluru', 'bengaluru');
+        const localMatches = localDb.filter(item => 
+          item.name.toLowerCase().includes(query) || 
+          item.desc.toLowerCase().includes(query) ||
+          item.name.toLowerCase().includes(queryNormalized) || 
+          item.desc.toLowerCase().includes(queryNormalized)
+        );
+
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&countrycodes=in&limit=10`, {
+          headers: { 'User-Agent': 'Sukrutha-Mobility-Client' }
+        });
+        const globalData = await response.json();
+        const globalMatches = globalData.map((item: any) => ({
+          name: item.name || item.display_name.split(',')[0],
+          type: "pin",
+          desc: item.display_name
+        }));
+
+        const combined = [
+          ...localMatches,
+          ...globalMatches.filter(g => !localMatches.some(l => l.name.toLowerCase() === g.name.toLowerCase()))
+        ];
+
+        setSuggestions(combined);
+      } catch (err) {
+        console.error("Autocomplete fetch error:", err);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [value]);
+
+  const handleSelect = (name: string) => {
+    onChange(name);
+    setShowDropdown(false);
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'bookmark':
+        return <Bookmark className="w-4 h-4 text-blue-500" />;
+      case 'history':
+        return <Clock className="w-4 h-4 text-gray-400" />;
+      default:
+        return <MapPin className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  return (
+    <div className="relative group w-full" ref={dropdownRef}>
+      <input
+        required
+        type="text"
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setShowDropdown(true);
+        }}
+        onFocus={() => setShowDropdown(true)}
+        placeholder={placeholder}
+        className={className}
+      />
+      
+      {showDropdown && suggestions.length > 0 && (
+        <div className="absolute left-0 right-0 mt-2 bg-[#120F17] rounded-2xl shadow-2xl z-50 border border-white/10 overflow-hidden divide-y divide-white/5 overflow-y-auto max-h-72">
+          {suggestions.map((item, i) => (
+            <button
+              type="button"
+              key={i}
+              onClick={() => handleSelect(item.name)}
+              className="w-full px-5 py-3 flex items-start space-x-4 hover:bg-white/5 transition-colors text-left"
+            >
+              <div className="mt-1 flex-shrink-0">
+                {getIcon(item.type)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="block text-sm font-bold text-white truncate">{item.name}</span>
+                <span className="block text-xs text-gray-500 truncate mt-0.5">{item.desc}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface TripAssignment {
   id: string;
@@ -72,6 +207,23 @@ export default function TripAssignment() {
   const [viewTripId, setViewTripId] = useState<string | null>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
 
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('sukrutha_assigned_trips');
+    if (stored) {
+      setTrips(JSON.parse(stored));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      localStorage.setItem('sukrutha_assigned_trips', JSON.stringify(trips));
+    }
+  }, [trips]);
+
   useEffect(() => {
     if (viewTripId && detailsRef.current) {
       detailsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -83,7 +235,10 @@ export default function TripAssignment() {
       try {
         const data = await fetchPilots();
         const ownerId = user?.id || 'owner-default';
-        const myPilots = (data || []).filter((p: any) => p.owner_id === ownerId);
+        const myPilots = (data || []).filter((p: any) => 
+          p.owner_id && ownerId && 
+          String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '')
+        );
         setPilots(myPilots);
       } catch (err) {
         console.error('Failed to load pilots:', err);
@@ -103,10 +258,13 @@ export default function TripAssignment() {
       const simulatedDuration = calculateMockDuration(form.origin, form.destination);
       const totalDurationWithBuffer = simulatedDuration + 1; // 1 hr buffer
       
-      const startDate = new Date(`${form.tripDate}T${form.startTime}`);
+      const [year, month, day] = form.tripDate.split('-').map(Number);
+      const [hours, minutes] = form.startTime.split(':').map(Number);
+      const startDate = new Date(year, month - 1, day, hours, minutes);
       if (isNaN(startDate.getTime())) return '';
       
-      startDate.setHours(startDate.getHours() + totalDurationWithBuffer);
+      const bufferMinutes = Math.round(totalDurationWithBuffer * 60);
+      startDate.setMinutes(startDate.getMinutes() + bufferMinutes);
       return formatTime(startDate);
     }
     return '';
@@ -116,7 +274,6 @@ export default function TripAssignment() {
 
   const isDriverAvailable = (driverName: string) => {
     const pilot = pilots.find(p => p.name === driverName);
-    if (pilot && (pilot.availability === 'off-duty' || pilot.availability === 'offday' || pilot.availability === 'unavailable')) return false;
 
     if (!form.tripDate || !form.startTime || !calculatedEndTime) return true;
 
@@ -376,20 +533,18 @@ Drive safe and please confirm receipt of this message!`;
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className={labelClass}>From (Origin) *</label>
-                      <input
-                        required
+                      <LocationAutocomplete
                         value={form.origin}
-                        onChange={e => setForm({ ...form, origin: e.target.value })}
+                        onChange={(val) => setForm({ ...form, origin: val })}
                         className={inputClass}
                         placeholder="e.g. Mumbai Airport"
                       />
                     </div>
                     <div>
                       <label className={labelClass}>To (Destination) *</label>
-                      <input
-                        required
+                      <LocationAutocomplete
                         value={form.destination}
-                        onChange={e => setForm({ ...form, destination: e.target.value })}
+                        onChange={(val) => setForm({ ...form, destination: val })}
                         className={inputClass}
                         placeholder="e.g. Pune"
                       />
@@ -464,7 +619,7 @@ Drive safe and please confirm receipt of this message!`;
                     <input
                       type="email"
                       value={form.customerEmail}
-                      onChange={e => setForm({ ...form, customerEmail: e.target.value })}
+                      onChange={e => setForm({ ...form, customerEmail: e.target.value.toLowerCase() })}
                       className={inputClass}
                       placeholder="customer@email.com"
                     />
@@ -655,11 +810,21 @@ Drive safe and please confirm receipt of this message!`;
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className={labelClass}>From (Origin) *</label>
-                  <input required value={form.origin} onChange={e => setForm({ ...form, origin: e.target.value })} className={inputClass} placeholder="e.g. Mumbai Airport" />
+                  <LocationAutocomplete
+                    value={form.origin}
+                    onChange={(val) => setForm({ ...form, origin: val })}
+                    className={inputClass}
+                    placeholder="e.g. Mumbai Airport"
+                  />
                 </div>
                 <div>
                   <label className={labelClass}>To (Destination) *</label>
-                  <input required value={form.destination} onChange={e => setForm({ ...form, destination: e.target.value })} className={inputClass} placeholder="e.g. Pune" />
+                  <LocationAutocomplete
+                    value={form.destination}
+                    onChange={(val) => setForm({ ...form, destination: val })}
+                    className={inputClass}
+                    placeholder="e.g. Pune"
+                  />
                 </div>
                 <div>
                   <label className={labelClass}>Trip Date *</label>
@@ -713,7 +878,7 @@ Drive safe and please confirm receipt of this message!`;
                   <input
                     type="email"
                     value={form.customerEmail}
-                    onChange={e => setForm({ ...form, customerEmail: e.target.value })}
+                    onChange={e => setForm({ ...form, customerEmail: e.target.value.toLowerCase() })}
                     className={inputClass}
                     placeholder="customer@email.com"
                   />

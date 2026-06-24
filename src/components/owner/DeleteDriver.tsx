@@ -16,7 +16,10 @@ export default function DeleteDriver() {
     try {
       const allPilots = await fetchPilots();
       const ownerId = user?.id || 'owner-default';
-      const myDrivers = allPilots.filter((p: any) => p.owner_id === ownerId);
+      const myDrivers = allPilots.filter((p: any) => 
+        p.owner_id && ownerId && 
+        String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '')
+      );
       setDrivers(myDrivers);
     } catch (error) {
       console.error('Failed to load drivers:', error);
@@ -86,7 +89,7 @@ export default function DeleteDriver() {
                     </div>
                     <div>
                       <h4 className="text-sm font-black text-white uppercase tracking-wider">{driver.name}</h4>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">ID: {driver.id}</p>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">ID: {driver.id.includes('_') ? driver.id.split('_')[1] : driver.id}</p>
                     </div>
                   </div>
                 </div>

@@ -40,7 +40,10 @@ export default function DriverManagement() {
       try {
         const allPilots = await fetchPilots();
         const ownerId = user?.id || 'owner-default';
-        const myDrivers = allPilots.filter((p: any) => p.owner_id === ownerId);
+        const myDrivers = allPilots.filter((p: any) => 
+          p.owner_id && ownerId && 
+          String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '')
+        );
         setDrivers(myDrivers);
         
         if (driverIdParam && myDrivers.some((d: any) => d.id === driverIdParam)) {
@@ -230,11 +233,7 @@ export default function DriverManagement() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-400">Score:</span>
-                    <span className="text-white ml-1">{driver.safety_score}/10</span>
-                  </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Vehicle:</span>
                     <span className="text-white ml-1">{driver.vehicle_model || 'Unknown'}</span>

@@ -12,6 +12,25 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
   const [ownerForm, setOwnerForm] = useState({ id: '', name: '', contact: '', email: '', password: '', fleetSize: 0, activeVehicles: 0, headquarters: '' });
   const [pilotForm, setPilotForm] = useState({ id: '', name: '', email: '', contact: '', password: '', owner_id: '', vehicleNumber: '', vehicleModel: '' });
 
+  React.useEffect(() => {
+    if (owners && owners.length > 0) {
+      let maxNum = 0;
+      owners.forEach((o: any) => {
+        const match = String(o.id).match(/^(?:O|0)?(\d+)$/i);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) {
+            maxNum = num;
+          }
+        }
+      });
+      const nextId = `O${String(maxNum + 1).padStart(2, '0')}`;
+      setOwnerForm(prev => ({ ...prev, id: nextId }));
+    } else {
+      setOwnerForm(prev => ({ ...prev, id: 'O01' }));
+    }
+  }, [owners]);
+
   const handleCreateOwner = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -63,7 +82,11 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
     setError('');
     setMessage('');
 
-    const duplicateId = pilots.find(p => p.id.toLowerCase() === pilotForm.id.toLowerCase());
+    const duplicateId = pilots.find(p => 
+      String(p.owner_id).trim().replace(/^0+/, '') === String(selectedFleetId).trim().replace(/^0+/, '') &&
+      (p.id.toLowerCase() === pilotForm.id.toLowerCase() || 
+       (p.id.includes('_') && p.id.split('_')[1].toLowerCase() === pilotForm.id.toLowerCase()))
+    );
     const duplicateEmail = pilotForm.email && pilots.find(p => p.email?.toLowerCase() === pilotForm.email.toLowerCase());
     const duplicatePhone = pilotForm.contact && pilots.find(p => p.contact === pilotForm.contact);
 
@@ -96,7 +119,8 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
     }
 
     const selectedOwner = owners.find(o => o.id === selectedFleetId);
-    await createPilot({ ...pilotForm, owner_id: selectedFleetId, trips: 0, hours: 0, safetyScore: 10, status: 'active', availability: 'off-duty', rating: 5 });
+    const dbId = `${selectedFleetId}_${pilotForm.id}`;
+    await createPilot({ ...pilotForm, id: dbId, owner_id: selectedFleetId, trips: 0, hours: 0, safetyScore: 10, status: 'active', availability: 'off-duty', rating: 5 });
     setMessage(`Driver added to ${selectedOwner?.name || 'fleet'} successfully!`);
     setPilotForm({ id: '', name: '', email: '', contact: '', password: '', owner_id: '', vehicleNumber: '', vehicleModel: '' });
     onRefresh();
@@ -104,7 +128,10 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
   };
 
   const selectedFleet = owners.find(o => o.id === selectedFleetId);
-  const fleetDrivers = selectedFleetId ? (pilots || []).filter((p: any) => p.owner_id === selectedFleetId) : [];
+  const fleetDrivers = selectedFleetId ? (pilots || []).filter((p: any) => 
+    p.owner_id && selectedFleetId && 
+    String(p.owner_id).trim().replace(/^0+/, '') === String(selectedFleetId).trim().replace(/^0+/, '')
+  ) : [];
 
   // If a fleet is selected, show the "Add Driver" form for that fleet
   if (selectedFleet) {
@@ -159,7 +186,7 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                <input type="email" value={pilotForm.email} onChange={e => setPilotForm({...pilotForm, email: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="driver@example.com" />
+                <input type="email" value={pilotForm.email} onChange={e => setPilotForm({...pilotForm, email: e.target.value.toLowerCase()})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-purple-500 outline-none" placeholder="driver@example.com" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
@@ -218,7 +245,7 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
-                <input type="email" value={ownerForm.email} onChange={e => setOwnerForm({...ownerForm, email: e.target.value})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
+                <input type="email" value={ownerForm.email} onChange={e => setOwnerForm({...ownerForm, email: e.target.value.toLowerCase()})} className="w-full bg-[#120F17] border border-white/5 rounded-lg p-3 text-white focus:border-blue-500 outline-none" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Password</label>
@@ -250,7 +277,10 @@ export const CreateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
         <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-4">Click on a fleet to add a new driver</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {owners.map(owner => {
-            const driverCount = (pilots || []).filter((p: any) => p.owner_id === owner.id).length;
+            const driverCount = (pilots || []).filter((p: any) => 
+              p.owner_id && owner.id && 
+              String(p.owner_id).trim().replace(/^0+/, '') === String(owner.id).trim().replace(/^0+/, '')
+            ).length;
             return (
               <div
                 key={owner.id}
@@ -301,7 +331,22 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
       return;
     }
 
-    await updateOwner(editingId!, editForm);
+    if (editForm.password) {
+      if (editForm.password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+      }
+      const confirmChange = window.confirm("Are you sure you want to change the password for this user?");
+      if (!confirmChange) {
+        return;
+      }
+    }
+
+    const res = await updateOwner(editingId!, editForm);
+    if (res && (res.error || res.success === false)) {
+      setError(res.error || 'Failed to update client.');
+      return;
+    }
     setEditingId(null);
     onRefresh();
   };
@@ -318,13 +363,31 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
       return;
     }
 
-    await updatePilot(editingId!, editForm);
+    if (editForm.password) {
+      if (editForm.password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+      }
+      const confirmChange = window.confirm("Are you sure you want to change the password for this user?");
+      if (!confirmChange) {
+        return;
+      }
+    }
+
+    const res = await updatePilot(editingId!, editForm);
+    if (res && (res.error || res.success === false)) {
+      setError(res.error || 'Failed to update driver.');
+      return;
+    }
     setEditingId(null);
     onRefresh();
   };
 
   const selectedFleet = owners.find((o: any) => o.id === selectedFleetId);
-  const fleetDrivers = selectedFleetId ? pilots.filter((p: any) => p.owner_id === selectedFleetId) : [];
+  const fleetDrivers = selectedFleetId ? pilots.filter((p: any) => 
+    p.owner_id && selectedFleetId && 
+    String(p.owner_id).trim().replace(/^0+/, '') === String(selectedFleetId).trim().replace(/^0+/, '')
+  ) : [];
 
   // Driver view: show drivers for the selected fleet
   if (tab === 'driver' && selectedFleet) {
@@ -376,7 +439,7 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                         </div>
                         <div>
                           <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email</label>
-                          <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
+                          <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value.toLowerCase()})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
                         </div>
                         <div>
                           <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
@@ -409,7 +472,7 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="text-sm font-black text-white uppercase tracking-wider">{driver.name}</h4>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">ID: {driver.id}</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">ID: {driver.id.includes('_') ? driver.id.split('_')[1] : driver.id}</p>
                         <div className="mt-2 space-y-0.5">
                           {driver.contact && <p className="text-xs text-gray-400">📞 {driver.contact}</p>}
                           {driver.email && <p className="text-xs text-gray-400">✉ {driver.email}</p>}
@@ -448,7 +511,10 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {owners.map((owner: any) => {
-            const driverCount = pilots.filter((p: any) => p.owner_id === owner.id).length;
+            const driverCount = pilots.filter((p: any) => 
+              p.owner_id && owner.id && 
+              String(p.owner_id).trim().replace(/^0+/, '') === String(owner.id).trim().replace(/^0+/, '')
+            ).length;
             return (
               <div
                 key={owner.id}
@@ -504,7 +570,7 @@ export const UpdateView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                     </div>
                     <div>
                       <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Email</label>
-                      <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
+                      <input type="email" value={editForm.email || ''} onChange={e => setEditForm({...editForm, email: e.target.value.toLowerCase()})} className="w-full bg-white/10 rounded-lg p-2 text-white text-sm" />
                     </div>
                     <div>
                       <label className="block text-[9px] font-bold text-gray-500 uppercase mb-1">Password</label>
@@ -575,7 +641,10 @@ export const RemoveView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
 
       <div className="space-y-4">
         {owners.map(client => {
-          const clientDrivers = pilots.filter(p => p.owner_id === client.id);
+          const clientDrivers = pilots.filter(p => 
+            p.owner_id && client.id && 
+            String(p.owner_id).trim().replace(/^0+/, '') === String(client.id).trim().replace(/^0+/, '')
+          );
           const isExpanded = expandedClient === client.id;
 
           return (
@@ -611,7 +680,7 @@ export const RemoveView = ({ onRefresh, owners, pilots }: { onRefresh: () => voi
                             <Car className="w-4 h-4 text-gray-400 group-hover:text-red-400 transition-colors" />
                             <div>
                               <div className="text-xs font-bold text-white">{driver.name}</div>
-                              <div className="text-[9px] text-gray-500 uppercase">{driver.id}</div>
+                              <div className="text-[9px] text-gray-500 uppercase">{driver.id.includes('_') ? driver.id.split('_')[1] : driver.id}</div>
                             </div>
                           </div>
                           <button 

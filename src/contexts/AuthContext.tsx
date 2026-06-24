@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        mapSupabaseUser(session.user);
+        await mapSupabaseUser(session.user);
       }
       setLoading(false);
     };
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for changes on auth state (logged in, signed out, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
-        mapSupabaseUser(session.user);
+        await mapSupabaseUser(session.user);
       } else {
         setUser(null);
       }
@@ -48,12 +48,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const mapSupabaseUser = (sbUser: SupabaseUser): User => {
+  const mapSupabaseUser = async (sbUser: SupabaseUser): Promise<User> => {
     const role = sbUser.user_metadata?.role || deriveRole(sbUser.email || '');
     const name = sbUser.user_metadata?.name || sbUser.email?.split('@')[0] || 'Unknown User';
 
+    let dbId = sbUser.id;
+
+    // Retrieve active session access token for authorization
+    const headers: Record<string, string> = {};
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+    } catch (e) {
+      console.error('Failed to get session for auth headers:', e);
+    }
+
+    if (role === 'owner' && sbUser.email) {
+      try {
+        const response = await fetch('http://localhost:5000/api/owners', { headers });
+        if (response.ok) {
+          const owners = await response.json();
+          const match = owners.find((o: any) => o.email?.toLowerCase() === sbUser.email?.toLowerCase());
+          if (match) {
+            dbId = match.id;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to map owner ID from DB:', err);
+      }
+    } else if (role === 'driver' && sbUser.email) {
+      try {
+        const response = await fetch('http://localhost:5000/api/pilots', { headers });
+        if (response.ok) {
+          const pilots = await response.json();
+          const match = pilots.find((p: any) => p.email?.toLowerCase() === sbUser.email?.toLowerCase());
+          if (match) {
+            dbId = match.id;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to map pilot ID from DB:', err);
+      }
+    }
+
     const mappedUser: User = {
-      id: sbUser.id,
+      id: dbId,
       email: sbUser.email || '',
       role: role as any,
       name: name
@@ -80,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
       if (data.user) {
-        const mappedUser = mapSupabaseUser(data.user);
+        const mappedUser = await mapSupabaseUser(data.user);
         return { success: true, user: mappedUser };
       }
       return { success: false, error: 'User mapping failed' };

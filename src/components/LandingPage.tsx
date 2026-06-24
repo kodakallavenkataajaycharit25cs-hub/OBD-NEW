@@ -131,9 +131,11 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         {/* Soft Background Blob */}
         <div className="absolute top-0 right-0 w-[45%] h-[60%] bg-blue-50/50 blur-[80px] rounded-full pointer-events-none" />
 
-        {/* Custom Light Header */}
         <header className="py-6 px-6 lg:px-12 max-w-7xl mx-auto flex justify-between items-center relative z-20">
-          <Link to="/" className="flex items-center space-x-2 group">
+          <Link to="/" className="flex items-center space-x-4 group">
+            <div className="w-11 h-11 bg-white text-black rounded-[1.2rem] flex items-center justify-center font-black text-xl shadow-xl transition-all group-hover:rotate-6">
+              S
+            </div>
             <span className="text-2xl font-black tracking-tighter text-slate-900">SUKRUTHA</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
@@ -153,7 +155,7 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
           <div>
             <button
               onClick={handleDashboardAccess}
-              className="px-6 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-full font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+              className="inline-flex items-center justify-center bg-[#EFF6FF] border border-[#BFDBFE] text-[#2563EB] px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-wider transition-all hover:bg-[#DBEAFE] active:scale-95"
             >
               {user ? 'View Dashboard' : 'Member Login'}
             </button>
@@ -263,8 +265,8 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
         </div>
 
       {/* Clay Stats Ticker */}
-      <section className="py-24 border-y border-white/5 bg-white/[0.02] overflow-hidden">
-        <div className="flex space-x-24 animate-marquee whitespace-nowrap">
+      <section className="py-[29px] border-y border-white/5 bg-white/[0.02] overflow-hidden">
+        <div className="flex space-x-16 animate-marquee whitespace-nowrap">
           {[
             { n: '50+', l: 'Strategic Partners' },
             { n: '₹2.5Cr', l: 'Fuel Cost Savings' },
@@ -273,10 +275,10 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
             { n: '15ms', l: 'Data Latency' },
             { n: '1.2M', l: 'Trips Tracked' }
           ].map((s, i) => (
-            <div key={i} className="flex items-center space-x-8">
-              <span className="text-7xl font-black text-white tracking-tighter clay-text-3d">{s.n}</span>
+            <div key={i} className="flex items-center space-x-6">
+              <span className="text-[35px] font-black text-white tracking-tighter clay-text-3d">{s.n}</span>
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 max-w-[120px] leading-tight whitespace-normal">{s.l}</span>
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full ml-12 opacity-30 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full ml-8 opacity-30 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
             </div>
           ))}
         </div>
@@ -315,21 +317,21 @@ export default function LandingPage({ onLoginClick }: LandingPageProps) {
 
 
       {/* Puffy CTA */}
-      <section className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="relative py-20 px-8 md:px-16 overflow-hidden text-center bg-blue-600 border-[3px] border-white/10 rounded-2xl">
+      <section className="py-12 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative py-[52px] px-10 md:px-16 overflow-hidden text-center bg-blue-600 border-[3px] border-white/10 rounded-2xl">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
             
-            <h2 className="text-3x2 md:text-5xl font-black text-white mb-4 relative z-10 uppercase font-display tracking-wide">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 relative z-10 uppercase font-display tracking-wide">
               READY FOR THE LONG HAUL?
             </h2>
             
-            <p className="text-base md:text-lg text-blue-100 mb-10 max-w-2xl mx-auto relative z-10 font-normal tracking-wide">
+            <p className="text-sm md:text-base text-blue-100 mb-8 max-w-xl mx-auto relative z-10 font-normal tracking-wide">
               Connect with our mobility experts to scale and optimize your fleet operations.
             </p>
             
             <div className="flex justify-center relative z-10">
-              <Link to="/contact" className="px-8 py-3.5 bg-white text-black border border-gray-200 rounded-xl font-black hover:bg-gray-100 transition-colors uppercase tracking-widest text-xs">
+              <Link to="/contact" className="px-8 py-3 bg-white text-black border border-gray-200 rounded-xl font-black hover:bg-gray-100 transition-colors uppercase tracking-widest text-xs">
                 GET IN TOUCH
               </Link>
             </div>

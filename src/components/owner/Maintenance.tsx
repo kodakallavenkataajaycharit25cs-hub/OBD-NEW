@@ -16,13 +16,12 @@ import {
 import BorderGlow from '../BorderGlow';
 import { formatDate } from '../../utils/dateFormat';
 import { useAuth } from '../../contexts/AuthContext';
-import { fetchDevices, fetchOwners } from '../../services/obdApi';
+import { fetchPilots, fetchOwners } from '../../services/obdApi';
 
 export default function Maintenance() {
   const { user } = useAuth();
   const [selectedView, setSelectedView] = useState<'schedule' | 'analytics'>('schedule');
   const [vehicles, setVehicles] = useState<any[]>([]);
-  const [scheduledJobs, setScheduledJobs] = useState<Record<string, boolean>>({});
 
   // Form State
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -34,87 +33,105 @@ export default function Maintenance() {
   const [formCost, setFormCost] = useState('');
   const [formDescription, setFormDescription] = useState('');
 
-  // Fetch Owner's Vehicles
+  const [upcomingMaintenance, setUpcomingMaintenance] = useState<any[]>([]);
+
+  // Fetch Owner's Vehicles & Load upcoming maintenance
   useEffect(() => {
     const loadVehicles = async () => {
       try {
-        const [owners, devices] = await Promise.all([
+        const [owners, pilots] = await Promise.all([
           fetchOwners(),
-          fetchDevices()
+          fetchPilots()
         ]);
         const currentOwner = owners.find(
           (o: any) => o.email?.toLowerCase() === user?.email?.toLowerCase()
         );
-        let myDevices = [];
+        const ownerId = currentOwner?.id || user?.id || 'default';
+        
+        let myDrivers = [];
         if (currentOwner) {
-          myDevices = devices.filter(
-            (d: any) =>
-              d.ownerId === currentOwner.id ||
-              d.owner_id === currentOwner.id ||
-              (d.owner && d.owner.toLowerCase() === currentOwner.name?.toLowerCase())
+          myDrivers = pilots.filter(
+            (p: any) =>
+              p.owner_id &&
+              String(p.owner_id).trim().replace(/^0+/, '') === String(currentOwner.id).trim().replace(/^0+/, '')
           );
         }
-        if (myDevices.length === 0) {
-          // Fallback to all devices if filtered is empty
-          setVehicles(devices.length > 0 ? devices : [
-            { id: 'v1', vehicle_number: 'MH-AB-273B', vehicle_model: 'BMW M4' },
-            { id: 'v2', vehicle_number: 'MH-02-XY-9876', vehicle_model: 'Tata Ace' },
-            { id: 'v3', vehicle_number: 'KA-05-EF-9012', vehicle_model: 'Mahindra Bolero' }
-          ]);
+        
+        const myVehicles = myDrivers.filter((d: any) => d.vehicle_number);
+        setVehicles(myVehicles);
+
+        const storageKey = `upcoming_maintenance_${ownerId}`;
+        const stored = localStorage.getItem(storageKey);
+        if (stored) {
+          try {
+            setUpcomingMaintenance(JSON.parse(stored));
+            return;
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        // Generate default mock data dynamically based on myVehicles
+        if (myVehicles.length > 0) {
+          const mockData = myVehicles.map((driver: any, idx: number) => {
+            const priorities = ['high', 'medium', 'low'];
+            const priority = priorities[idx % priorities.length];
+            const types = [
+              'Engine Diagnostics & Tuning',
+              'Brake System Overhaul',
+              'Suspension Alignment',
+              'General Routine Service'
+            ];
+            const type = types[idx % types.length];
+            const costs = [12500, 4500, 8000, 3500];
+            const cost = costs[idx % costs.length];
+            const descriptions = [
+              'Scheduled engine diagnostics, ECU tuning, and spark plug replacement.',
+              'Replacing front brake pads, checking rear drums, and flushing brake fluid.',
+              'Wheel balancing, alignment check, and strut inspections.',
+              'Routine multi-point check, oil change, and filter replacement.'
+            ];
+            const description = descriptions[idx % descriptions.length];
+            
+            return {
+              id: `m_mock_${driver.id || idx}`,
+              vehicle: driver.vehicle_number,
+              model: driver.vehicle_model || 'Unknown Model',
+              priority,
+              type,
+              dueDate: new Date(Date.now() + (5 + idx * 7) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              estimatedCost: cost,
+              description
+            };
+          });
+          setUpcomingMaintenance(mockData);
         } else {
-          setVehicles(myDevices);
+          setUpcomingMaintenance([]);
         }
       } catch (err) {
         console.error('Failed to load vehicles for maintenance', err);
-        setVehicles([
-          { id: 'v1', vehicle_number: 'MH-AB-273B', vehicle_model: 'BMW M4' },
-          { id: 'v2', vehicle_number: 'MH-02-XY-9876', vehicle_model: 'Tata Ace' },
-          { id: 'v3', vehicle_number: 'KA-05-EF-9012', vehicle_model: 'Mahindra Bolero' }
-        ]);
       }
     };
     loadVehicles();
   }, [user]);
 
-  // Load from LocalStorage
-  const [upcomingMaintenance, setUpcomingMaintenance] = useState<any[]>(() => {
-    const stored = localStorage.getItem('upcoming_maintenance');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    // Default mock data
-    return [
-      {
-        id: 'm1',
-        vehicle: 'MH-AB-273B',
-        model: 'BMW M4',
-        priority: 'high',
-        type: 'Engine Diagnostics & Tuning',
-        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        estimatedCost: 12500,
-        description: 'Scheduled engine diagnostics, ECU tuning, and spark plug replacement.'
-      },
-      {
-        id: 'm2',
-        vehicle: 'MH-02-XY-9876',
-        model: 'Tata Ace',
-        priority: 'medium',
-        type: 'Brake System Overhaul',
-        dueDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        estimatedCost: 4500,
-        description: 'Replacing front brake pads, checking rear drums, and flushing brake fluid.'
-      }
-    ];
-  });
-
   // Save to LocalStorage
   useEffect(() => {
-    localStorage.setItem('upcoming_maintenance', JSON.stringify(upcomingMaintenance));
-  }, [upcomingMaintenance]);
+    if (!user || upcomingMaintenance.length === 0) return;
+    const saveMaintenance = async () => {
+      try {
+        const owners = await fetchOwners();
+        const currentOwner = owners.find(
+          (o: any) => o.email?.toLowerCase() === user?.email?.toLowerCase()
+        );
+        const ownerId = currentOwner?.id || user?.id || 'default';
+        localStorage.setItem(`upcoming_maintenance_${ownerId}`, JSON.stringify(upcomingMaintenance));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    saveMaintenance();
+  }, [upcomingMaintenance, user]);
 
   const formatIndianCurrency = (amount: number) => {
     if (amount >= 10000000) {
@@ -134,9 +151,9 @@ export default function Maintenance() {
   };
 
   const maintenanceMetrics = [
-    { title: 'Monthly Cost', value: formatIndianCurrency(upcomingMaintenance.filter(m => !scheduledJobs[m.id]).reduce((sum, m) => sum + (Number(m.estimatedCost) || 0), 0)), change: '+4.2%' },
-    { title: 'Scheduled Jobs', value: upcomingMaintenance.filter(m => !scheduledJobs[m.id]).length.toString(), change: '+1' },
-    { title: 'Critical Items', value: upcomingMaintenance.filter(m => !scheduledJobs[m.id] && (m.priority === 'critical' || m.priority === 'high')).length.toString(), change: 'Live' },
+    { title: 'Monthly Cost', value: formatIndianCurrency(upcomingMaintenance.filter(m => !m.completed).reduce((sum, m) => sum + (Number(m.estimatedCost) || 0), 0)), change: '+4.2%' },
+    { title: 'Scheduled Jobs', value: upcomingMaintenance.filter(m => !m.completed).length.toString(), change: '+1' },
+    { title: 'Critical Items', value: upcomingMaintenance.filter(m => !m.completed && (m.priority === 'critical' || m.priority === 'high')).length.toString(), change: 'Live' },
     { title: 'Predicted ROI', value: '1.8x', change: '+0.2%' }
   ];
 
@@ -192,7 +209,7 @@ export default function Maintenance() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {upcomingMaintenance.filter((maintenance) => !scheduledJobs[maintenance.id]).map((maintenance) => {
+        {upcomingMaintenance.filter((maintenance) => !maintenance.completed).map((maintenance) => {
           const priorityColor = getPriorityColor(maintenance.priority);
           const daysUntilDue = Math.ceil((new Date(maintenance.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
@@ -236,11 +253,11 @@ export default function Maintenance() {
 
               <div className="flex space-x-3">
                 <button
-                  onClick={() => setScheduledJobs(prev => ({ ...prev, [maintenance.id]: true }))}
-                  disabled={scheduledJobs[maintenance.id]}
-                  className={`flex-1 ${scheduledJobs[maintenance.id] ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-lg font-medium transition-colors`}
+                  onClick={() => setUpcomingMaintenance(prev => prev.map(m => m.id === maintenance.id ? { ...m, completed: true } : m))}
+                  disabled={maintenance.completed}
+                  className={`flex-1 ${maintenance.completed ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-700'} text-white py-2 rounded-lg font-medium transition-colors`}
                 >
-                  {scheduledJobs[maintenance.id] ? 'Completed ✓' : 'Complete'}
+                  {maintenance.completed ? 'Completed ✓' : 'Complete'}
                 </button>
                 <button
                   onClick={() => alert(`Details:\n\nVehicle: ${maintenance.vehicle}\nType: ${maintenance.type}\nDate: ${maintenance.dueDate}\nPriority: ${maintenance.priority}\nCost: ₹${maintenance.estimatedCost}\nDescription: ${maintenance.description}`)}
@@ -260,19 +277,19 @@ export default function Maintenance() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">
-              {upcomingMaintenance.filter(m => !scheduledJobs[m.id]).length}
+              {upcomingMaintenance.filter(m => !m.completed).length}
             </div>
             <div className="text-sm text-blue-300">Vehicles Due Soon</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-orange-400">
-              {upcomingMaintenance.filter(m => !scheduledJobs[m.id] && (m.priority === 'critical' || m.priority === 'high')).length}
+              {upcomingMaintenance.filter(m => !m.completed && (m.priority === 'critical' || m.priority === 'high')).length}
             </div>
             <div className="text-sm text-orange-300">Anomalies Detected</div>
           </div>
           <div className="bg-[#120F17] border border-white/5 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-green-400">
-              {formatIndianCurrency(upcomingMaintenance.filter(m => !scheduledJobs[m.id]).reduce((sum, m) => sum + (Number(m.estimatedCost) || 0), 0) * 0.15)}
+              {formatIndianCurrency(upcomingMaintenance.filter(m => !m.completed).reduce((sum, m) => sum + (Number(m.estimatedCost) || 0), 0) * 0.15)}
             </div>
             <div className="text-sm text-green-300">Cost Savings (Predicted)</div>
           </div>
@@ -379,28 +396,35 @@ export default function Maintenance() {
               </h3>
 
               <form onSubmit={handleScheduleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Car Number</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. MH-AB-273B"
-                      value={formVehicle}
-                      onChange={(e) => setFormVehicle(e.target.value)}
-                      className="w-full bg-[#120F17] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Car Name (Model)</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. BMW M4"
-                      value={customVehicle}
-                      onChange={(e) => setCustomVehicle(e.target.value)}
-                      className="w-full bg-[#120F17] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors"
-                    />
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Select Vehicle</label>
+                    {vehicles.length > 0 ? (
+                      <select
+                        required
+                        value={formVehicle}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFormVehicle(val);
+                          const matched = vehicles.find(v => v.vehicle_number === val);
+                          if (matched) {
+                            setCustomVehicle(matched.vehicle_model || 'Unknown Model');
+                          }
+                        }}
+                        className="w-full bg-[#120F17] border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none transition-colors"
+                      >
+                        <option value="">-- Choose a Vehicle --</option>
+                        {vehicles.map((v) => (
+                          <option key={v.id || v.vehicle_number} value={v.vehicle_number}>
+                            {v.vehicle_number} - {v.vehicle_model || 'Unknown Model'}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="text-sm text-yellow-500 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                        No vehicles found in your fleet. Please create drivers with vehicles first.
+                      </div>
+                    )}
                   </div>
                 </div>
 

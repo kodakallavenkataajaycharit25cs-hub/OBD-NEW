@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { triggerDownload } from '../utils/download';
 import { useAuth } from '../contexts/AuthContext';
-import { recordTransaction, fetchExpenses, createExpense, verifyExpense } from '../services/obdApi';
+import { recordTransaction, fetchExpenses, createExpense, verifyExpense, fetchOwners, fetchPilots } from '../services/obdApi';
 import { formatDate } from '../utils/dateFormat';
 import { supabase } from '../services/supabaseClient';
 
@@ -96,14 +96,48 @@ export default function ExpenseClassifier({ userRole }: ExpenseClassifierProps) 
   const [apiKey, setApiKey] = useState(localStorage.getItem('OPENROUTER_API_KEY') || localStorage.getItem('GEMINI_API_KEY') || '');
   const [showKeyInput, setShowKeyInput] = useState(!apiKey);
   const [classifiedExpenses, setClassifiedExpenses] = useState<ClassifiedExpense[]>([]);
+  const [currentOwnerId, setCurrentOwnerId] = useState<string>('');
 
   React.useEffect(() => {
-    const loadExpenses = async () => {
-      const data = await fetchExpenses();
-      setClassifiedExpenses(data);
+    const loadExpensesAndResolveOwner = async () => {
+      try {
+        const [owners, pilots, data] = await Promise.all([
+          fetchOwners(),
+          fetchPilots(),
+          fetchExpenses()
+        ]);
+        
+        let resolvedOwnerId = '';
+        if (userRole === 'owner') {
+          const matchedOwner = owners.find(
+            (o: any) => o.email?.toLowerCase() === user?.email?.toLowerCase()
+          );
+          resolvedOwnerId = matchedOwner?.id || user?.id || '';
+        } else if (userRole === 'driver') {
+          const matchedPilot = pilots.find(
+            (p: any) => p.email?.toLowerCase() === user?.email?.toLowerCase()
+          );
+          resolvedOwnerId = matchedPilot?.owner_id || '';
+        }
+        
+        setCurrentOwnerId(resolvedOwnerId);
+        
+        if (resolvedOwnerId) {
+          const filtered = data.filter(
+            (exp: any) =>
+              exp.owner_id &&
+              String(exp.owner_id).trim().replace(/^0+/, '') === String(resolvedOwnerId).trim().replace(/^0+/, '')
+          );
+          setClassifiedExpenses(filtered);
+        } else {
+          setClassifiedExpenses([]);
+        }
+      } catch (err) {
+        console.error('Failed to load expenses or resolve owner:', err);
+      }
     };
-    loadExpenses();
-  }, []);
+    loadExpensesAndResolveOwner();
+  }, [user, userRole]);
 
   const loadPdfJs = async (): Promise<any> => {
     if ((window as any).pdfjsLib) return (window as any).pdfjsLib;
@@ -319,7 +353,8 @@ Do not include any Markdown tags, comments or other text. Return ONLY the JSON o
           confidence: 100,
           status: 'classified',
           ocrText: `Vendor Address: ${extracted.address || 'N/A'}\nInvoice/Receipt: ${extracted.invoice || 'N/A'}`,
-          imageUrl: publicUrl
+          imageUrl: publicUrl,
+          owner_id: currentOwnerId
         };
 
         await createExpense(newExpense);
@@ -591,14 +626,16 @@ Do not include any Markdown tags, comments or other text. Return ONLY the JSON o
                 )}
 
                 <div className="flex space-x-3 mt-4">
-                  <button 
-                    onClick={() => handleVerify(expense.id)}
-                    disabled={expense.status === 'verified'}
-                    className={`flex items-center space-x-2 ${expense.status === 'verified' ? 'bg-gray-600 cursor-default' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-2xl text-sm transition-colors`}
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    <span>{expense.status === 'verified' ? 'Verified' : 'Verify'}</span>
-                  </button>
+                  {user?.role !== 'driver' && (
+                    <button 
+                      onClick={() => handleVerify(expense.id)}
+                      disabled={expense.status === 'verified'}
+                      className={`flex items-center space-x-2 ${expense.status === 'verified' ? 'bg-gray-600 cursor-default' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-2xl text-sm transition-colors`}
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span>{expense.status === 'verified' ? 'Verified' : 'Verify'}</span>
+                    </button>
+                  )}
                   <button 
                     onClick={() => setViewExpense(expense)}
                     className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-2xl text-sm transition-colors"

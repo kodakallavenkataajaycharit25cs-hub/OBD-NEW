@@ -18,7 +18,10 @@ export default function UpdateDriver() {
     try {
       const allPilots = await fetchPilots();
       const ownerId = user?.id || 'owner-default';
-      const myDrivers = allPilots.filter((p: any) => p.owner_id === ownerId);
+      const myDrivers = allPilots.filter((p: any) => 
+        p.owner_id && ownerId && 
+        String(p.owner_id).trim().replace(/^0+/, '') === String(ownerId).trim().replace(/^0+/, '')
+      );
       setDrivers(myDrivers);
     } catch (error) {
       console.error('Failed to load drivers:', error);
@@ -116,7 +119,7 @@ export default function UpdateDriver() {
                         <input 
                           type="email" 
                           value={editForm.email || ''} 
-                          onChange={e => setEditForm({...editForm, email: e.target.value})} 
+                          onChange={e => setEditForm({...editForm, email: e.target.value.toLowerCase()})} 
                           className="w-full bg-white/10 border border-white/10 rounded-lg p-2.5 text-white text-sm focus:border-yellow-500 outline-none" 
                         />
                       </div>
@@ -189,7 +192,7 @@ export default function UpdateDriver() {
                         </div>
                         <div>
                           <h4 className="text-sm font-black text-white uppercase tracking-wider">{driver.name}</h4>
-                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">ID: {driver.id}</p>
+                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">ID: {driver.id.includes('_') ? driver.id.split('_')[1] : driver.id}</p>
                         </div>
                       </div>
                       <button 

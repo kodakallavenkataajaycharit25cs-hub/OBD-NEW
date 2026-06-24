@@ -4,6 +4,7 @@ const cors = require('cors');
 const postgres = require('postgres');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -65,8 +66,70 @@ const EMULATOR_HOST = process.env.EMULATOR_HOST || '127.0.0.1';
 const EMULATOR_PORT = process.env.EMULATOR_PORT || 35000;
 const PORT = process.env.PORT || 5000;
 
+// Rate Limiters
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10000,
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+const contactLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many contact messages sent from this IP, please try again later.' }
+});
+
+// Apply general API rate limit
+app.use('/api/', apiLimiter);
+
+// JWT Authentication & Role Mapping Middleware
+const authenticateJWT = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+        if (error || !user) {
+            return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+        }
+        
+        const userEmail = user.email?.toLowerCase();
+        let dbId = user.id;
+        let role = user.user_metadata?.role;
+        
+        if (!role) {
+            if (userEmail === 'admin@test.com') role = 'superadmin';
+            else if (userEmail === 'regular_admin@test.com') role = 'admin';
+            else if (userEmail.includes('owner')) role = 'owner';
+            else if (userEmail.includes('driver')) role = 'driver';
+            else role = 'driver';
+        }
+
+        if (role === 'owner') {
+            const match = await sql`SELECT id FROM owners WHERE email = ${userEmail}`;
+            if (match.length > 0) dbId = match[0].id;
+        } else if (role === 'driver') {
+            const match = await sql`SELECT id FROM pilots WHERE email = ${userEmail}`;
+            if (match.length > 0) dbId = match[0].id;
+        }
+
+        req.user = {
+            ...user,
+            dbId,
+            role
+        };
+        next();
+    } catch (err) {
+        console.error('[Auth Middleware] Verification error:', err);
+        return res.status(500).json({ error: 'Internal server error during authentication' });
+    }
+};
+
 // Contact Form Route
-app.post('/api/contact', async (req, res) => {
+app.post('/api/contact', contactLimiter, async (req, res) => {
     try {
         const { name, email, phone, message } = req.body;
 
@@ -77,7 +140,7 @@ app.post('/api/contact', async (req, res) => {
 
         const mailOptions = {
             from: `"Sukrutha Contact Form" <${process.env.SMTP_USER}>`,
-            to: process.env.SMTP_TO || process.env.SMTP_USER,
+            to: process.env.SMTP_TO || 'sukruthamobility@gmail.com',
             subject: `New Contact Message from ${name}`,
             text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nMessage: ${message}`,
             html: `<h3>New Contact Message</h3><p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Phone:</strong> ${phone || 'N/A'}</p><p><strong>Message:</strong></p><p>${message}</p>`,
@@ -197,14 +260,39 @@ app.get('/api/fuel', async (req, res) => {
 });
 
 // Database Get Routes
-app.get('/api/trips', async (req, res) => {
-    try { res.json(await sql`SELECT * FROM trips ORDER BY start_time DESC`); }
-    catch (err) { res.status(500).json({ error: err.message }); }
+app.get('/api/trips', authenticateJWT, async (req, res) => {
+    try {
+        let rows = [];
+        if (req.user.role === 'superadmin' || req.user.role === 'admin') {
+            rows = await sql`SELECT * FROM trips ORDER BY start_time DESC`;
+        } else if (req.user.role === 'owner') {
+            rows = await sql`
+                SELECT t.* FROM trips t 
+                JOIN pilots p ON t.pilot_id = p.id 
+                WHERE p.owner_id = ${req.user.dbId} 
+                ORDER BY t.start_time DESC
+            `;
+        } else if (req.user.role === 'driver') {
+            rows = await sql`SELECT * FROM trips WHERE pilot_id = ${req.user.dbId} ORDER BY start_time DESC`;
+        }
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/owners', async (req, res) => {
+app.get('/api/owners', authenticateJWT, async (req, res) => {
     try {
-        const rows = await sql`SELECT * FROM owners ORDER BY revenue DESC`;
+        let rows = [];
+        if (req.user.role === 'superadmin' || req.user.role === 'admin') {
+            rows = await sql`SELECT * FROM owners ORDER BY revenue DESC`;
+        } else if (req.user.role === 'owner') {
+            rows = await sql`SELECT * FROM owners WHERE id = ${req.user.dbId}`;
+        } else if (req.user.role === 'driver') {
+            rows = await sql`
+                SELECT o.* FROM owners o 
+                JOIN pilots p ON p.owner_id = o.id 
+                WHERE p.id = ${req.user.dbId}
+            `;
+        }
         res.json(rows.map(r => ({
             id: r.id, name: r.name, email: r.email, contact: r.contact,
             fleetSize: r.fleet_size, activeVehicles: r.active_vehicles,
@@ -214,9 +302,16 @@ app.get('/api/owners', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/pilots', async (req, res) => {
+app.get('/api/pilots', authenticateJWT, async (req, res) => {
     try {
-        const rows = await sql`SELECT * FROM pilots`;
+        let rows = [];
+        if (req.user.role === 'superadmin' || req.user.role === 'admin') {
+            rows = await sql`SELECT * FROM pilots`;
+        } else if (req.user.role === 'owner') {
+            rows = await sql`SELECT * FROM pilots WHERE owner_id = ${req.user.dbId}`;
+        } else if (req.user.role === 'driver') {
+            rows = await sql`SELECT * FROM pilots WHERE id = ${req.user.dbId}`;
+        }
         res.json(rows.map(r => ({
             id: r.id, name: r.name, email: r.email, contact: r.contact,
             owner_id: r.owner_id, trips: r.trips, hours: r.hours,
@@ -290,7 +385,8 @@ app.put('/api/owners/:id', async (req, res) => {
 
         // Fetch list of users from Supabase Auth to find the user to update
         const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-        const userToUpdate = usersData?.users?.find(u => u.email === oldEmail) || (email && usersData?.users?.find(u => u.email === email));
+        const userToUpdate = usersData?.users?.find(u => u.email?.toLowerCase() === oldEmail?.toLowerCase()) || 
+                             (email && usersData?.users?.find(u => u.email?.toLowerCase() === email?.toLowerCase()));
         
         if (userToUpdate) {
             const updateFields = {};
@@ -305,7 +401,10 @@ app.put('/api/owners/:id', async (req, res) => {
             }
             if (Object.keys(updateFields).length > 0) {
                 const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, updateFields);
-                if (updateError) console.error('[Supabase Auth Owner Update Error]:', updateError.message);
+                if (updateError) {
+                    console.error('[Supabase Auth Owner Update Error]:', updateError.message);
+                    return res.status(400).json({ success: false, error: updateError.message });
+                }
             }
         } else if (email || oldEmail) {
             // If the user does not exist in Supabase Auth yet, create them
@@ -315,12 +414,15 @@ app.put('/api/owners/:id', async (req, res) => {
                 email_confirm: true,
                 user_metadata: { name: name || oldName || 'Owner', role: 'owner' }
             });
-            if (createError) console.error('[Supabase Auth Owner Creation Error]:', createError.message);
+            if (createError) {
+                console.error('[Supabase Auth Owner Creation Error]:', createError.message);
+                return res.status(400).json({ success: false, error: createError.message });
+            }
         }
 
         await sql`UPDATE owners SET name = COALESCE(${name}, name), email = COALESCE(${email}, email), contact = COALESCE(${contact}, contact), fleet_size = COALESCE(${fleetSize}, fleet_size), active_vehicles = COALESCE(${activeVehicles}, active_vehicles), status = COALESCE(${status}, status), headquarters = COALESCE(${headquarters}, headquarters) WHERE id = ${req.params.id}`;
         res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
 app.delete('/api/owners/:id', async (req, res) => {
@@ -331,10 +433,18 @@ app.delete('/api/owners/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/pilots', async (req, res) => {
+app.post('/api/pilots', authenticateJWT, async (req, res) => {
     try {
-        const { id, name, email, contact, owner_id, trips, hours, safetyScore, status, availability, rating, password, vehicleNumber, vehicleModel } = req.body;
+        if (req.user.role === 'driver') {
+            return res.status(403).json({ error: 'Forbidden: Drivers cannot create pilots' });
+        }
+        let { id, name, email, contact, owner_id, trips, hours, safetyScore, status, availability, rating, password, vehicleNumber, vehicleModel } = req.body;
         
+        // Owner can only create pilot for their own fleet
+        if (req.user.role === 'owner') {
+            owner_id = req.user.dbId;
+        }
+
         if (email && password) {
             const { data, error } = await supabaseAdmin.auth.admin.createUser({
                 email,
@@ -350,43 +460,63 @@ app.post('/api/pilots', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.put('/api/pilots/:id', async (req, res) => {
+app.put('/api/pilots/:id', authenticateJWT, async (req, res) => {
     try {
-        const { name = null, email = null, contact = null, owner_id = null, status = null, availability = null, password = null, vehicleNumber = null, vehicleModel = null } = req.body;
+        if (req.user.role === 'driver' && req.user.dbId !== req.params.id) {
+            return res.status(403).json({ error: 'Forbidden: Drivers can only edit their own profile' });
+        }
         
         // Find existing record to get old email and name
-        const currentRecord = await sql`SELECT name, email FROM pilots WHERE id = ${req.params.id}`;
+        const currentRecord = await sql`SELECT name, email, owner_id FROM pilots WHERE id = ${req.params.id}`;
+        if (currentRecord.length === 0) {
+            return res.status(404).json({ error: 'Pilot not found' });
+        }
+        
+        if (req.user.role === 'owner' && currentRecord[0].owner_id !== req.user.dbId) {
+            return res.status(403).json({ error: 'Forbidden: You do not own this pilot' });
+        }
+
+        let { name = null, email = null, contact = null, owner_id = null, status = null, availability = null, password = null, vehicleNumber = null, vehicleModel = null } = req.body;
+        
+        if (req.user.role === 'owner') {
+            owner_id = req.user.dbId; // prevent owner-change tampering
+        } else if (req.user.role === 'driver') {
+            owner_id = currentRecord[0].owner_id; // prevent driver-change tempering
+            status = currentRecord[0].status; // prevent self-activation if suspended
+        }
+
         const oldEmail = currentRecord[0]?.email;
         const oldName = currentRecord[0]?.name;
 
         // Fetch list of users from Supabase Auth to find the user to update
         const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
-        const userToUpdate = usersData?.users?.find(u => u.email === oldEmail) || (email && usersData?.users?.find(u => u.email === email));
+        const userToUpdate = usersData?.users?.find(u => u.email?.toLowerCase() === oldEmail?.toLowerCase()) || 
+                             (email && usersData?.users?.find(u => u.email?.toLowerCase() === email?.toLowerCase()));
         
         if (userToUpdate) {
             const updateFields = {};
-            if (email && email !== userToUpdate.email) {
-                updateFields.email = email;
-            }
-            if (password) {
-                updateFields.password = password;
-            }
-            if (name && name !== userToUpdate.user_metadata?.name) {
-                updateFields.user_metadata = { ...userToUpdate.user_metadata, name };
-            }
+            if (email) updateFields.email = email;
+            if (password) updateFields.password = password;
+            if (name) updateFields.user_metadata = { ...userToUpdate.user_metadata, name };
+            
             if (Object.keys(updateFields).length > 0) {
                 const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userToUpdate.id, updateFields);
-                if (updateError) console.error('[Supabase Auth Pilot Update Error]:', updateError.message);
+                if (updateError) {
+                    console.error('[Supabase Auth Update Error]:', updateError.message);
+                    return res.status(400).json({ success: false, error: updateError.message });
+                }
             }
-        } else if (email || oldEmail) {
-            // If the user does not exist in Supabase Auth yet, create them
+        } else if (email && password) {
             const { error: createError } = await supabaseAdmin.auth.admin.createUser({
-                email: email || oldEmail,
-                password: password || 'DefaultPassword123!',
+                email,
+                password,
                 email_confirm: true,
                 user_metadata: { name: name || oldName || 'Driver', role: 'driver' }
             });
-            if (createError) console.error('[Supabase Auth Pilot Creation Error]:', createError.message);
+            if (createError) {
+                console.error('[Supabase Auth Pilot Creation Error]:', createError.message);
+                return res.status(400).json({ success: false, error: createError.message });
+            }
         }
 
         await sql`UPDATE pilots SET name = COALESCE(${name}, name), email = COALESCE(${email}, email), contact = COALESCE(${contact}, contact), owner_id = COALESCE(${owner_id}, owner_id), status = COALESCE(${status}, status), availability = COALESCE(${availability}, availability), vehicle_number = COALESCE(${vehicleNumber}, vehicle_number), vehicle_model = COALESCE(${vehicleModel}, vehicle_model) WHERE id = ${req.params.id}`;
@@ -394,8 +524,24 @@ app.put('/api/pilots/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/api/pilots/:id', async (req, res) => {
-    try { await sql`DELETE FROM pilots WHERE id = ${req.params.id}`; res.json({ success: true }); }
+app.delete('/api/pilots/:id', authenticateJWT, async (req, res) => {
+    try {
+        if (req.user.role === 'driver') {
+            return res.status(403).json({ error: 'Forbidden: Drivers cannot delete accounts' });
+        }
+        
+        const currentRecord = await sql`SELECT owner_id FROM pilots WHERE id = ${req.params.id}`;
+        if (currentRecord.length === 0) {
+            return res.status(404).json({ error: 'Pilot not found' });
+        }
+        
+        if (req.user.role === 'owner' && currentRecord[0].owner_id !== req.user.dbId) {
+            return res.status(403).json({ error: 'Forbidden: You do not own this pilot' });
+        }
+
+        await sql`DELETE FROM pilots WHERE id = ${req.params.id}`; 
+        res.json({ success: true }); 
+    }
     catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -547,11 +693,15 @@ app.post('/api/bookings', async (req, res) => {
             if (pilots.length > 0) {
                 const pilot = pilots[0];
                 
-                // Override booking details with real data from DB
+                // Override booking details with real data from DB (use selected if present, else fallback)
                 if (pilot.name) bookingDetails.driverName = pilot.name;
                 if (pilot.contact) bookingDetails.driverPhone = pilot.contact;
-                if (pilot.vehicle_number) bookingDetails.vehicleNumber = pilot.vehicle_number;
-                if (pilot.vehicle_model) bookingDetails.car = pilot.vehicle_model;
+                if (!bookingDetails.vehicleNumber || bookingDetails.vehicleNumber === 'N/A') {
+                    if (pilot.vehicle_number) bookingDetails.vehicleNumber = pilot.vehicle_number;
+                }
+                if (!bookingDetails.car || bookingDetails.car === 'N/A') {
+                    if (pilot.vehicle_model) bookingDetails.car = pilot.vehicle_model;
+                }
 
                 if (pilot.owner_id) {
                     try {
@@ -668,10 +818,12 @@ async function initDB() {
                 status TEXT DEFAULT 'classified',
                 ocr_text TEXT,
                 image_url TEXT,
+                owner_id TEXT,
                 created_at TIMESTAMPTZ DEFAULT NOW()
             )
         `;
-        console.log('[DB] expenses table checked/created.');
+        await sql`ALTER TABLE expenses ADD COLUMN IF NOT EXISTS owner_id TEXT;`;
+        console.log('[DB] expenses table checked/created/altered.');
 
         await sql`
             CREATE TABLE IF NOT EXISTS pricing_models (
@@ -680,10 +832,12 @@ async function initDB() {
                 people_count INTEGER NOT NULL,
                 total_amount NUMERIC NOT NULL,
                 custom_option TEXT,
+                owner_id TEXT,
                 created_at TIMESTAMPTZ DEFAULT NOW()
             )
         `;
-        console.log('[DB] pricing_models table checked/created.');
+        await sql`ALTER TABLE pricing_models ADD COLUMN IF NOT EXISTS owner_id TEXT;`;
+        console.log('[DB] pricing_models table checked/created/altered.');
 
         await sql`
             CREATE TABLE IF NOT EXISTS pilot_documents (
@@ -756,10 +910,10 @@ app.get('/api/expenses', async (req, res) => {
 
 app.post('/api/expenses', async (req, res) => {
     try {
-        const { id, file_name, category, amount, date, vendor, address, invoice_number, confidence, status, ocr_text, image_url } = req.body;
+        const { id, file_name, category, amount, date, vendor, address, invoice_number, confidence, status, ocr_text, image_url, owner_id } = req.body;
         const [row] = await sql`
-            INSERT INTO expenses (id, file_name, category, amount, date, vendor, address, invoice_number, confidence, status, ocr_text, image_url)
-            VALUES (${id}, ${file_name}, ${category}, ${amount}, ${date}, ${vendor}, ${address || null}, ${invoice_number || null}, ${confidence || 100}, ${status || 'classified'}, ${ocr_text || null}, ${image_url || null})
+            INSERT INTO expenses (id, file_name, category, amount, date, vendor, address, invoice_number, confidence, status, ocr_text, image_url, owner_id)
+            VALUES (${id}, ${file_name}, ${category}, ${amount}, ${date}, ${vendor}, ${address || null}, ${invoice_number || null}, ${confidence || 100}, ${status || 'classified'}, ${ocr_text || null}, ${image_url || null}, ${owner_id || null})
             RETURNING *
         `;
         res.json(row);
@@ -798,10 +952,10 @@ app.get('/api/pricing-models', async (req, res) => {
 
 app.post('/api/pricing-models', async (req, res) => {
     try {
-        const { id, name, people_count, total_amount, custom_option } = req.body;
+        const { id, name, people_count, total_amount, custom_option, owner_id } = req.body;
         const [row] = await sql`
-            INSERT INTO pricing_models (id, name, people_count, total_amount, custom_option)
-            VALUES (${id}, ${name}, ${people_count}, ${total_amount}, ${custom_option || null})
+            INSERT INTO pricing_models (id, name, people_count, total_amount, custom_option, owner_id)
+            VALUES (${id}, ${name}, ${people_count}, ${total_amount}, ${custom_option || null}, ${owner_id || null})
             RETURNING *
         `;
         res.json(row);
@@ -814,10 +968,10 @@ app.post('/api/pricing-models', async (req, res) => {
 app.put('/api/pricing-models/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, people_count, total_amount, custom_option } = req.body;
+        const { name, people_count, total_amount, custom_option, owner_id } = req.body;
         const [row] = await sql`
             UPDATE pricing_models
-            SET name = ${name}, people_count = ${people_count}, total_amount = ${total_amount}, custom_option = ${custom_option || null}
+            SET name = ${name}, people_count = ${people_count}, total_amount = ${total_amount}, custom_option = ${custom_option || null}, owner_id = COALESCE(${owner_id || null}, owner_id)
             WHERE id = ${id}
             RETURNING *
         `;

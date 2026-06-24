@@ -10,6 +10,23 @@ export interface OBDData {
   };
 }
 
+import { supabase } from './supabaseClient';
+
+const authenticatedFetch = async (url: string | URL, options: RequestInit = {}) => {
+  const headers = new Headers(options.headers || {});
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      headers.set('Authorization', `Bearer ${session.access_token}`);
+    }
+  } catch (e) {
+    console.error('Failed to get session for auth headers:', e);
+  }
+  return window.fetch(url, { ...options, headers });
+};
+
+const fetch = authenticatedFetch;
+
 const API_BASE_URL = 'http://localhost:5000/api';
 
 export const fetchRPM = async () => {
@@ -369,6 +386,7 @@ export interface ClassifiedExpense {
   status: 'processing' | 'classified' | 'verified';
   ocrText?: string;
   imageUrl?: string;
+  owner_id?: string;
 }
 
 export const fetchExpenses = async (): Promise<ClassifiedExpense[]> => {
@@ -388,7 +406,8 @@ export const fetchExpenses = async (): Promise<ClassifiedExpense[]> => {
       confidence: Number(row.confidence),
       status: row.status,
       ocrText: row.ocr_text,
-      imageUrl: row.image_url
+      imageUrl: row.image_url,
+      owner_id: row.owner_id
     }));
   } catch (error) {
     console.error('Error fetching expenses:', error);
@@ -413,7 +432,8 @@ export const createExpense = async (expenseData: any) => {
         confidence: expenseData.confidence,
         status: expenseData.status,
         ocr_text: expenseData.ocrText,
-        image_url: expenseData.imageUrl
+        image_url: expenseData.imageUrl,
+        owner_id: expenseData.owner_id
       })
     });
     return response.json();
@@ -441,6 +461,7 @@ export interface PricingModel {
   people_count: number;
   total_amount: number;
   custom_option?: string;
+  owner_id?: string;
   created_at?: string;
 }
 

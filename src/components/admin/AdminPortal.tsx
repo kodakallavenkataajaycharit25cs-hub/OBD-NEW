@@ -99,7 +99,10 @@ export default function AdminPortal() {
       const ownerDevices = devices.filter(d => d.owner === owner.name || d.ownerId === owner.id);
       
       // Filter pilots if they were linked to owners (assuming name match for demo)
-      const driverCount = pilots.filter(p => p.owner_id === owner.id).length || Math.floor((owner.fleetSize || 5) * 1.1);
+      const driverCount = pilots.filter(p => 
+        p.owner_id && owner.id && 
+        String(p.owner_id).trim().replace(/^0+/, '') === String(owner.id).trim().replace(/^0+/, '')
+      ).length || Math.floor((owner.fleetSize || 5) * 1.1);
       const deviceCount = ownerDevices.length;
 
       return {
@@ -117,7 +120,10 @@ export default function AdminPortal() {
 
     if (selectedClient) {
       // Get real drivers for this client
-      const clientDrivers = pilots.filter(p => p.owner_id === selectedClient.id).map(p => ({
+      const clientDrivers = pilots.filter(p => 
+        p.owner_id && selectedClient.id && 
+        String(p.owner_id).trim().replace(/^0+/, '') === String(selectedClient.id).trim().replace(/^0+/, '')
+      ).map(p => ({
         id: p.id,
         name: p.name,
         status: p.availability || p.status || 'off-duty',
@@ -150,7 +156,7 @@ export default function AdminPortal() {
                     </div>
                     <div>
                       <h4 className="text-xs font-black text-white uppercase tracking-wider">{driver.name}</h4>
-                      <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{driver.id}</p>
+                      <p className="text-[8px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">{driver.id.includes('_') ? driver.id.split('_')[1] : driver.id}</p>
                     </div>
                   </div>
                   <div className="text-right">
